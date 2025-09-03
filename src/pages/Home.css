@@ -13,6 +13,28 @@
   padding: var(--spacing-3xl) 0;
   position: relative;
   overflow: hidden;
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease infinite;
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      circle at 30% 40%,
+      rgba(255, 215, 0, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 70% 80%,
+      rgba(217, 160, 82, 0.1) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
 }
 
 .hero-container {
@@ -35,9 +57,11 @@
   color: var(--text-primary);
   margin-bottom: var(--spacing-lg);
   line-height: 1.2;
-  background: linear-gradient(135deg, var(--black-tie), var(--sapphire));
+  background: linear-gradient(135deg, #ffd700, var(--golden), var(--black-tie));
   -webkit-background-clip: text;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(217, 160, 82, 0.3);
 }
 
 .hero-subtitle {
@@ -70,9 +94,10 @@
 .decoration-circle {
   position: absolute;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--sapphire), var(--golden));
-  opacity: 0.1;
+  background: linear-gradient(135deg, #ffd700, var(--golden), #daa520);
+  opacity: 0.2;
   animation: float 6s ease-in-out infinite;
+  box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3);
 }
 
 .circle-1 {
@@ -514,5 +539,18 @@
   .product-image {
     height: 120px;
     font-size: 2.5rem;
+  }
+}
+
+/* Golden Hero Animation */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
