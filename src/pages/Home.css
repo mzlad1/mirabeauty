@@ -6,9 +6,9 @@
 .hero-section {
   background: linear-gradient(
     135deg,
-    var(--diamond),
-    var(--silver),
-    var(--icy-lake)
+    var(--soft-pink),
+    var(--white),
+    var(--light-gold)
   );
   padding: var(--spacing-3xl) 0;
   position: relative;
