@@ -1,0 +1,342 @@
+/* Staff Admin Page Styles */
+.admin-page {
+  min-height: 100vh;
+  padding: var(--spacing-3xl) 0;
+  background: var(--silver);
+  /* Hide scrollbars for admin pages */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.admin-page::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+.admin-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+  /* Hide scrollbars for containers in admin pages */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.admin-container::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+/* Page Header */
+.admin-page-header {
+  text-align: center;
+  margin-bottom: var(--spacing-3xl);
+}
+
+.admin-page-header h1 {
+  font-size: var(--font-size-4xl);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-lg);
+  background: linear-gradient(135deg, var(--black-tie), var(--sapphire));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.admin-page-header p {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* Page Actions */
+.admin-page-actions {
+  text-align: center;
+  margin-bottom: var(--spacing-3xl);
+}
+
+/* Staff Grid */
+.admin-staff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-xl);
+}
+
+/* Staff Cards */
+.admin-staff-card {
+  padding: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: 350px;
+  border-radius: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-staff-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+}
+
+.staff-avatar {
+  width: 80px;
+  height: 80px;
+  background: var(--gradient-elegant);
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  color: var(--white);
+  margin-bottom: var(--spacing-lg);
+  position: relative;
+}
+
+.staff-status {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 0;
+  border: 2px solid var(--white);
+}
+
+.staff-status.online {
+  background: var(--success);
+}
+
+.staff-status.offline {
+  background: var(--error);
+}
+
+.staff-status.busy {
+  background: var(--warning);
+}
+
+.admin-staff-header h3 {
+  color: var(--elegant-black);
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-lg);
+}
+
+.staff-role {
+  color: var(--primary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+}
+
+.staff-department {
+  background: var(--background-light);
+  color: var(--text-secondary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 0;
+  font-size: var(--font-size-xs);
+  margin-bottom: var(--spacing-lg);
+}
+
+.admin-staff-details {
+  width: 100%;
+  flex-grow: 1;
+  text-align: left;
+}
+
+.staff-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row .label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.info-row .value {
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.staff-skills {
+  margin: var(--spacing-md) 0;
+}
+
+.staff-skills h4 {
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.skill-tag {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: linear-gradient(
+    135deg,
+    var(--primary-light),
+    var(--secondary-light)
+  );
+  color: var(--text-primary);
+  border-radius: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.staff-schedule {
+  background: var(--background-light);
+  padding: var(--spacing-md);
+  border-radius: 0;
+  margin: var(--spacing-md) 0;
+}
+
+.staff-schedule h4 {
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--font-size-sm);
+}
+
+.schedule-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+  font-size: var(--font-size-xs);
+}
+
+.schedule-item .day {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.schedule-item .hours {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.staff-performance {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+  margin: var(--spacing-md) 0;
+}
+
+.performance-metric {
+  text-align: center;
+  padding: var(--spacing-sm);
+  background: var(--background-light);
+  border-radius: 0;
+}
+
+.metric-value {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--primary);
+  display: block;
+}
+
+.metric-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-top: var(--spacing-xs);
+}
+
+.admin-staff-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  width: 100%;
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-lg) 0;
+}
+
+.quick-action {
+  width: 40px;
+  height: 40px;
+  border-radius: 0;
+  border: 1px solid var(--border-light);
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-base);
+  color: var(--text-secondary);
+}
+
+.quick-action:hover {
+  background: var(--primary);
+  color: var(--white);
+  border-color: var(--primary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .admin-staff-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-staff-actions {
+    flex-direction: column;
+  }
+
+  .staff-performance {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-page {
+    padding: var(--spacing-xl) 0;
+  }
+
+  .admin-container {
+    padding: 0 var(--spacing-md);
+  }
+
+  .admin-staff-card {
+    padding: var(--spacing-lg);
+    min-height: 300px;
+  }
+
+  .staff-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: var(--font-size-lg);
+  }
+
+  .quick-actions {
+    flex-wrap: wrap;
+  }
+}

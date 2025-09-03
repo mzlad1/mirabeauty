@@ -1,10 +1,10 @@
 .luxury-card {
-  background: var(--white);
-  border-radius: var(--radius-xl);
+  background: var(--diamond);
+  border-radius: 0;
   box-shadow: var(--shadow-md);
   padding: var(--spacing-xl);
   transition: all 0.3s ease;
-  border: 1px solid var(--border-gray);
+  border: 1px solid var(--border-color);
   position: relative;
   overflow: hidden;
 }
@@ -16,7 +16,7 @@
   right: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, var(--primary-pink), var(--gold));
+  background: var(--golden);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -31,7 +31,7 @@
 }
 
 .gradient-bg {
-  background: linear-gradient(135deg, var(--white), var(--light-gray));
+  background: linear-gradient(135deg, var(--diamond), var(--silver));
 }
 
 .card-badge {
@@ -39,7 +39,7 @@
   top: var(--spacing-md);
   left: var(--spacing-md);
   padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-md);
+  border-radius: 0;
   font-size: var(--font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
@@ -48,33 +48,33 @@
 }
 
 .card-badge.primary {
-  background: var(--primary-pink);
-  color: var(--white);
+  background: var(--sapphire);
+  color: var(--diamond);
 }
 
 .card-badge.gold {
-  background: var(--gold);
-  color: var(--white);
+  background: var(--golden);
+  color: var(--diamond);
 }
 
 .card-badge.success {
   background: #10b981;
-  color: var(--white);
+  color: var(--diamond);
 }
 
 .card-badge.warning {
   background: #f59e0b;
-  color: var(--white);
+  color: var(--diamond);
 }
 
 .card-badge.danger {
   background: #ef4444;
-  color: var(--white);
+  color: var(--diamond);
 }
 
 .card-badge.discount {
   background: linear-gradient(135deg, #ef4444, #f87171);
-  color: var(--white);
+  color: var(--diamond);
   box-shadow: var(--shadow-sm);
 }
 
@@ -90,14 +90,14 @@
 .service-card .service-icon {
   font-size: 3rem;
   margin-bottom: var(--spacing-lg);
-  background: linear-gradient(135deg, var(--primary-pink), var(--gold));
+  background: linear-gradient(135deg, var(--sapphire), var(--golden));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .service-card h3 {
-  color: var(--elegant-black);
+  color: var(--text-primary);
   margin-bottom: var(--spacing-md);
   font-size: var(--font-size-xl);
 }
@@ -133,7 +133,7 @@
   width: 100%;
   height: 200px;
   background: var(--light-gray);
-  border-radius: var(--radius-lg);
+  border-radius: 0;
   margin-bottom: var(--spacing-lg);
   display: flex;
   align-items: center;

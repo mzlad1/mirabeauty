@@ -24,9 +24,9 @@ const Products = () => {
 
   return (
     <div className="products-page">
-      <div className="container">
+      <div className="products-container">
         {/* Header */}
-        <div className="page-header">
+        <div className="products-page-header">
           <h1>منتجاتنا الفاخرة</h1>
           <p>
             اكتشفي مجموعة منتجات العناية بالبشرة الفاخرة من أفضل الماركات
@@ -57,17 +57,19 @@ const Products = () => {
           {filteredProducts.map((product) => (
             <LuxuryCard
               key={product.id}
-              className="product-card"
+              className="products-product-card"
               badge={{ text: `${product.discount}% خصم`, type: "discount" }}
             >
-              <div className="product-image">{product.image}</div>
+              <div className="products-product-image">{product.image}</div>
               <div className="product-category">{product.category}</div>
               <h3>{product.name}</h3>
               <p>{product.description}</p>
               <div className="product-price">
-                <div className="price-container">
-                  <span className="current-price">{product.price}</span>
-                  <span className="original-price">
+                <div className="products-price-container">
+                  <span className="products-current-price">
+                    {product.price}
+                  </span>
+                  <span className="products-original-price">
                     {product.originalPrice}
                   </span>
                 </div>

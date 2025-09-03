@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "./Header.css";
+import "../luxury-theme.css";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,12 +33,15 @@ const Header = () => {
 
   const navItems = isAdminRoute ? adminNavItems : customerNavItems;
 
+  // Don't render header for admin routes - AdminLayout handles navigation
+  if (isAdminRoute) {
+    return null;
+  }
+
   return (
-    <header
-      className={`header ${isAdminRoute ? "admin-header" : "customer-header"}`}
-    >
+    <header className="header navbar-golden customer-header">
       <div className="header-container">
-        <Link to={isAdminRoute ? "/admin" : "/"} className="logo">
+        <Link to="/" className="logo">
           <div className="logo-icon">🌹</div>
           <div className="logo-text">
             <span className="logo-main">Mira Beauty Clinic</span>
@@ -47,7 +51,7 @@ const Header = () => {
 
         <nav className={`nav ${isMenuOpen ? "nav-open" : ""}`}>
           <ul className="nav-list">
-            {navItems.map((item) => (
+            {customerNavItems.map((item) => (
               <li key={item.path} className="nav-item">
                 <Link
                   to={item.path}

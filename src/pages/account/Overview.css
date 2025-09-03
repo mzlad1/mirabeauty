@@ -21,13 +21,13 @@
 }
 
 .welcome-text h2 {
-  color: var(--elegant-black);
+  color: var(--text-primary);
   margin-bottom: var(--spacing-sm);
   font-size: var(--font-size-2xl);
 }
 
 .welcome-text p {
-  color: var(--soft-black);
+  color: var(--text-secondary);
   margin: 0;
   font-size: var(--font-size-base);
 }
@@ -40,13 +40,13 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-pink), var(--gold));
+  background: linear-gradient(135deg, var(--sapphire), var(--golden));
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: var(--font-size-2xl);
   font-weight: 700;
-  color: var(--white);
+  color: var(--diamond);
 }
 
 /* Upcoming Sessions */
@@ -55,7 +55,7 @@
 .bundles-section h2,
 .quick-actions h2 {
   font-size: var(--font-size-2xl);
-  color: var(--elegant-black);
+  color: var(--text-primary);
   margin-bottom: var(--spacing-xl);
 }
 

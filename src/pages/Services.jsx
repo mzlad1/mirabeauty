@@ -27,9 +27,9 @@ const Services = () => {
 
   return (
     <div className="services-page">
-      <div className="container">
+      <div className="services-container">
         {/* Header */}
-        <div className="page-header">
+        <div className="services-page-header">
           <h1>خدماتنا المميزة</h1>
           <p>
             اكتشفي مجموعة واسعة من خدمات الليزر والعناية بالبشرة المصممة خصيصاً
@@ -56,7 +56,7 @@ const Services = () => {
           {currentServices.map((service) => (
             <LuxuryCard
               key={service.id}
-              className="service-card"
+              className="services-service-card"
               badge={
                 service.popular ? { text: "الأكثر طلباً", type: "gold" } : null
               }
@@ -71,10 +71,12 @@ const Services = () => {
                 </div>
                 <div className="service-price">
                   <span className="detail-label">السعر:</span>
-                  <div className="price-container">
-                    <span className="current-price">{service.price}</span>
+                  <div className="services-price-container">
+                    <span className="services-current-price">
+                      {service.price}
+                    </span>
                     {service.originalPrice && (
-                      <span className="original-price">
+                      <span className="services-original-price">
                         {service.originalPrice}
                       </span>
                     )}

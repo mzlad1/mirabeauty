@@ -1,38 +1,33 @@
 .account-page {
   min-height: 100vh;
   padding: var(--spacing-3xl) 0;
-  background: var(--light-gray);
+  background: var(--silver);
 }
 
-.container {
+.account-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--spacing-lg);
 }
 
 /* Page Header */
-.page-header {
+.account-page-header {
   text-align: center;
   margin-bottom: var(--spacing-3xl);
 }
 
-.page-header h1 {
+.account-page-header h1 {
   font-size: var(--font-size-4xl);
-  color: var(--elegant-black);
+  color: var(--text-primary);
   margin-bottom: var(--spacing-lg);
-  background: linear-gradient(
-    135deg,
-    var(--elegant-black),
-    var(--primary-pink)
-  );
+  background: linear-gradient(135deg, var(--black-tie), var(--sapphire));
   -webkit-background-clip: text;
-
   background-clip: text;
 }
 
-.page-header p {
+.account-page-header p {
   font-size: var(--font-size-lg);
-  color: var(--soft-black);
+  color: var(--text-secondary);
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.7;
@@ -47,13 +42,14 @@
   display: flex;
   justify-content: center;
   gap: var(--spacing-sm);
-  background: var(--white);
+  background: var(--diamond);
   padding: var(--spacing-sm);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
   max-width: 800px;
   margin: 0 auto;
   flex-wrap: wrap;
+  border: 1px solid var(--border-color);
 }
 
 .nav-tab {
@@ -68,7 +64,7 @@
   transition: all 0.3s ease;
   font-family: var(--font-family);
   font-weight: 500;
-  color: var(--soft-black);
+  color: var(--text-secondary);
   text-decoration: none;
   flex: 1;
   justify-content: center;
@@ -76,14 +72,14 @@
 }
 
 .nav-tab:hover {
-  background: var(--soft-pink);
-  color: var(--primary-pink);
+  background: var(--accent-color);
+  color: var(--primary-color);
   text-decoration: none;
 }
 
 .nav-tab.active {
-  background: linear-gradient(135deg, var(--primary-pink), var(--soft-pink));
-  color: var(--white);
+  background: linear-gradient(135deg, var(--sapphire), var(--primary-color));
+  color: var(--diamond);
   box-shadow: var(--shadow-md);
 }
 

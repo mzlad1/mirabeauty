@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import AdminLayout from "../../components/AdminLayout";
 import LuxuryCard from "../../components/LuxuryCard";
 import Button from "../../components/Button";
-import "./AdminPage.css";
+import "./Settings.css";
 
 const AdminSettings = () => {
   const [settings, setSettings] = useState({
@@ -26,166 +27,170 @@ const AdminSettings = () => {
   };
 
   return (
-    <div className="admin-page">
-      <div className="container">
-        <div className="page-header">
-          <h1>إعدادات النظام</h1>
-          <p>إدارة إعدادات المركز والنظام</p>
-        </div>
+    <AdminLayout>
+      <div className="admin-settings-page">
+        <div className="admin-settings-container">
+          <div className="admin-settings-header">
+            <h1>إعدادات النظام</h1>
+            <p>إدارة إعدادات المركز والنظام</p>
+          </div>
 
-        <div className="settings-sections">
-          <LuxuryCard className="settings-section">
-            <h2>سياسة الإلغاء</h2>
-            <div className="form-group">
-              <label>ساعات الإلغاء المسموحة</label>
-              <input
-                type="number"
-                value={settings.cancellationHours}
-                onChange={(e) =>
-                  handleInputChange("cancellationHours", e.target.value)
-                }
-                className="form-input"
-                min="1"
-                max="72"
-              />
-              <p className="form-help">
-                عدد الساعات قبل الموعد التي يمكن للعميلة إلغاء الحجز خلالها
-              </p>
-            </div>
-          </LuxuryCard>
-
-          <LuxuryCard className="settings-section">
-            <h2>إعدادات التذكيرات</h2>
-            <div className="reminder-settings">
-              <div className="reminder-item">
-                <label className="reminder-label">
-                  <input
-                    type="checkbox"
-                    checked={settings.reminder24h}
-                    onChange={(e) =>
-                      handleInputChange("reminder24h", e.target.checked)
-                    }
-                  />
-                  <span>تذكير قبل 24 ساعة</span>
-                </label>
-              </div>
-              <div className="reminder-item">
-                <label className="reminder-label">
-                  <input
-                    type="checkbox"
-                    checked={settings.reminder3h}
-                    onChange={(e) =>
-                      handleInputChange("reminder3h", e.target.checked)
-                    }
-                  />
-                  <span>تذكير قبل 3 ساعات</span>
-                </label>
-              </div>
-            </div>
-          </LuxuryCard>
-
-          <LuxuryCard className="settings-section">
-            <h2>قوالب الرسائل</h2>
-            <div className="template-settings">
-              <div className="form-group">
-                <label>قالب واتساب</label>
-                <textarea
-                  value={settings.whatsappTemplate}
-                  onChange={(e) =>
-                    handleInputChange("whatsappTemplate", e.target.value)
-                  }
-                  className="form-textarea"
-                  rows="3"
-                />
-              </div>
-              <div className="form-group">
-                <label>قالب SMS</label>
-                <textarea
-                  value={settings.smsTemplate}
-                  onChange={(e) =>
-                    handleInputChange("smsTemplate", e.target.value)
-                  }
-                  className="form-textarea"
-                  rows="3"
-                />
-              </div>
-              <div className="form-group">
-                <label>قالب البريد الإلكتروني</label>
-                <textarea
-                  value={settings.emailTemplate}
-                  onChange={(e) =>
-                    handleInputChange("emailTemplate", e.target.value)
-                  }
-                  className="form-textarea"
-                  rows="4"
-                />
-              </div>
-            </div>
-          </LuxuryCard>
-
-          <LuxuryCard className="settings-section">
-            <h2>معلومات الموقع</h2>
-            <div className="location-settings">
-              <div className="form-group">
-                <label>العنوان</label>
+          <div className="settings-sections">
+            <LuxuryCard className="settings-section">
+              <h2>سياسة الإلغاء</h2>
+              <div className="settings-form-group">
+                <label>ساعات الإلغاء المسموحة</label>
                 <input
-                  type="text"
-                  value={settings.location}
+                  type="number"
+                  value={settings.cancellationHours}
                   onChange={(e) =>
-                    handleInputChange("location", e.target.value)
+                    handleInputChange("cancellationHours", e.target.value)
                   }
-                  className="form-input"
+                  className="settings-form-input"
+                  min="1"
+                  max="72"
                 />
+                <p className="form-help">
+                  عدد الساعات قبل الموعد التي يمكن للعميلة إلغاء الحجز خلالها
+                </p>
               </div>
-              <div className="form-group">
-                <label>رابط الخريطة</label>
-                <input
-                  type="url"
-                  value={settings.mapLink}
-                  onChange={(e) => handleInputChange("mapLink", e.target.value)}
-                  className="form-input"
-                />
-              </div>
-            </div>
-          </LuxuryCard>
+            </LuxuryCard>
 
-          <LuxuryCard className="settings-section">
-            <h2>إعدادات VIP</h2>
-            <div className="vip-settings">
-              <div className="form-group">
-                <label className="vip-toggle">
-                  <input
-                    type="checkbox"
-                    checked={settings.vipPricing}
+            <LuxuryCard className="settings-section">
+              <h2>إعدادات التذكيرات</h2>
+              <div className="reminder-settings">
+                <div className="reminder-item">
+                  <label className="reminder-label">
+                    <input
+                      type="checkbox"
+                      checked={settings.reminder24h}
+                      onChange={(e) =>
+                        handleInputChange("reminder24h", e.target.checked)
+                      }
+                    />
+                    <span>تذكير قبل 24 ساعة</span>
+                  </label>
+                </div>
+                <div className="reminder-item">
+                  <label className="reminder-label">
+                    <input
+                      type="checkbox"
+                      checked={settings.reminder3h}
+                      onChange={(e) =>
+                        handleInputChange("reminder3h", e.target.checked)
+                      }
+                    />
+                    <span>تذكير قبل 3 ساعات</span>
+                  </label>
+                </div>
+              </div>
+            </LuxuryCard>
+
+            <LuxuryCard className="settings-section">
+              <h2>قوالب الرسائل</h2>
+              <div className="template-settings">
+                <div className="admin-form-group">
+                  <label>قالب واتساب</label>
+                  <textarea
+                    value={settings.whatsappTemplate}
                     onChange={(e) =>
-                      handleInputChange("vipPricing", e.target.checked)
+                      handleInputChange("whatsappTemplate", e.target.value)
                     }
+                    className="admin-form-textarea"
+                    rows="3"
                   />
-                  <span>تفعيل أسعار VIP</span>
-                </label>
+                </div>
+                <div className="admin-form-group">
+                  <label>قالب SMS</label>
+                  <textarea
+                    value={settings.smsTemplate}
+                    onChange={(e) =>
+                      handleInputChange("smsTemplate", e.target.value)
+                    }
+                    className="admin-form-textarea"
+                    rows="3"
+                  />
+                </div>
+                <div className="admin-form-group">
+                  <label>قالب البريد الإلكتروني</label>
+                  <textarea
+                    value={settings.emailTemplate}
+                    onChange={(e) =>
+                      handleInputChange("emailTemplate", e.target.value)
+                    }
+                    className="admin-form-textarea"
+                    rows="4"
+                  />
+                </div>
               </div>
-              <div className="form-group">
-                <label>ملاحظات VIP</label>
-                <textarea
-                  value={settings.vipNotes}
-                  onChange={(e) =>
-                    handleInputChange("vipNotes", e.target.value)
-                  }
-                  className="form-textarea"
-                  rows="3"
-                />
-              </div>
-            </div>
-          </LuxuryCard>
+            </LuxuryCard>
 
-          <div className="save-section">
-            <Button variant="luxury" size="lg" onClick={handleSave}>
-              حفظ الإعدادات
-            </Button>
+            <LuxuryCard className="settings-section">
+              <h2>معلومات الموقع</h2>
+              <div className="location-settings">
+                <div className="admin-form-group">
+                  <label>العنوان</label>
+                  <input
+                    type="text"
+                    value={settings.location}
+                    onChange={(e) =>
+                      handleInputChange("location", e.target.value)
+                    }
+                    className="admin-form-input"
+                  />
+                </div>
+                <div className="admin-form-group">
+                  <label>رابط الخريطة</label>
+                  <input
+                    type="url"
+                    value={settings.mapLink}
+                    onChange={(e) =>
+                      handleInputChange("mapLink", e.target.value)
+                    }
+                    className="admin-form-input"
+                  />
+                </div>
+              </div>
+            </LuxuryCard>
+
+            <LuxuryCard className="settings-section">
+              <h2>إعدادات VIP</h2>
+              <div className="vip-settings">
+                <div className="admin-form-group">
+                  <label className="vip-toggle">
+                    <input
+                      type="checkbox"
+                      checked={settings.vipPricing}
+                      onChange={(e) =>
+                        handleInputChange("vipPricing", e.target.checked)
+                      }
+                    />
+                    <span>تفعيل أسعار VIP</span>
+                  </label>
+                </div>
+                <div className="admin-form-group">
+                  <label>ملاحظات VIP</label>
+                  <textarea
+                    value={settings.vipNotes}
+                    onChange={(e) =>
+                      handleInputChange("vipNotes", e.target.value)
+                    }
+                    className="admin-form-textarea"
+                    rows="3"
+                  />
+                </div>
+              </div>
+            </LuxuryCard>
+
+            <div className="save-section">
+              <Button variant="luxury" size="lg" onClick={handleSave}>
+                حفظ الإعدادات
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

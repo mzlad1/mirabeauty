@@ -20,9 +20,9 @@ const FAQ = () => {
 
   return (
     <div className="faq-page">
-      <div className="container">
+      <div className="faq-container">
         {/* Header */}
-        <div className="page-header">
+        <div className="faq-page-header">
           <h1>الأسئلة الشائعة</h1>
           <p>إجابات على أكثر الأسئلة شيوعاً حول خدماتنا وطرق العناية</p>
         </div>

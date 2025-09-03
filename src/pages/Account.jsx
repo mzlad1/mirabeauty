@@ -18,9 +18,9 @@ const Account = () => {
 
   return (
     <div className="account-page">
-      <div className="container">
+      <div className="account-container">
         {/* Header */}
-        <div className="page-header">
+        <div className="account-page-header">
           <h1>حسابي</h1>
           <p>إدارة حسابك وتتبع جلساتك وتقييماتك</p>
         </div>

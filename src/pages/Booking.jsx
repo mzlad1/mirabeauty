@@ -53,9 +53,9 @@ const Booking = () => {
 
   return (
     <div className="booking-page">
-      <div className="container">
+      <div className="booking-container">
         {/* Header */}
-        <div className="page-header">
+        <div className="booking-page-header">
           <h1>احجزي جلستك</h1>
           <p>اختيار الخدمة المناسبة لكِ وتحديد الموعد المناسب</p>
         </div>

@@ -47,8 +47,8 @@ const Home = () => {
 
       {/* Categories Section */}
       <section className="categories-section">
-        <div className="container">
-          <div className="section-header">
+        <div className="home-container">
+          <div className="home-section-header">
             <h2>خدماتنا المميزة</h2>
             <p>اختر من بين خدماتنا الفاخرة المصممة خصيصاً لجمالك</p>
           </div>
@@ -91,8 +91,8 @@ const Home = () => {
 
       {/* Promotions Section */}
       <section className="promotions-section">
-        <div className="container">
-          <div className="section-header">
+        <div className="home-container">
+          <div className="home-section-header">
             <h2>عروضنا الحصرية</h2>
             <p>لا تفوتي فرصة الحصول على أفضل العروض والخصومات</p>
           </div>
@@ -122,8 +122,8 @@ const Home = () => {
 
       {/* Testimonials Section */}
       <section className="testimonials-section">
-        <div className="container">
-          <div className="section-header">
+        <div className="home-container">
+          <div className="home-section-header">
             <h2>آراء عملائنا</h2>
             <p>اكتشفي تجارب عملائنا المميزة معنا</p>
           </div>
@@ -149,8 +149,8 @@ const Home = () => {
 
       {/* Featured Products Section */}
       <section className="products-section">
-        <div className="container">
-          <div className="section-header">
+        <div className="home-container">
+          <div className="home-section-header">
             <h2>منتجاتنا المميزة</h2>
             <p>منتجات فاخرة للعناية بالبشرة من أفضل الماركات العالمية</p>
           </div>
@@ -158,15 +158,15 @@ const Home = () => {
             {products.slice(0, 3).map((product) => (
               <LuxuryCard
                 key={product.id}
-                className="product-card"
+                className="home-product-card"
                 badge={{ text: `${product.discount}% خصم`, type: "discount" }}
               >
-                <div className="product-image">{product.image}</div>
+                <div className="home-product-image">{product.image}</div>
                 <h3>{product.name}</h3>
                 <p>{product.description}</p>
-                <div className="price-container">
-                  <span className="current-price">{product.price}</span>
-                  <span className="original-price">
+                <div className="home-price-container">
+                  <span className="home-current-price">{product.price}</span>
+                  <span className="home-original-price">
                     {product.originalPrice}
                   </span>
                 </div>
@@ -188,7 +188,7 @@ const Home = () => {
 
       {/* CTA Section */}
       <section className="cta-section">
-        <div className="container">
+        <div className="home-container">
           <LuxuryCard className="cta-card" gradient>
             <h2>جاهزة لبدء رحلتك نحو الجمال؟</h2>
             <p>احجزي جلستك الآن واستمتعي بتجربة فاخرة لا تُنسى</p>

@@ -1,33 +1,47 @@
 import React from "react";
+import AdminLayout from "../../components/AdminLayout";
 import LuxuryCard from "../../components/LuxuryCard";
 import Button from "../../components/Button";
-import { adminData } from "../../data/arabicData";
 import "./Dashboard.css";
 
 const Dashboard = () => {
-  const stats = adminData.stats;
+  const stats = {
+    totalRevenue: "45,000",
+    totalBookings: 156,
+    roomOccupancy: 85,
+    averageRating: 4.9,
+    topService: "إزالة الشعر بالليزر",
+  };
 
   return (
-    <div className="admin-dashboard">
-      <div className="container">
-        {/* Header */}
-        <div className="dashboard-header">
+    <AdminLayout>
+      <div className="admin-dashboard">
+        <div className="admin-dashboard-header">
           <h1>لوحة التحكم</h1>
-          <p>نظرة عامة على أداء المركز والإحصائيات</p>
+          <p>نظرة عامة على أداء المركز</p>
         </div>
 
         {/* Stats Cards */}
-        <div className="stats-grid">
-          <LuxuryCard className="stat-card">
-            <div className="stat-icon">📅</div>
+        <div className="admin-stats-grid">
+          <LuxuryCard className="admin-stat-card">
+            <div className="stat-icon">💰</div>
             <div className="stat-content">
-              <h3>الحجوزات هذا الأسبوع</h3>
-              <div className="stat-number">{stats.weeklyBookings}</div>
-              <div className="stat-change positive">+12% من الأسبوع الماضي</div>
+              <h3>إجمالي الإيرادات</h3>
+              <div className="stat-number">{stats.totalRevenue} شيكل</div>
+              <div className="stat-change positive">+15% من الشهر الماضي</div>
             </div>
           </LuxuryCard>
 
-          <LuxuryCard className="stat-card">
+          <LuxuryCard className="admin-stat-card">
+            <div className="stat-icon">📅</div>
+            <div className="stat-content">
+              <h3>عدد الحجوزات</h3>
+              <div className="stat-number">{stats.totalBookings}</div>
+              <div className="stat-change positive">+8% من الشهر الماضي</div>
+            </div>
+          </LuxuryCard>
+
+          <LuxuryCard className="admin-stat-card">
             <div className="stat-icon">🏠</div>
             <div className="stat-content">
               <h3>معدل إشغال الغرف</h3>
@@ -36,7 +50,7 @@ const Dashboard = () => {
             </div>
           </LuxuryCard>
 
-          <LuxuryCard className="stat-card">
+          <LuxuryCard className="admin-stat-card">
             <div className="stat-icon">⭐</div>
             <div className="stat-content">
               <h3>متوسط التقييم</h3>
@@ -45,7 +59,7 @@ const Dashboard = () => {
             </div>
           </LuxuryCard>
 
-          <LuxuryCard className="stat-card">
+          <LuxuryCard className="admin-stat-card">
             <div className="stat-icon">🔥</div>
             <div className="stat-content">
               <h3>الخدمة الأكثر طلباً</h3>
@@ -56,9 +70,9 @@ const Dashboard = () => {
         </div>
 
         {/* Charts Section */}
-        <div className="charts-section">
-          <div className="charts-grid">
-            <LuxuryCard className="chart-card">
+        <div className="admin-charts-section">
+          <div className="admin-charts-grid">
+            <LuxuryCard className="admin-chart-card">
               <h3>إحصائيات الحجوزات</h3>
               <div className="chart-placeholder">
                 <div className="chart-bars">
@@ -82,7 +96,7 @@ const Dashboard = () => {
               </div>
             </LuxuryCard>
 
-            <LuxuryCard className="chart-card">
+            <LuxuryCard className="admin-chart-card">
               <h3>توزيع الخدمات</h3>
               <div className="chart-placeholder">
                 <div className="pie-chart">
@@ -119,8 +133,8 @@ const Dashboard = () => {
         </div>
 
         {/* Recent Activity */}
-        <div className="recent-activity">
-          <LuxuryCard className="activity-card">
+        <div className="admin-recent-activity">
+          <LuxuryCard className="admin-activity-card">
             <h3>النشاط الأخير</h3>
             <div className="activity-list">
               <div className="activity-item">
@@ -156,10 +170,10 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="quick-actions">
+        <div className="admin-quick-actions">
           <h2>إجراءات سريعة</h2>
-          <div className="actions-grid">
-            <LuxuryCard className="action-card">
+          <div className="admin-actions-grid">
+            <LuxuryCard className="admin-action-card">
               <div className="action-icon">📅</div>
               <h3>إدارة الحجوزات</h3>
               <p>عرض وإدارة جميع الحجوزات</p>
@@ -168,7 +182,7 @@ const Dashboard = () => {
               </Button>
             </LuxuryCard>
 
-            <LuxuryCard className="action-card">
+            <LuxuryCard className="admin-action-card">
               <div className="action-icon">👥</div>
               <h3>إدارة الموظفين</h3>
               <p>عرض وإدارة جدول الموظفين</p>
@@ -177,7 +191,7 @@ const Dashboard = () => {
               </Button>
             </LuxuryCard>
 
-            <LuxuryCard className="action-card">
+            <LuxuryCard className="admin-action-card">
               <div className="action-icon">🏠</div>
               <h3>إدارة الغرف</h3>
               <p>عرض حالة الغرف والمواعيد</p>
@@ -186,7 +200,7 @@ const Dashboard = () => {
               </Button>
             </LuxuryCard>
 
-            <LuxuryCard className="action-card">
+            <LuxuryCard className="admin-action-card">
               <div className="action-icon">⭐</div>
               <h3>التقييمات</h3>
               <p>مراجعة وتدقيق التقييمات</p>
@@ -197,7 +211,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

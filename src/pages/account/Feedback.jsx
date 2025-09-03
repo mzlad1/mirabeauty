@@ -75,9 +75,9 @@ const Feedback = () => {
         <p>نقدر آراءك وملاحظاتك لمساعدتنا في تحسين خدماتنا</p>
 
         <div className="feedback-form">
-          <div className="form-group">
+          <div className="feedback-form-group">
             <label>الخدمة المقيّمة</label>
-            <select className="form-select" defaultValue="">
+            <select className="feedback-form-select" defaultValue="">
               <option value="">اختر الخدمة</option>
               <option value="ليزر-وجه">إزالة الشعر بالليزر - الوجه</option>
               <option value="ليزر-جسم">إزالة الشعر بالليزر - الجسم كامل</option>
@@ -87,7 +87,7 @@ const Feedback = () => {
             </select>
           </div>
 
-          <div className="form-group">
+          <div className="feedback-form-group">
             <label>تقييمك</label>
             <div className="rating-input">
               {[1, 2, 3, 4, 5].map((value) => (
@@ -115,18 +115,18 @@ const Feedback = () => {
             </div>
           </div>
 
-          <div className="form-group">
+          <div className="feedback-form-group">
             <label>تعليقك</label>
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="form-textarea"
+              className="feedback-form-textarea"
               placeholder="شاركي تجربتك معنا... ما الذي أعجبك؟ كيف يمكننا التحسين؟"
               rows="4"
             />
           </div>
 
-          <div className="form-actions">
+          <div className="feedback-form-actions">
             <Button
               variant="luxury"
               size="lg"

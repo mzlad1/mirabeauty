@@ -10,13 +10,13 @@
 }
 
 .feedback-form-section h2 {
-  color: var(--elegant-black);
+  color: var(--text-primary);
   margin-bottom: var(--spacing-sm);
   font-size: var(--font-size-2xl);
 }
 
 .feedback-form-section p {
-  color: var(--soft-black);
+  color: var(--text-secondary);
   margin-bottom: var(--spacing-2xl);
   line-height: 1.6;
 }
@@ -27,37 +27,37 @@
   gap: var(--spacing-xl);
 }
 
-.form-group {
+.feedback-form-group {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
 }
 
-.form-group label {
-  color: var(--elegant-black);
+.feedback-form-group label {
+  color: var(--text-primary);
   font-weight: 500;
   font-size: var(--font-size-base);
 }
 
-.form-select,
-.form-textarea {
+.feedback-form-select,
+.feedback-form-textarea {
   padding: var(--spacing-sm) var(--spacing-md);
-  border: 2px solid var(--border-gray);
+  border: 2px solid var(--border-color);
   border-radius: var(--radius-md);
   font-family: var(--font-family);
   font-size: var(--font-size-base);
   transition: border-color 0.3s ease;
-  background: var(--white);
+  background: var(--diamond);
 }
 
-.form-select:focus,
-.form-textarea:focus {
+.feedback-form-select:focus,
+.feedback-form-textarea:focus {
   outline: none;
-  border-color: var(--primary-pink);
-  box-shadow: 0 0 0 3px rgba(248, 181, 193, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(35, 78, 96, 0.1);
 }
 
-.form-textarea {
+.feedback-form-textarea {
   resize: vertical;
   min-height: 100px;
 }
@@ -93,7 +93,7 @@
   font-size: var(--font-size-base);
 }
 
-.form-actions {
+.feedback-form-actions {
   text-align: center;
   padding-top: var(--spacing-lg);
 }

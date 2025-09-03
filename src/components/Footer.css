@@ -1,13 +1,32 @@
 .footer {
-  background: linear-gradient(135deg, var(--elegant-black), var(--soft-black));
-  color: var(--white);
+  background: linear-gradient(
+    135deg,
+    var(--black-tie) 0%,
+    var(--sapphire) 50%,
+    #1a3d4a 100%
+  );
+  color: var(--diamond);
   margin-top: var(--spacing-3xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--golden), transparent);
 }
 
 .footer-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--spacing-3xl) var(--spacing-lg) var(--spacing-lg);
+  position: relative;
+  z-index: 1;
 }
 
 .footer-content {
@@ -18,14 +37,27 @@
 }
 
 .footer-section h4 {
-  color: var(--primary-pink);
+  color: var(--golden);
   margin-bottom: var(--spacing-lg);
   font-size: var(--font-size-lg);
   font-weight: 600;
+  position: relative;
+  padding-bottom: var(--spacing-sm);
+}
+
+.footer-section h4::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--golden), transparent);
+  border-radius: 0;
 }
 
 .footer-section h5 {
-  color: var(--gold);
+  color: var(--icy-lake);
   margin-bottom: var(--spacing-md);
   font-size: var(--font-size-base);
   font-weight: 500;
@@ -40,26 +72,26 @@
 
 .footer-logo .logo-icon {
   font-size: 2.5rem;
-  background: linear-gradient(135deg, var(--primary-pink), var(--gold));
+  background: linear-gradient(135deg, var(--golden), var(--icy-lake));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .footer-logo h3 {
-  color: var(--white);
+  color: var(--diamond);
   margin-bottom: var(--spacing-xs);
   font-size: var(--font-size-xl);
 }
 
 .footer-logo p {
-  color: var(--light-gray);
+  color: var(--silver);
   font-size: var(--font-size-sm);
   margin: 0;
 }
 
 .footer-description {
-  color: var(--light-gray);
+  color: var(--silver);
   line-height: 1.7;
   font-size: var(--font-size-sm);
 }
@@ -75,14 +107,33 @@
 }
 
 .footer-links a {
-  color: var(--light-gray);
+  color: var(--silver);
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
   font-size: var(--font-size-sm);
+  padding: var(--spacing-xs) 0;
+  display: inline-block;
+  position: relative;
+}
+
+.footer-links a::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--golden);
+  transition: width 0.3s ease;
 }
 
 .footer-links a:hover {
-  color: var(--primary-pink);
+  color: var(--golden);
+  transform: translateX(4px);
+}
+
+.footer-links a:hover::before {
+  width: 100%;
 }
 
 .contact-info {
@@ -100,10 +151,12 @@
 .contact-icon {
   font-size: var(--font-size-lg);
   margin-top: 2px;
+  color: var(--golden);
+  text-shadow: 0 0 10px rgba(217, 160, 82, 0.3);
 }
 
 .contact-item p {
-  color: var(--light-gray);
+  color: var(--silver);
   margin: 0;
   font-size: var(--font-size-sm);
   line-height: 1.5;
@@ -202,7 +255,7 @@
 }
 
 .footer-bottom p {
-  color: var(--light-gray);
+  color: var(--silver);
   font-size: var(--font-size-sm);
   margin: 0;
 }
@@ -213,14 +266,30 @@
 }
 
 .footer-bottom-links a {
-  color: var(--light-gray);
+  color: var(--silver);
   text-decoration: none;
   font-size: var(--font-size-sm);
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.footer-bottom-links a::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--golden);
+  transition: width 0.3s ease;
 }
 
 .footer-bottom-links a:hover {
-  color: var(--primary-pink);
+  color: var(--golden);
+}
+
+.footer-bottom-links a:hover::after {
+  width: 100%;
 }
 
 /* Mobile Styles */

@@ -33,34 +33,34 @@ const Settings = () => {
         {/* Profile Section */}
         <LuxuryCard className="settings-section">
           <h2>الملف الشخصي</h2>
-          <div className="form-grid">
-            <div className="form-group">
+          <div className="settings-form-grid">
+            <div className="settings-form-group">
               <label>الاسم الكامل</label>
               <input
                 type="text"
                 value={settings.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
-                className="form-input"
+                className="settings-form-input"
                 placeholder="أدخل اسمك الكامل"
               />
             </div>
-            <div className="form-group">
+            <div className="settings-form-group">
               <label>البريد الإلكتروني</label>
               <input
                 type="email"
                 value={settings.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                className="form-input"
+                className="settings-form-input"
                 placeholder="أدخل بريدك الإلكتروني"
               />
             </div>
-            <div className="form-group">
+            <div className="settings-form-group">
               <label>رقم الهاتف</label>
               <input
                 type="tel"
                 value={settings.phone}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
-                className="form-input"
+                className="settings-form-input"
                 placeholder="أدخل رقم هاتفك"
               />
             </div>
@@ -174,14 +174,14 @@ const Settings = () => {
         {/* Pre-session Preferences */}
         <LuxuryCard className="settings-section">
           <h2>تفضيلات ما قبل الجلسة</h2>
-          <div className="form-group">
+          <div className="settings-form-group">
             <label>ملاحظات خاصة للجلسات</label>
             <textarea
               value={settings.preSessionPreferences}
               onChange={(e) =>
                 handleInputChange("preSessionPreferences", e.target.value)
               }
-              className="form-textarea"
+              className="settings-form-textarea"
               placeholder="اكتبي أي ملاحظات خاصة أو تفضيلات للجلسات..."
               rows="4"
             />
@@ -192,7 +192,7 @@ const Settings = () => {
         <LuxuryCard className="settings-section">
           <h2>الكوبونات والعضوية</h2>
           <div className="loyalty-section">
-            <div className="form-group">
+            <div className="settings-form-group">
               <label>كود الخصم</label>
               <div className="promo-input-group">
                 <input
@@ -201,7 +201,7 @@ const Settings = () => {
                   onChange={(e) =>
                     handleInputChange("promoCode", e.target.value)
                   }
-                  className="form-input"
+                  className="settings-form-input"
                   placeholder="أدخل كود الخصم"
                 />
                 <Button variant="secondary" size="sm">
