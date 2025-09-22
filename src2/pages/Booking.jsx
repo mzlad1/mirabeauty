@@ -194,7 +194,7 @@ const Booking = () => {
                 <div className="summary-item">
                   <span className="label">التاريخ:</span>
                   <span className="value">
-                    {selectedDate?.toLocaleDateString("ar-SA", {
+                    {selectedDate?.toLocaleDateString("en-US", {
                       weekday: "long",
                       year: "numeric",
                       month: "long",

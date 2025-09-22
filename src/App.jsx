@@ -1,72 +1,104 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
-  useLocation,
+  Navigate,
 } from "react-router-dom";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
+import "./App.css";
 
-// Customer Pages
-import Home from "./pages/Home";
-import Services from "./pages/Services";
-import Booking from "./pages/Booking";
-import Products from "./pages/Products";
-import FAQ from "./pages/FAQ";
-import Account from "./pages/Account";
+// Import Pages
+import HomePage from "./pages/HomePage";
+import ServicesPage from "./pages/ServicesPage";
+import ProductsPage from "./pages/ProductsPage";
+import BookingPage from "./pages/BookingPage";
+import FAQPage from "./pages/FAQPage";
+import ProfilePage from "./pages/ProfilePage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import StaffDashboardPage from "./pages/StaffDashboardPage";
 
-// Admin Pages
-import AdminDashboard from "./pages/admin/Dashboard";
-import AdminBookings from "./pages/admin/Bookings";
-import AdminServices from "./pages/admin/Services";
-import AdminRooms from "./pages/admin/Rooms";
-import AdminStaff from "./pages/admin/Staff";
-import AdminProducts from "./pages/admin/Products";
-import AdminDiscounts from "./pages/admin/Discounts";
-import AdminFAQ from "./pages/admin/FAQ";
-import AdminFeedback from "./pages/admin/Feedback";
-import AdminSettings from "./pages/admin/Settings";
+// Import Components
+import Navigation from "./components/common/Navigation";
+import Footer from "./components/common/Footer";
 
-function AppContent() {
-  const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith("/admin");
-
-  return (
-    <div className="min-h-screen bg-gradient-luxury">
-      <Header />
-      <main className="min-h-screen">
-        <Routes>
-          {/* Customer Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/booking" element={<Booking />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/account/*" element={<Account />} />
-
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/bookings" element={<AdminBookings />} />
-          <Route path="/admin/services" element={<AdminServices />} />
-          <Route path="/admin/rooms" element={<AdminRooms />} />
-          <Route path="/admin/staff" element={<AdminStaff />} />
-          <Route path="/admin/products" element={<AdminProducts />} />
-          <Route path="/admin/discounts" element={<AdminDiscounts />} />
-          <Route path="/admin/faq" element={<AdminFAQ />} />
-          <Route path="/admin/feedback" element={<AdminFeedback />} />
-          <Route path="/admin/settings" element={<AdminSettings />} />
-        </Routes>
-      </main>
-      {!isAdminRoute && <Footer />}
-    </div>
-  );
-}
+// Import Sample Data
+import { sampleUsers } from "./data/sampleUsers";
 
 function App() {
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Load user from localStorage on app start
+  useEffect(() => {
+    const savedUser = localStorage.getItem("currentUser");
+    if (savedUser) {
+      setCurrentUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  // Save user to localStorage when it changes
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem("currentUser");
+    }
+  }, [currentUser]);
+
+  // Protected route component for dashboard
+  const ProtectedDashboard = () => {
+    if (!currentUser) {
+      return <Navigate to="/login" replace />;
+    }
+
+    if (currentUser.role === "admin") {
+      return <AdminDashboardPage currentUser={currentUser} />;
+    } else if (currentUser.role === "staff") {
+      return <StaffDashboardPage currentUser={currentUser} />;
+    } else {
+      return <Navigate to="/" replace />;
+    }
+  };
+
+  // Protected route component for profile
+  const ProtectedProfile = () => {
+    if (!currentUser) {
+      return <Navigate to="/login" replace />;
+    }
+    return (
+      <ProfilePage currentUser={currentUser} setCurrentUser={setCurrentUser} />
+    );
+  };
+
   return (
     <Router>
-      <AppContent />
+      <div className="App" dir="rtl">
+        <Navigation currentUser={currentUser} setCurrentUser={setCurrentUser} />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route
+              path="/book"
+              element={<BookingPage currentUser={currentUser} />}
+            />
+            <Route path="/faq" element={<FAQPage />} />
+            <Route path="/profile" element={<ProtectedProfile />} />
+            <Route
+              path="/login"
+              element={<LoginPage setCurrentUser={setCurrentUser} />}
+            />
+            <Route
+              path="/register"
+              element={<RegisterPage setCurrentUser={setCurrentUser} />}
+            />
+            <Route path="/dashboard" element={<ProtectedDashboard />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
     </Router>
   );
 }

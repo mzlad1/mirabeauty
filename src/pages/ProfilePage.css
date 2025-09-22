@@ -1,0 +1,716 @@
+/* ProfilePage.css - Profile Page Specific Styles */
+
+/* Page Header */
+.profile-page .page-header {
+  background: linear-gradient(135deg, var(--navy-blue) 0%, #0f2a5a 100%);
+  color: var(--white);
+  padding: 4rem 0;
+}
+
+.profile-page .page-header h1 {
+  color: var(--white);
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.profile-page .page-header p {
+  font-size: 1.25rem;
+  opacity: 0.9;
+}
+
+/* Profile Layout */
+.profile-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Profile Sidebar */
+.profile-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: sticky;
+  top: 100px;
+}
+
+/* Profile Card */
+.profile-card {
+  background-color: var(--white);
+  padding: 2rem;
+  border: 2px solid var(--border-color);
+  text-align: center;
+}
+
+.profile-avatar {
+  margin-bottom: 1.5rem;
+}
+
+.profile-avatar img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border: 4px solid var(--gold);
+  margin: 0 auto;
+}
+
+.profile-card h3 {
+  color: var(--navy-blue);
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.profile-card p {
+  color: var(--charcoal);
+  opacity: 0.8;
+  margin-bottom: 1.5rem;
+}
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--border-color);
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--charcoal);
+  opacity: 0.8;
+}
+
+/* Profile Navigation */
+.profile-nav {
+  background-color: var(--white);
+  border: 2px solid var(--border-color);
+}
+
+.nav-item {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  text-align: right;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.nav-item:last-child {
+  border-bottom: none;
+}
+
+.nav-item:hover {
+  background-color: var(--ivory);
+  color: var(--navy-blue);
+}
+
+.nav-item.active {
+  background-color: var(--gold);
+  color: var(--white);
+}
+
+.nav-icon {
+  font-size: 1.25rem;
+}
+
+/* Profile Main Content */
+.profile-main {
+  background-color: var(--white);
+  border: 2px solid var(--border-color);
+  min-height: 600px;
+}
+
+.tab-content {
+  padding: 2rem;
+}
+
+.tab-content h2 {
+  color: var(--navy-blue);
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background-color: var(--ivory);
+  padding: 1.5rem;
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-3px);
+}
+
+.stat-card .stat-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.stat-card .stat-info h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--navy-blue);
+  margin-bottom: 0.25rem;
+}
+
+.stat-card .stat-info p {
+  color: var(--charcoal);
+  opacity: 0.8;
+  margin: 0;
+}
+
+/* Next Appointment */
+.next-appointment {
+  margin-bottom: 2rem;
+}
+
+.next-appointment h3 {
+  color: var(--navy-blue);
+  margin-bottom: 1rem;
+}
+
+.appointment-card {
+  background-color: var(--ivory);
+  padding: 1.5rem;
+  border: 2px solid var(--gold);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.appointment-info h4 {
+  color: var(--navy-blue);
+  margin-bottom: 0.5rem;
+}
+
+.appointment-info p {
+  color: var(--charcoal);
+  margin-bottom: 1rem;
+}
+
+.appointment-meta {
+  display: flex;
+  gap: 1rem;
+}
+
+.appointment-meta span {
+  color: var(--charcoal);
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.appointment-actions button {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+
+/* Loyalty Section */
+.loyalty-section h3 {
+  color: var(--navy-blue);
+  margin-bottom: 1rem;
+}
+
+.loyalty-card {
+  background-color: var(--ivory);
+  padding: 2rem;
+  border: 2px solid var(--border-color);
+}
+
+.loyalty-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.loyalty-header h4 {
+  color: var(--navy-blue);
+  margin: 0;
+}
+
+.points {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.loyalty-progress {
+  margin-bottom: 1.5rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background-color: var(--border-color);
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--gold);
+  transition: width 0.3s ease;
+}
+
+.loyalty-progress p {
+  color: var(--charcoal);
+  opacity: 0.8;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.loyalty-benefits {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.benefit {
+  text-align: center;
+  padding: 1rem;
+  background-color: var(--white);
+  border: 2px solid var(--border-color);
+  flex: 1;
+}
+
+.benefit-points {
+  display: block;
+  font-weight: 700;
+  color: var(--navy-blue);
+  margin-bottom: 0.25rem;
+}
+
+.benefit-reward {
+  font-size: 0.875rem;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* Appointments List */
+.appointments-list,
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.appointment-item,
+.history-item {
+  background-color: var(--ivory);
+  padding: 1.5rem;
+  border: 2px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.appointment-item:hover,
+.history-item:hover {
+  border-color: var(--gold);
+}
+
+.appointment-header,
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.appointment-header h4,
+.history-header h4 {
+  color: var(--navy-blue);
+  margin: 0;
+}
+
+.status {
+  padding: 4px 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.status.confirmed {
+  background-color: #28a745;
+}
+
+.status.pending {
+  background-color: #ffc107;
+  color: var(--charcoal);
+}
+
+.status.completed {
+  background-color: var(--navy-blue);
+}
+
+.status.cancelled {
+  background-color: #dc3545;
+}
+
+.appointment-details,
+.history-details {
+  margin-bottom: 1rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.detail-row .label {
+  color: var(--charcoal);
+  font-weight: 600;
+}
+
+.detail-row .value {
+  color: var(--navy-blue);
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.action-btn {
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  background-color: var(--white);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.action-btn.cancel {
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+.action-btn.cancel:hover {
+  background-color: #dc3545;
+  color: var(--white);
+}
+
+.action-btn.edit {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.action-btn.edit:hover {
+  background-color: var(--gold);
+  color: var(--white);
+}
+
+.action-btn.details {
+  color: var(--navy-blue);
+  border-color: var(--navy-blue);
+}
+
+.action-btn.details:hover {
+  background-color: var(--navy-blue);
+  color: var(--white);
+}
+
+/* History Specific Styles */
+.history-header .date {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.rating {
+  margin-top: 0.5rem;
+  color: var(--charcoal);
+}
+
+.feedback {
+  margin-top: 0.5rem;
+  font-style: italic;
+  color: var(--charcoal);
+  opacity: 0.8;
+}
+
+/* Settings Section */
+.settings-section {
+  background-color: var(--ivory);
+  padding: 2rem;
+  border: 2px solid var(--border-color);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.section-header h3 {
+  color: var(--navy-blue);
+  margin: 0;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.edit-actions button {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+
+.settings-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.settings-form .form-group {
+  background-color: var(--white);
+  padding: 1.25rem;
+  border: 2px solid var(--border-color);
+}
+
+.settings-form .form-label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--navy-blue);
+}
+
+.settings-form .form-input,
+.settings-form .form-select,
+.settings-form .form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--border-color);
+  background-color: var(--white);
+  font-size: 1rem;
+  color: var(--charcoal);
+  direction: rtl;
+}
+
+.settings-form .form-input:focus,
+.settings-form .form-select:focus,
+.settings-form .form-textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.form-value {
+  color: var(--charcoal);
+  margin: 0;
+  padding: 10px 0;
+}
+
+.settings-form small {
+  color: var(--charcoal);
+  opacity: 0.6;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  background-color: var(--ivory);
+  border: 2px solid var(--border-color);
+}
+
+.empty-state h3 {
+  color: var(--navy-blue);
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  color: var(--charcoal);
+  opacity: 0.8;
+  margin-bottom: 2rem;
+}
+
+.empty-state button {
+  padding: 12px 24px;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .profile-sidebar {
+    position: static;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .profile-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .nav-item {
+    padding: 1rem;
+    text-align: center;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-page .page-header h1 {
+    font-size: 2rem;
+  }
+
+  .profile-page .page-header p {
+    font-size: 1.125rem;
+  }
+
+  .tab-content {
+    padding: 1.5rem;
+  }
+
+  .profile-sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-nav {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .appointment-card {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .appointment-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .section-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .loyalty-benefits {
+    flex-direction: column;
+  }
+
+  .appointment-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .tab-content {
+    padding: 1rem;
+  }
+
+  .profile-card {
+    padding: 1.5rem;
+  }
+
+  .profile-avatar img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .profile-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-item {
+    flex-direction: row;
+    text-align: right;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .settings-section {
+    padding: 1rem;
+  }
+
+  .loyalty-card {
+    padding: 1.5rem;
+  }
+
+  .appointment-item,
+  .history-item {
+    padding: 1rem;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .detail-row .label,
+  .detail-row .value {
+    font-size: 0.9rem;
+  }
+}
