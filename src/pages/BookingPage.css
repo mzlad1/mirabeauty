@@ -3,7 +3,6 @@
 /* Category Selection */
 .category-selection {
   background-color: var(--white);
-  padding: 4rem 0;
 }
 
 .category-selection h2 {
@@ -21,56 +20,177 @@
   margin: 0 auto;
 }
 
-.category-card {
-  background: var(--white);
-  border-radius: 1.5rem;
-  padding: 3rem 2rem;
-  text-align: center;
+/* Flip Card Styles */
+.flip-card {
+  background-color: transparent;
+  width: 100%;
+  height: 400px;
+  perspective: 1000px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid var(--border-color);
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+  border-radius: 1.5rem;
   box-shadow: 0 6px 24px rgba(11, 34, 53, 0.06);
 }
 
-.category-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 40px rgba(11, 34, 53, 0.12);
-  border-color: var(--gold);
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(180deg);
 }
 
-.category-icon {
-  font-size: 4rem;
-  margin-bottom: 1.5rem;
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 1.5rem;
+  border: 2px solid var(--border-color);
+  top: 0;
+  left: 0;
 }
 
-.category-card h3 {
+.flip-card-front {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 2;
+  transform: rotateY(0deg);
+}
+
+.flip-card-back {
+  background: var(--white);
+  transform: rotateY(180deg);
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+
+/* Background Images */
+.skincare-bg {
+  background-image: linear-gradient(
+      rgba(11, 34, 53, 0.6),
+      rgba(11, 34, 53, 0.6)
+    ),
+    url("https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80");
+}
+
+.laser-bg {
+  background-image: linear-gradient(
+      rgba(11, 34, 53, 0.6),
+      rgba(11, 34, 53, 0.6)
+    ),
+    url("https://images.unsplash.com/photo-1629909613654-28e377c37b09?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80");
+}
+
+/* Special styling for consultation card */
+.consultation-card .flip-card-inner {
+  border: 3px solid var(--gold);
+}
+
+.consultation-card .category-overlay h3 {
+  color: var(--white);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.consultation-card .flip-card-back {
+  background: linear-gradient(135deg, var(--ivory) 0%, var(--white) 100%);
+  border: 3px solid var(--gold);
+}
+
+.consultation-card .flip-card-back h3 {
+  color: var(--gold);
+}
+
+.consultation-card .flip-card-back li:last-child {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* Category Overlay */
+.category-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--white);
+  text-align: center;
+  width: 100%;
+  padding: 0 2rem;
+}
+
+.category-overlay h3 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin: 0;
+}
+
+/* Back Card Content */
+.flip-card-back h3 {
   color: var(--navy-blue);
   font-size: 1.75rem;
   margin-bottom: 1rem;
   font-weight: 700;
 }
 
-.category-card p {
+.flip-card-back p {
   color: var(--charcoal);
   font-size: 1.1rem;
   margin-bottom: 2rem;
   opacity: 0.8;
 }
 
-.category-card ul {
+.flip-card-back ul {
   list-style: none;
   padding: 0;
   margin: 0;
+  width: 100%;
 }
 
-.category-card li {
+.flip-card-back li {
   color: var(--charcoal);
   padding: 0.5rem 0;
   border-bottom: 1px solid var(--border-color);
   opacity: 0.7;
 }
 
-.category-card li:last-child {
+.flip-card-back li:last-child {
+  border-bottom: none;
+}
+
+/* Special styling for consultation card */
+.consultation-card .flip-card-inner {
+  border: 3px solid var(--gold);
+}
+
+.consultation-card .category-overlay h3 {
+  color: var(--white);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.consultation-card .flip-card-back {
+  background: linear-gradient(135deg, var(--ivory) 0%, var(--white) 100%);
+  border: 3px solid var(--gold);
+}
+
+.consultation-card .flip-card-back h3 {
+  color: var(--gold);
+}
+
+.consultation-card .flip-card-back li:last-child {
+  color: var(--gold);
+  font-weight: 600;
   border-bottom: none;
 }
 
@@ -660,15 +780,19 @@
     gap: 2rem;
   }
 
-  .category-card {
+  .flip-card {
+    height: 350px;
+  }
+
+  .flip-card-back {
     padding: 2rem 1.5rem;
   }
 
-  .category-icon {
-    font-size: 3rem;
+  .category-overlay h3 {
+    font-size: 2rem;
   }
 
-  .category-card h3 {
+  .flip-card-back h3 {
     font-size: 1.5rem;
   }
 
@@ -728,5 +852,240 @@
 
   .step-title {
     font-size: 0.75rem;
+  }
+}
+
+/* Consultation Booking */
+.consultation-booking {
+  background-color: var(--white);
+  min-height: 600px;
+}
+
+.consultation-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.consultation-header h2 {
+  color: var(--navy-blue);
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.consultation-header p {
+  color: var(--charcoal);
+  font-size: 1.25rem;
+  opacity: 0.8;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.consultation-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.consultation-info {
+  display: grid;
+  gap: 2rem;
+}
+
+.info-card {
+  background: var(--ivory);
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 2px solid var(--border-color);
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(11, 34, 53, 0.1);
+}
+
+.info-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.info-card h3 {
+  color: var(--navy-blue);
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+}
+
+.info-card p {
+  color: var(--charcoal);
+  opacity: 0.8;
+  line-height: 1.5;
+}
+
+.consultation-form-container {
+  background: var(--white);
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  border: 2px solid var(--border-color);
+  box-shadow: 0 6px 32px rgba(11, 34, 53, 0.06);
+}
+
+.consultation-form h3 {
+  color: var(--navy-blue);
+  margin-bottom: 2rem;
+  text-align: center;
+  font-size: 1.75rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--charcoal);
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gold);
+}
+
+.consultation-actions {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.consultation-btn {
+  background: linear-gradient(135deg, var(--gold) 0%, #b8921f 100%);
+  color: var(--white);
+  padding: 15px 40px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
+}
+
+.consultation-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(197, 174, 46, 0.3);
+}
+
+.consultation-note {
+  color: var(--charcoal);
+  font-size: 0.9rem;
+  opacity: 0.8;
+  font-style: italic;
+}
+
+/* Responsive for consultation */
+@media (max-width: 968px) {
+  .consultation-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .checkbox-group {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .consultation-form-container {
+    padding: 1.5rem;
+  }
+
+  .consultation-header h2 {
+    font-size: 2rem;
+  }
+
+  .consultation-header p {
+    font-size: 1.125rem;
+  }
+
+  .info-card {
+    padding: 1.5rem;
+  }
+
+  .info-icon {
+    font-size: 2.5rem;
+  }
+}
+
+/* Booking CTA */
+.booking-cta {
+  background: linear-gradient(135deg, var(--navy-blue) 0%, #0f2a5a 100%);
+  color: var(--white);
+}
+
+.booking-cta .cta-content h2 {
+  color: var(--white);
+  margin-bottom: 1rem;
+}
+
+.booking-cta .cta-content p {
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.booking-cta .cta-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.booking-cta .btn-primary {
+  background-color: var(--gold);
+  padding: 15px 30px;
+  font-size: 1.125rem;
+}
+
+.booking-cta .btn-secondary {
+  border-color: var(--white);
+  color: var(--white);
+  padding: 13px 28px;
+  font-size: 1.125rem;
+}
+
+.booking-cta .btn-secondary:hover {
+  background-color: var(--white);
+  color: var(--navy-blue);
+}
+
+@media (max-width: 768px) {
+  .booking-cta .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .booking-cta .cta-buttons button {
+    width: 100%;
+    max-width: 300px;
   }
 }

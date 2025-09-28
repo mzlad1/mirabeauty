@@ -130,8 +130,23 @@
   color: var(--white);
 }
 
+.nav-item.active .nav-icon,
+.nav-item.active .fas,
+.nav-item.active .far,
+.nav-item.active .fab {
+  color: var(--white);
+}
+
 .nav-icon {
   font-size: 1.25rem;
+  color: var(--navy-blue);
+}
+
+/* Font Awesome Icons */
+.fas,
+.far,
+.fab {
+  color: var(--navy-blue);
 }
 
 /* Profile Main Content */
@@ -178,6 +193,7 @@
 .stat-card .stat-icon {
   font-size: 2rem;
   flex-shrink: 0;
+  color: var(--navy-blue);
 }
 
 .stat-card .stat-info h3 {

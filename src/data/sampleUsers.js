@@ -8,7 +8,7 @@ export const sampleUsers = [
     password: "admin123",
     role: "admin",
     name: "د. سارة أحمد",
-    phone: "+966501234567",
+    phone: "+970501234567",
     avatar:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     permissions: ["all"],
@@ -22,7 +22,7 @@ export const sampleUsers = [
     password: "manager123",
     role: "admin",
     name: "فاطمة محمد",
-    phone: "+966507654321",
+    phone: "+970507654321",
     avatar:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     permissions: ["appointments", "customers", "services", "reports"],
@@ -38,7 +38,7 @@ export const sampleUsers = [
     password: "staff123",
     role: "staff",
     name: "نورا علي",
-    phone: "+966551234567",
+    phone: "+970551234567",
     avatar:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     specialization: "أخصائية ليزر",
@@ -62,7 +62,7 @@ export const sampleUsers = [
     password: "staff123",
     role: "staff",
     name: "مريم خالد",
-    phone: "+966557654321",
+    phone: "+970557654321",
     avatar:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     specialization: "أخصائية عناية بالبشرة",
@@ -86,7 +86,7 @@ export const sampleUsers = [
     password: "staff123",
     role: "staff",
     name: "هدى سالم",
-    phone: "+966559876543",
+    phone: "+970559876543",
     avatar:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     specialization: "أخصائية نحت الجسم",
@@ -112,7 +112,7 @@ export const sampleUsers = [
     password: "customer123",
     role: "customer",
     name: "عائشة محمود",
-    phone: "+966501111111",
+    phone: "+970501111111",
     avatar:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     birthDate: "1990-05-15",
@@ -132,7 +132,7 @@ export const sampleUsers = [
     password: "customer123",
     role: "customer",
     name: "ريم عبدالله",
-    phone: "+966502222222",
+    phone: "+970502222222",
     avatar:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     birthDate: "1985-08-22",
@@ -152,7 +152,7 @@ export const sampleUsers = [
     password: "customer123",
     role: "customer",
     name: "أمل حسين",
-    phone: "+966503333333",
+    phone: "+970503333333",
     avatar:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     birthDate: "1992-12-03",
@@ -172,7 +172,7 @@ export const sampleUsers = [
     password: "customer123",
     role: "customer",
     name: "لينا عماد",
-    phone: "+966504444444",
+    phone: "+970504444444",
     avatar:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     birthDate: "1988-03-18",
@@ -192,7 +192,7 @@ export const sampleUsers = [
     password: "customer123",
     role: "customer",
     name: "جواهر سعد",
-    phone: "+966505555555",
+    phone: "+970505555555",
     avatar:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     birthDate: "1995-07-10",

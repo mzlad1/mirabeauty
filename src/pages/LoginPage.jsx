@@ -86,25 +86,24 @@ const LoginPage = ({ setCurrentUser }) => {
 
   return (
     <div className="login-page">
-
       {/* Login Content */}
       <section className="login-content section">
         <div className="container">
-          <div className="login-layout">
+          <div className="login-page-layout">
             {/* Login Form */}
-            <div className="login-form-container">
-              <div className="form-header">
+            <div className="login-page-form-container">
+              <div className="login-form-header">
                 <h2>أهلاً بك مرة أخرى</h2>
                 <p>ادخلي بياناتك للوصول إلى حسابك</p>
               </div>
 
               {errors.general && (
-                <div className="error-message">{errors.general}</div>
+                <div className="login-error-message">{errors.general}</div>
               )}
 
-              <form onSubmit={handleSubmit} className="login-form">
-                <div className="form-group">
-                  <label htmlFor="email" className="form-label">
+              <form onSubmit={handleSubmit} className="login-page-form">
+                <div className="login-form-group">
+                  <label htmlFor="email" className="login-form-label">
                     البريد الإلكتروني
                   </label>
                   <input
@@ -113,17 +112,19 @@ const LoginPage = ({ setCurrentUser }) => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className={`form-input ${errors.email ? "error" : ""}`}
+                    className={`login-form-input ${
+                      errors.email ? "error" : ""
+                    }`}
                     placeholder="أدخلي بريدك الإلكتروني"
                     disabled={loading}
                   />
                   {errors.email && (
-                    <span className="field-error">{errors.email}</span>
+                    <span className="login-field-error">{errors.email}</span>
                   )}
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="password" className="form-label">
+                <div className="login-form-group">
+                  <label htmlFor="password" className="login-form-label">
                     كلمة المرور
                   </label>
                   <input
@@ -132,28 +133,30 @@ const LoginPage = ({ setCurrentUser }) => {
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className={`form-input ${errors.password ? "error" : ""}`}
+                    className={`login-form-input ${
+                      errors.password ? "error" : ""
+                    }`}
                     placeholder="أدخلي كلمة المرور"
                     disabled={loading}
                   />
                   {errors.password && (
-                    <span className="field-error">{errors.password}</span>
+                    <span className="login-field-error">{errors.password}</span>
                   )}
                 </div>
 
-                <div className="form-options">
-                  <label className="remember-me">
+                <div className="login-form-options">
+                  <label className="login-remember-me">
                     <input type="checkbox" />
                     <span>تذكريني</span>
                   </label>
-                  <button type="button" className="forgot-password">
+                  <button type="button" className="login-forgot-password">
                     نسيت كلمة المرور؟
                   </button>
                 </div>
 
                 <button
                   type="submit"
-                  className={`btn-primary login-btn ${
+                  className={`btn-primary login-btn-form ${
                     loading ? "loading" : ""
                   }`}
                   disabled={loading}
@@ -162,79 +165,66 @@ const LoginPage = ({ setCurrentUser }) => {
                 </button>
               </form>
 
-              <div className="form-footer">
+              <div className="login-form-footer">
                 <p>ليس لديك حساب؟</p>
                 <button
                   onClick={() => navigate("/register")}
-                  className="register-link"
+                  className="login-register-link"
                 >
                   إنشاء حساب جديد
                 </button>
               </div>
             </div>
-
-            {/* Login Benefits */}
-            <div className="login-benefits">
-              <h3>مميزات الحساب الشخصي</h3>
-              <div className="benefits-list">
-                <div className="benefit-item">
-                  <div className="benefit-icon">📅</div>
-                  <div className="benefit-content">
-                    <h4>إدارة المواعيد</h4>
-                    <p>احجزي وعدلي مواعيدك بسهولة</p>
-                  </div>
-                </div>
-                <div className="benefit-item">
-                  <div className="benefit-icon">📋</div>
-                  <div className="benefit-content">
-                    <h4>تاريخ العلاجات</h4>
-                    <p>تتبعي تطور علاجاتك ونتائجها</p>
-                  </div>
-                </div>
-                <div className="benefit-item">
-                  <div className="benefit-icon">🎁</div>
-                  <div className="benefit-content">
-                    <h4>عروض حصرية</h4>
-                    <p>احصلي على خصومات وعروض خاصة</p>
-                  </div>
-                </div>
-                <div className="benefit-item">
-                  <div className="benefit-icon">⭐</div>
-                  <div className="benefit-content">
-                    <h4>نقاط الولاء</h4>
-                    <p>اجمعي نقاط واستبدليها بخدمات</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Demo Login Section */}
-          <div className="demo-section">
+          <div className="login-demo-section">
             <h3>تسجيل دخول تجريبي</h3>
             <p>جربي النظام بأدوار مختلفة</p>
-            <div className="demo-buttons">
+            <div className="login-demo-buttons">
               <button
                 onClick={() => handleDemoLogin("customer")}
-                className="demo-btn customer-demo"
+                className="login-demo-btn login-customer-demo"
               >
                 عميل
                 <span>customer1@example.com</span>
               </button>
               <button
                 onClick={() => handleDemoLogin("staff")}
-                className="demo-btn staff-demo"
+                className="login-demo-btn login-staff-demo"
               >
                 موظف
                 <span>staff1@mirabeauty.com</span>
               </button>
               <button
                 onClick={() => handleDemoLogin("admin")}
-                className="demo-btn admin-demo"
+                className="login-demo-btn login-admin-demo"
               >
                 مدير
                 <span>admin@mirabeauty.com</span>
               </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Login Benefits Section */}
+      <section className="login-benefits section">
+        <div className="container">
+          <div className="why-grid">
+            <div className="why-heading text-right">
+              <h2>مميزات الحساب الشخصي</h2>
+              <p>
+                احصلي على تجربة شخصية متكاملة مع العديد من المميزات الحصرية.
+              </p>
+            </div>
+            <div className="why-points">
+              <ul>
+                <li>إدارة وتعديل المواعيد بسهولة</li>
+                <li>تتبع تاريخ العلاجات ونتائجها</li>
+                <li>عروض وخصومات حصرية للأعضاء</li>
+                <li>نقاط الولاء واستبدالها بخدمات</li>
+              </ul>
             </div>
           </div>
         </div>

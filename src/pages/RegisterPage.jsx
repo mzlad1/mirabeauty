@@ -57,7 +57,7 @@ const RegisterPage = ({ setCurrentUser }) => {
 
     if (!formData.phone) {
       newErrors.phone = "رقم الهاتف مطلوب";
-    } else if (!/^[+966|0]\d{9,10}$/.test(formData.phone.replace(/\s/g, ""))) {
+    } else if (!/^[+970|0]\d{9,10}$/.test(formData.phone.replace(/\s/g, ""))) {
       newErrors.phone = "رقم الهاتف غير صحيح";
     }
 
@@ -139,7 +139,6 @@ const RegisterPage = ({ setCurrentUser }) => {
 
   return (
     <div className="register-page">
-
       {/* Register Content */}
       <section className="register-content section">
         <div className="container">
@@ -206,7 +205,7 @@ const RegisterPage = ({ setCurrentUser }) => {
                         value={formData.phone}
                         onChange={handleInputChange}
                         className={`form-input ${errors.phone ? "error" : ""}`}
-                        placeholder="+966 5X XXX XXXX"
+                        placeholder="+970 5X XXX XXXX"
                         disabled={loading}
                       />
                       {errors.phone && (
@@ -335,41 +334,39 @@ const RegisterPage = ({ setCurrentUser }) => {
                 </div>
 
                 {/* Terms and Conditions */}
-                <div className="form-section">
-                  <div className="form-group">
-                    <label
-                      className={`terms-checkbox ${
-                        errors.agreeToTerms ? "error" : ""
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        name="agreeToTerms"
-                        checked={formData.agreeToTerms}
-                        onChange={handleInputChange}
-                        disabled={loading}
-                      />
-                      <span className="checkmark"></span>
-                      <span className="terms-text">
-                        أوافق على{" "}
-                        <button type="button" className="terms-link">
-                          الشروط والأحكام
-                        </button>{" "}
-                        و
-                        <button type="button" className="terms-link">
-                          سياسة الخصوصية
-                        </button>
-                      </span>
-                    </label>
-                    {errors.agreeToTerms && (
-                      <span className="field-error">{errors.agreeToTerms}</span>
-                    )}
-                  </div>
+                <div className="form-group">
+                  <label
+                    className={`terms-checkbox ${
+                      errors.agreeToTerms ? "error" : ""
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      name="agreeToTerms"
+                      checked={formData.agreeToTerms}
+                      onChange={handleInputChange}
+                      disabled={loading}
+                    />
+                    <span className="checkmark"></span>
+                    <span className="terms-text">
+                      أوافق على{" "}
+                      <button type="button" className="terms-link">
+                        الشروط والأحكام
+                      </button>{" "}
+                      و
+                      <button type="button" className="terms-link">
+                        سياسة الخصوصية
+                      </button>
+                    </span>
+                  </label>
+                  {errors.agreeToTerms && (
+                    <span className="field-error">{errors.agreeToTerms}</span>
+                  )}
                 </div>
 
                 <button
                   type="submit"
-                  className={`btn-primary register-btn ${
+                  className={`btn-primary register-btn-form ${
                     loading ? "loading" : ""
                   }`}
                   disabled={loading}
@@ -379,56 +376,39 @@ const RegisterPage = ({ setCurrentUser }) => {
               </form>
 
               <div className="form-footer">
-                <p>لديك حساب بالفعل؟</p>
-                <button
-                  onClick={() => navigate("/login")}
-                  className="login-link"
-                >
-                  تسجيل الدخول
-                </button>
+                <p>
+                  لديك حساب بالفعل؟{" "}
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="login-link"
+                  >
+                    تسجيل الدخول
+                  </button>
+                </p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Registration Benefits */}
-            <div className="register-benefits">
-              <h3>مميزات الانضمام إلينا</h3>
-              <div className="benefits-list">
-                <div className="benefit-item">
-                  <div className="benefit-icon">🎯</div>
-                  <div className="benefit-content">
-                    <h4>خطة علاج شخصية</h4>
-                    <p>خطة مصممة خصيصاً لنوع بشرتك واحتياجاتك</p>
-                  </div>
-                </div>
-                <div className="benefit-item">
-                  <div className="benefit-icon">📊</div>
-                  <div className="benefit-content">
-                    <h4>تتبع التقدم</h4>
-                    <p>راقبي تطور نتائج علاجاتك بالصور والملاحظات</p>
-                  </div>
-                </div>
-                <div className="benefit-item">
-                  <div className="benefit-icon">🔔</div>
-                  <div className="benefit-content">
-                    <h4>تذكيرات ذكية</h4>
-                    <p>تذكيرات للمواعيد والعناية اليومية</p>
-                  </div>
-                </div>
-                <div className="benefit-item">
-                  <div className="benefit-icon">💰</div>
-                  <div className="benefit-content">
-                    <h4>خصومات حصرية</h4>
-                    <p>خصم 15% على أول زيارة وعروض أعضاء حصرية</p>
-                  </div>
-                </div>
-                <div className="benefit-item">
-                  <div className="benefit-icon">🏆</div>
-                  <div className="benefit-content">
-                    <h4>برنامج VIP</h4>
-                    <p>أولوية في الحجز وخدمات VIP مع كل زيارة</p>
-                  </div>
-                </div>
-              </div>
+      {/* Register Benefits Section */}
+      <section className="register-benefits section">
+        <div className="container">
+          <div className="why-grid">
+            <div className="why-heading text-right">
+              <h2>مميزات الانضمام إلينا</h2>
+              <p>
+                انضمي إلينا واستمتعي بتجربة جمال متميزة مع العديد من المميزات
+                الحصرية.
+              </p>
+            </div>
+            <div className="why-points">
+              <ul>
+                <li>خطة علاج شخصية مصممة لبشرتك</li>
+                <li>تتبع التقدم بالصور والملاحظات</li>
+                <li>خصم 15% على أول زيارة وعروض حصرية</li>
+                <li>برنامج VIP مع أولوية في الحجز</li>
+              </ul>
             </div>
           </div>
         </div>

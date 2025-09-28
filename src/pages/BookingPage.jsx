@@ -109,14 +109,6 @@ const BookingPage = ({ currentUser, setCurrentPage }) => {
 
   return (
     <div className="booking-page">
-      {/* Page Header */}
-      <div className="page-header">
-        <div className="container">
-          <h1>احجزي موعدك</h1>
-          <p>اختاري الخدمة والوقت المناسب لك</p>
-        </div>
-      </div>
-
       {/* Service Category Selection */}
       {!selectedCategory && (
         <section className="category-selection section">
@@ -124,32 +116,48 @@ const BookingPage = ({ currentUser, setCurrentPage }) => {
             <h2>اختاري نوع الجلسة</h2>
             <div className="category-cards">
               <div
-                className="category-card"
+                className="category-card flip-card"
                 onClick={() => setSelectedCategory("skincare")}
               >
-                <div className="category-icon">🌟</div>
-                <h3>جلسة بشرة</h3>
-                <p>علاجات العناية بالبشرة والتجميل</p>
-                <ul>
-                  <li>تجديد البشرة</li>
-                  <li>تنظيف عميق</li>
-                  <li>علاج التصبغات</li>
-                  <li>مكافحة الشيخوخة</li>
-                </ul>
+                <div className="flip-card-inner">
+                  <div className="flip-card-front skincare-bg">
+                    <div className="category-overlay">
+                      <h3>جلسة بشرة</h3>
+                    </div>
+                  </div>
+                  <div className="flip-card-back">
+                    <h3>جلسة بشرة</h3>
+                    <p>علاجات العناية بالبشرة والتجميل</p>
+                    <ul>
+                      <li>تجديد البشرة</li>
+                      <li>تنظيف عميق</li>
+                      <li>علاج التصبغات</li>
+                      <li>مكافحة الشيخوخة</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
               <div
-                className="category-card"
+                className="category-card flip-card"
                 onClick={() => setSelectedCategory("laser")}
               >
-                <div className="category-icon">⚡</div>
-                <h3>جلسة ليزر</h3>
-                <p>إزالة الشعر وعلاجات الليزر</p>
-                <ul>
-                  <li>إزالة الشعر بالليزر</li>
-                  <li>تقشير الليزر</li>
-                  <li>علاج الندوب</li>
-                  <li>شد البشرة</li>
-                </ul>
+                <div className="flip-card-inner">
+                  <div className="flip-card-front laser-bg">
+                    <div className="category-overlay">
+                      <h3>جلسة ليزر</h3>
+                    </div>
+                  </div>
+                  <div className="flip-card-back">
+                    <h3>جلسة ليزر</h3>
+                    <p>إزالة الشعر وعلاجات الليزر</p>
+                    <ul>
+                      <li>إزالة الشعر بالليزر</li>
+                      <li>تقشير الليزر</li>
+                      <li>علاج الندوب</li>
+                      <li>شد البشرة</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -157,7 +165,7 @@ const BookingPage = ({ currentUser, setCurrentPage }) => {
       )}
 
       {/* Booking Steps */}
-      {selectedCategory && (
+      {selectedCategory && selectedCategory !== "consultation" && (
         <section className="booking-content section">
           <div className="container">
             {/* Progress Indicator */}
@@ -444,6 +452,236 @@ const BookingPage = ({ currentUser, setCurrentPage }) => {
           </div>
         </section>
       )}
+
+      {/* Consultation Booking */}
+      {selectedCategory === "consultation" && (
+        <section className="consultation-booking section">
+          <div className="container">
+            <div className="consultation-header">
+              <button
+                className="back-to-category"
+                onClick={() => setSelectedCategory("")}
+              >
+                ← العودة لاختيار نوع الجلسة
+              </button>
+              <h2>حجز استشارة مجانية</h2>
+              <p>احصلي على تقييم شخصي مجاني لاحتياجاتك الجمالية</p>
+            </div>
+
+            <div className="consultation-content">
+              <div className="consultation-info">
+                <div className="info-card">
+                  <div className="info-icon">📋</div>
+                  <h3>تحليل شامل</h3>
+                  <p>تقييم نوع بشرتك وتحديد المشاكل والحلول المناسبة</p>
+                </div>
+                <div className="info-card">
+                  <div className="info-icon">👩‍⚕️</div>
+                  <h3>استشارة متخصصة</h3>
+                  <p>مع أخصائيات معتمدات ذوات خبرة عالية</p>
+                </div>
+                <div className="info-card">
+                  <div className="info-icon">🎯</div>
+                  <h3>خطة شخصية</h3>
+                  <p>وضع برنامج علاجي مخصص يناسب احتياجاتك</p>
+                </div>
+                <div className="info-card">
+                  <div className="info-icon">💰</div>
+                  <h3>مجانية تماماً</h3>
+                  <p>استشارة 30 دقيقة بدون أي تكلفة</p>
+                </div>
+              </div>
+
+              <div className="consultation-form-container">
+                <form onSubmit={handleSubmit} className="consultation-form">
+                  <h3>معلومات الحجز</h3>
+
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label className="form-label">الاسم الكامل</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={bookingData.customerInfo.name}
+                        onChange={(e) =>
+                          setBookingData({
+                            ...bookingData,
+                            customerInfo: {
+                              ...bookingData.customerInfo,
+                              name: e.target.value,
+                            },
+                          })
+                        }
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">رقم الهاتف</label>
+                      <input
+                        type="tel"
+                        className="form-input"
+                        value={bookingData.customerInfo.phone}
+                        onChange={(e) =>
+                          setBookingData({
+                            ...bookingData,
+                            customerInfo: {
+                              ...bookingData.customerInfo,
+                              phone: e.target.value,
+                            },
+                          })
+                        }
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">البريد الإلكتروني</label>
+                      <input
+                        type="email"
+                        className="form-input"
+                        value={bookingData.customerInfo.email}
+                        onChange={(e) =>
+                          setBookingData({
+                            ...bookingData,
+                            customerInfo: {
+                              ...bookingData.customerInfo,
+                              email: e.target.value,
+                            },
+                          })
+                        }
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">العمر</label>
+                      <select className="form-input" required>
+                        <option value="">اختاري الفئة العمرية</option>
+                        <option value="18-25">18-25 سنة</option>
+                        <option value="26-35">26-35 سنة</option>
+                        <option value="36-45">36-45 سنة</option>
+                        <option value="46+">46+ سنة</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      المشاكل الجمالية الحالية
+                    </label>
+                    <div className="checkbox-group">
+                      <label className="checkbox-item">
+                        <input type="checkbox" /> حب الشباب
+                      </label>
+                      <label className="checkbox-item">
+                        <input type="checkbox" /> تصبغات البشرة
+                      </label>
+                      <label className="checkbox-item">
+                        <input type="checkbox" /> شعر زائد
+                      </label>
+                      <label className="checkbox-item">
+                        <input type="checkbox" /> تجاعيد وخطوط
+                      </label>
+                      <label className="checkbox-item">
+                        <input type="checkbox" /> ندوب
+                      </label>
+                      <label className="checkbox-item">
+                        <input type="checkbox" /> جفاف البشرة
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">التاريخ المفضل</label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={bookingData.date}
+                      min={getMinDate()}
+                      onChange={(e) =>
+                        setBookingData({ ...bookingData, date: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">الوقت المفضل</label>
+                    <select
+                      className="form-input"
+                      value={bookingData.time}
+                      onChange={(e) =>
+                        setBookingData({ ...bookingData, time: e.target.value })
+                      }
+                      required
+                    >
+                      <option value="">اختاري الوقت</option>
+                      <option value="morning">الصباح (9:00 - 12:00)</option>
+                      <option value="afternoon">
+                        بعد الظهر (12:00 - 16:00)
+                      </option>
+                      <option value="evening">المساء (16:00 - 20:00)</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">ملاحظات إضافية</label>
+                    <textarea
+                      className="form-textarea"
+                      value={bookingData.notes}
+                      onChange={(e) =>
+                        setBookingData({
+                          ...bookingData,
+                          notes: e.target.value,
+                        })
+                      }
+                      placeholder="اذكري أي معلومات إضافية تساعدنا في تقديم الاستشارة الأنسب لك..."
+                      rows="4"
+                    />
+                  </div>
+
+                  <div className="consultation-actions">
+                    <button
+                      type="submit"
+                      className="btn-primary consultation-btn"
+                    >
+                      احجزي استشارتك المجانية
+                    </button>
+                    <p className="consultation-note">
+                      سيتم التواصل معك خلال 24 ساعة لتأكيد موعد الاستشارة
+                    </p>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Call to Action */}
+      <section className="booking-cta section">
+        <div className="container">
+          <div className="cta-content text-center">
+            <h2>مستعدة لتجربة التميز؟</h2>
+            <p>احجزي استشارة مجانية اليوم واكتشفي الخدمة المناسبة لك</p>
+            <div className="cta-buttons">
+              <button
+                className="btn-primary"
+                onClick={() => setSelectedCategory("consultation")}
+              >
+                احجزي استشارة مجانية
+              </button>
+              <button
+                className="btn-secondary"
+                onClick={() => setCurrentPage("faq")}
+              >
+                الأسئلة الشائعة
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

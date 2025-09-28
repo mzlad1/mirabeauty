@@ -82,7 +82,6 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
 
   return (
     <div className="profile-page">
-
       {/* Profile Content */}
       <section className="profile-content section">
         <div className="container">
@@ -120,7 +119,7 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                   }`}
                   onClick={() => setActiveTab("overview")}
                 >
-                  <span className="nav-icon">📊</span>
+                  <i className="nav-icon fas fa-chart-pie"></i>
                   نظرة عامة
                 </button>
                 <button
@@ -129,8 +128,8 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                   }`}
                   onClick={() => setActiveTab("appointments")}
                 >
-                  <span className="nav-icon">📅</span>
-                  المواعيد
+                  <i className="nav-icon fas fa-calendar-alt"></i>
+                  مواعيدي
                 </button>
                 <button
                   className={`nav-item ${
@@ -138,8 +137,8 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                   }`}
                   onClick={() => setActiveTab("history")}
                 >
-                  <span className="nav-icon">📋</span>
-                  تاريخ العلاجات
+                  <i className="nav-icon fas fa-history"></i>
+                  سجل الجلسات
                 </button>
                 <button
                   className={`nav-item ${
@@ -147,7 +146,7 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                   }`}
                   onClick={() => setActiveTab("settings")}
                 >
-                  <span className="nav-icon">⚙️</span>
+                  <i className="nav-icon fas fa-cog"></i>
                   إعدادات الحساب
                 </button>
               </nav>
@@ -163,28 +162,28 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                   {/* Quick Stats */}
                   <div className="stats-grid">
                     <div className="stat-card">
-                      <div className="stat-icon">📅</div>
+                      <i className="stat-icon fas fa-calendar-check"></i>
                       <div className="stat-info">
                         <h3>{upcomingAppointments.length}</h3>
                         <p>مواعيد قادمة</p>
                       </div>
                     </div>
                     <div className="stat-card">
-                      <div className="stat-icon">✅</div>
+                      <i className="stat-icon fas fa-check-circle"></i>
                       <div className="stat-info">
                         <h3>{pastAppointments.length}</h3>
                         <p>جلسات مكتملة</p>
                       </div>
                     </div>
                     <div className="stat-card">
-                      <div className="stat-icon">⭐</div>
+                      <i className="stat-icon fas fa-award"></i>
                       <div className="stat-info">
                         <h3>{loyaltyPoints}</h3>
                         <p>نقاط الولاء</p>
                       </div>
                     </div>
                     <div className="stat-card">
-                      <div className="stat-icon">💰</div>
+                      <i className="stat-icon fas fa-wallet"></i>
                       <div className="stat-info">
                         <h3>{totalSpent} شيكل</h3>
                         <p>إجمالي المصروفات</p>
@@ -202,7 +201,8 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                           <p>الأخصائية: {upcomingAppointments[0].staffName}</p>
                           <div className="appointment-meta">
                             <span className="date">
-                              📅 {upcomingAppointments[0].date}
+                              <i className="fas fa-calendar"></i>{" "}
+                              {upcomingAppointments[0].date}
                             </span>
                             <span className="time">
                               🕐 {upcomingAppointments[0].time}
@@ -345,7 +345,16 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                             {appointment.rating && (
                               <div className="rating">
                                 <span>التقييم: </span>
-                                {"⭐".repeat(appointment.rating)}
+                                {Array.from(
+                                  { length: appointment.rating },
+                                  (_, i) => (
+                                    <i
+                                      key={i}
+                                      className="fas fa-star"
+                                      style={{ color: "var(--gold)" }}
+                                    ></i>
+                                  )
+                                )}
                               </div>
                             )}
                             {appointment.feedback && (

@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import "./ServicesPage.css";
 import { sampleServices } from "../data/sampleServices";
 
-const ServicesPage = () => {
+const ServicesPage = ({ setCurrentPage }) => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [bookmarkedServices, setBookmarkedServices] = useState([]);
 
   const categories = [
     { id: "all", name: "جميع الخدمات" },
@@ -22,130 +23,201 @@ const ServicesPage = () => {
           (service) => service.category === selectedCategory
         );
 
+  const addToBookmarks = (service) => {
+    const existingItem = bookmarkedServices.find(
+      (item) => item.id === service.id
+    );
+    if (!existingItem) {
+      setBookmarkedServices([...bookmarkedServices, service]);
+    }
+  };
+
+  const removeFromBookmarks = (serviceId) => {
+    setBookmarkedServices(
+      bookmarkedServices.filter((item) => item.id !== serviceId)
+    );
+  };
+
   return (
     <div className="services-page">
-
       {/* Services Content */}
       <section className="services-content section">
         <div className="container">
-          {/* Category Filter */}
-          <div className="category-filter">
-            <h3>تصفح حسب الفئة</h3>
-            <div className="filter-buttons">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  className={`filter-btn ${
-                    selectedCategory === category.id ? "active" : ""
-                  }`}
-                  onClick={() => setSelectedCategory(category.id)}
-                >
-                  {category.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Services Grid */}
-          <div className="services-container">
-            {filteredServices.map((service) => (
-              <div key={service.id} className="service-detail-card">
-                <div className="service-image">
-                  <img src={service.image} alt={service.name} />
-                  <div className="service-overlay">
+          <div className="services-layout">
+            {/* Sidebar */}
+            <aside className="services-sidebar">
+              {/* Category Filter */}
+              <div className="filter-section">
+                <h3>تصفح حسب الفئة</h3>
+                <div className="filter-list">
+                  {categories.map((category) => (
                     <button
-                      className="view-details-btn"
-                      onClick={() => setCurrentPage("book")}
+                      key={category.id}
+                      className={`filter-item ${
+                        selectedCategory === category.id ? "active" : ""
+                      }`}
+                      onClick={() => setSelectedCategory(category.id)}
                     >
-                      احجز الآن
+                      {category.name}
                     </button>
-                  </div>
-                </div>
-                <div className="service-info">
-                  <div className="service-category">{service.categoryName}</div>
-                  <h3>{service.name}</h3>
-                  <p>{service.description}</p>
-                  <div className="service-features">
-                    <ul>
-                      {service.features?.map((feature, index) => (
-                        <li key={index}>{feature}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="service-details">
-                    <div className="service-duration">
-                      <span className="detail-label">المدة:</span>
-                      <span className="detail-value">{service.duration}</span>
-                    </div>
-
-                  </div>
-                  <div className="service-actions">
-                    <button
-                      className="btn-primary book-service-btn"
-                      onClick={() => setCurrentPage("book")}
-                    >
-                      احجز الآن
-                    </button>
-                    <button className="btn-secondary info-btn">
-                      معلومات أكثر
-                    </button>
-                  </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* No Services Message */}
-          {filteredServices.length === 0 && (
-            <div className="no-services">
-              <h3>لا توجد خدمات في هذه الفئة حالياً</h3>
-              <p>يرجى اختيار فئة أخرى أو العودة لاحقاً</p>
-            </div>
-          )}
+              {/* Bookmarked Services */}
+              {bookmarkedServices.length > 0 && (
+                <div className="bookmarks-section">
+                  <h3>الخدمات المحفوظة ({bookmarkedServices.length})</h3>
+                  <div className="bookmark-items">
+                    {bookmarkedServices.map((item) => (
+                      <div key={item.id} className="bookmark-item">
+                        <div className="bookmark-item-info">
+                          <img src={item.image} alt={item.name} />
+                          <div>
+                            <h4>{item.name}</h4>
+                            <span className="bookmark-item-duration">
+                              {item.duration}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => removeFromBookmarks(item.id)}
+                          className="remove-bookmark-btn"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    className="book-all-btn btn-primary"
+                    onClick={() => setCurrentPage("book")}
+                  >
+                    احجز الكل
+                  </button>
+                </div>
+              )}
+            </aside>
+
+            {/* Services Grid */}
+            <main className="services-main">
+              <div className="services-header">
+                <h2>
+                  {selectedCategory === "all"
+                    ? "جميع الخدمات"
+                    : categories.find((c) => c.id === selectedCategory)?.name}
+                </h2>
+                <span className="services-count">
+                  {filteredServices.length} خدمة
+                </span>
+              </div>
+
+              <div className="services-grid">
+                {filteredServices.map((service) => (
+                  <div key={service.id} className="service-card">
+                    <div className="service-image">
+                      <img src={service.image} alt={service.name} />
+                      {service.originalPrice && (
+                        <div className="discount-badge">
+                          خصم{" "}
+                          {Math.round(
+                            (1 -
+                              parseInt(service.price) /
+                                parseInt(service.originalPrice)) *
+                              100
+                          )}
+                          %
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="service-info">
+                      <div className="service-category">
+                        {service.categoryName}
+                      </div>
+                      <h3>{service.name}</h3>
+                      <p className="service-description">
+                        {service.description}
+                      </p>
+
+                      <div className="service-rating">
+                        <div className="stars">
+                          {"⭐".repeat(Math.floor(service.rating || 5))}
+                        </div>
+                        <span className="rating-text">
+                          {service.rating || 5} ({service.reviewsCount || 25}{" "}
+                          تقييم)
+                        </span>
+                      </div>
+
+                      <div className="service-price">
+                        <span className="current-price">
+                          {service.price || "اتصل للاستفسار"}
+                        </span>
+                        {service.originalPrice && (
+                          <span className="original-price">
+                            {service.originalPrice}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="service-actions">
+                        <button
+                          className={`book-service-btn ${
+                            !service.available ? "disabled" : ""
+                          }`}
+                          onClick={() =>
+                            service.available !== false &&
+                            setCurrentPage("book")
+                          }
+                          disabled={service.available === false}
+                        >
+                          {service.available !== false
+                            ? "احجز الآن"
+                            : "غير متاح"}
+                        </button>
+                        <button
+                          className="bookmark-btn btn-secondary"
+                          onClick={() => addToBookmarks(service)}
+                        >
+                          احفظ
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* No Services Message */}
+              {filteredServices.length === 0 && (
+                <div className="no-services">
+                  <h3>لا توجد خدمات في هذه الفئة حالياً</h3>
+                  <p>يرجى اختيار فئة أخرى أو العودة لاحقاً</p>
+                </div>
+              )}
+            </main>
+          </div>
         </div>
       </section>
 
-      {/* Service Benefits */}
-      <section className="service-benefits section">
+      {/* Service Why Choose Us Section */}
+      <section className="why-choose-services section">
         <div className="container">
-          <div className="section-header text-center mb-3">
-            <h2>مميزات خدماتنا</h2>
-            <p>نحن نضمن لك أفضل تجربة وأعلى معايير الجودة</p>
-          </div>
-            <div>
+          <div className="why-grid">
+            <div className="why-heading text-right">
+              <h2>لماذا خدماتنا؟</h2>
+              <p>
+                خدماتنا تمنحك نتائج فعالة بأمان وجودة عالية، مع اهتمام كامل
+                بصحتك وجمالك.
+              </p>
+            </div>
+            <div className="why-points">
               <ul>
-                <li>جودة عالية
-خدمات بأعلى معايير الجودة العالمية</li>
-                <li>نتائج سريعة
-نتائج واضحة ومرضية من الجلسة الأولى</li>
-                <li>آمان تام
-بروتوكولات صحية صارمة وأجهزة معقمة</li>
-                <li>خبرة متميزة
-فريق متخصص بخبرة تزيد عن 10 سنوات</li>
+                <li>أجهزة حديثة ومعتمدة عالمياً</li>
+                <li>فريق متخصص بخبرة تزيد عن 10 سنوات</li>
+                <li>استشارة مجانية قبل البدء بالعلاج</li>
+                <li>ضمان النتائج مع المتابعة المستمرة</li>
               </ul>
-            </div>
-        </div>
-      </section>
-
-      {/* Call to Action */}
-      <section className="services-cta section">
-        <div className="container">
-          <div className="cta-content text-center">
-            <h2>مستعدة لتجربة التميز؟</h2>
-            <p>احجزي استشارة مجانية اليوم واكتشفي الخدمة المناسبة لك</p>
-            <div className="cta-buttons">
-              <button
-                className="btn-primary"
-                onClick={() => setCurrentPage("book")}
-              >
-                احجزي استشارة مجانية
-              </button>
-              <button
-                className="btn-secondary"
-                onClick={() => setCurrentPage("faq")}
-              >
-                الأسئلة الشائعة
-              </button>
             </div>
           </div>
         </div>

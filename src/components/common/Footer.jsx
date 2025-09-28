@@ -102,7 +102,7 @@ const Footer = () => {
                 <div className="contact-item">
                   <div className="contact-text">
                     <strong>الهاتف</strong>
-                    <p>+966 11 234 5678</p>
+                    <p>+970 11 234 5678</p>
                   </div>
                 </div>
                 <div className="contact-item">

@@ -78,26 +78,6 @@ const StaffDashboardPage = ({ currentUser }) => {
 
   return (
     <div className="staff-dashboard">
-      {/* Dashboard Header */}
-      <div className="dashboard-header">
-        <div className="container">
-          <div className="header-content">
-            <div className="header-stats">
-              <div className="header-stat">
-                <span className="stat-number">{todayAppointments.length}</span>
-                <span className="stat-label">مواعيد اليوم</span>
-              </div>
-              <div className="header-stat">
-                <span className="stat-number">
-                  {upcomingAppointments.length}
-                </span>
-                <span className="stat-label">مواعيد قادمة</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Dashboard Content */}
       <section className="dashboard-content">
         <div className="container">
@@ -111,7 +91,7 @@ const StaffDashboardPage = ({ currentUser }) => {
                   }`}
                   onClick={() => setActiveTab("overview")}
                 >
-                  <span className="nav-icon">📊</span>
+                  <i className="nav-icon fas fa-chart-pie"></i>
                   نظرة عامة
                 </button>
                 <button
@@ -120,8 +100,8 @@ const StaffDashboardPage = ({ currentUser }) => {
                   }`}
                   onClick={() => setActiveTab("schedule")}
                 >
-                  <span className="nav-icon">📅</span>
-                  جدولي اليومي
+                  <i className="nav-icon fas fa-calendar-alt"></i>
+                  جدول المواعيد
                 </button>
                 <button
                   className={`nav-item ${
@@ -129,8 +109,8 @@ const StaffDashboardPage = ({ currentUser }) => {
                   }`}
                   onClick={() => setActiveTab("appointments")}
                 >
-                  <span className="nav-icon">📋</span>
-                  مواعيدي
+                  <i className="nav-icon fas fa-clipboard-list"></i>
+                  المواعيد
                 </button>
                 <button
                   className={`nav-item ${
@@ -138,7 +118,7 @@ const StaffDashboardPage = ({ currentUser }) => {
                   }`}
                   onClick={() => setActiveTab("customers")}
                 >
-                  <span className="nav-icon">👥</span>
+                  <i className="nav-icon fas fa-users"></i>
                   عملائي
                 </button>
                 <button
@@ -147,7 +127,7 @@ const StaffDashboardPage = ({ currentUser }) => {
                   }`}
                   onClick={() => setActiveTab("performance")}
                 >
-                  <span className="nav-icon">📈</span>
+                  <i className="nav-icon fas fa-chart-line"></i>
                   أدائي
                 </button>
               </nav>
@@ -160,31 +140,49 @@ const StaffDashboardPage = ({ currentUser }) => {
                 <div className="tab-content">
                   <h2>نظرة عامة</h2>
 
+                  {/* Header Statistics */}
+                  <div className="header-stats-overview">
+                    <div className="header-stat-card">
+                      <i className="stat-icon fas fa-calendar-day"></i>
+                      <div className="stat-info">
+                        <h3>{todayAppointments.length}</h3>
+                        <p>مواعيد اليوم</p>
+                      </div>
+                    </div>
+                    <div className="header-stat-card">
+                      <i className="stat-icon fas fa-calendar-plus"></i>
+                      <div className="stat-info">
+                        <h3>{upcomingAppointments.length}</h3>
+                        <p>مواعيد قادمة</p>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Statistics Cards */}
                   <div className="stats-grid">
                     <div className="stat-card total">
-                      <div className="stat-icon">📅</div>
+                      <i className="stat-icon fas fa-calendar-check"></i>
                       <div className="stat-info">
                         <h3>{myAppointments.length}</h3>
                         <p>إجمالي المواعيد</p>
                       </div>
                     </div>
                     <div className="stat-card completed">
-                      <div className="stat-icon">✅</div>
+                      <i className="stat-icon fas fa-check-circle"></i>
                       <div className="stat-info">
                         <h3>{completedAppointments.length}</h3>
                         <p>مواعيد مكتملة</p>
                       </div>
                     </div>
                     <div className="stat-card revenue">
-                      <div className="stat-icon">💰</div>
+                      <i className="stat-icon fas fa-dollar-sign"></i>
                       <div className="stat-info">
-                        <h3>{myRevenue.toLocaleString()} شيكل</h3>
+                        <h3>{myRevenue.toLocaleString()}</h3>
                         <p>إجمالي الإيرادات</p>
                       </div>
                     </div>
                     <div className="stat-card rate">
-                      <div className="stat-icon">📊</div>
+                      <i className="stat-icon fas fa-percentage"></i>
                       <div className="stat-info">
                         <h3>{completionRate}%</h3>
                         <p>معدل الإتمام</p>
@@ -371,10 +369,22 @@ const StaffDashboardPage = ({ currentUser }) => {
                             <div className="appointment-service">
                               <h3>{appointment.serviceName}</h3>
                               <div className="service-details">
-                                <span>📅 {appointment.date}</span>
-                                <span>🕐 {appointment.time}</span>
-                                <span>⏱️ {appointment.duration} دقيقة</span>
-                                <span>💰 {appointment.price} شيكل</span>
+                                <span>
+                                  <i className="fas fa-calendar"></i>{" "}
+                                  {appointment.date}
+                                </span>
+                                <span>
+                                  <i className="fas fa-clock"></i>{" "}
+                                  {appointment.time}
+                                </span>
+                                <span>
+                                  <i className="fas fa-hourglass-half"></i>{" "}
+                                  {appointment.duration} دقيقة
+                                </span>
+                                <span>
+                                  <i className="fas fa-money-bill"></i>{" "}
+                                  {appointment.price} شيكل
+                                </span>
                               </div>
                             </div>
                             {appointment.notes && (
@@ -506,7 +516,7 @@ const StaffDashboardPage = ({ currentUser }) => {
                   <div className="performance-chart">
                     <h3>الأداء الشهري</h3>
                     <div className="chart-placeholder">
-                      📊 مخطط الأداء الشهري
+                      <i className="fas fa-chart-area"></i> مخطط الأداء الشهري
                       <p>عدد المواعيد والإيرادات لكل شهر</p>
                     </div>
                   </div>

@@ -1,46 +1,29 @@
 /* AdminDashboardPage.css - Admin Dashboard Specific Styles */
 
-/* Dashboard Header */
-.dashboard-header {
-  background: linear-gradient(135deg, var(--navy-blue) 0%, #0f2a5a 100%);
-  color: var(--white);
-  padding: 2rem 0;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-info h1 {
-  color: var(--white);
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.header-info p {
-  opacity: 0.9;
-  font-size: 1.125rem;
-}
-
-.header-actions {
+/* Overview Actions within Tab Header */
+.admin-dashboard .tab-header .overview-actions {
   display: flex;
   gap: 1rem;
   align-items: center;
 }
 
-.timeframe-select {
+.admin-dashboard .timeframe-select {
   padding: 8px 12px;
   border: 2px solid var(--border-color);
   background-color: var(--white);
   color: var(--charcoal);
   font-weight: 600;
+  border-radius: 4px;
 }
 
-.timeframe-select:focus {
+.admin-dashboard .timeframe-select:focus {
   outline: none;
-  border-color: var(--gold);
+  border-color: var(--navy-blue);
+}
+
+.action-icon {
+  font-size: 1.25rem;
+  color: var(--navy-blue);
 }
 
 /* Dashboard Layout */
@@ -49,6 +32,7 @@
   grid-template-columns: 250px 1fr;
   gap: 2rem;
   align-items: start;
+  padding-top: 2rem;
 }
 
 /* Dashboard Sidebar */
@@ -93,8 +77,23 @@
   color: var(--white);
 }
 
+.dashboard-nav .nav-item.active .nav-icon,
+.dashboard-nav .nav-item.active .fas,
+.dashboard-nav .nav-item.active .far,
+.dashboard-nav .nav-item.active .fab {
+  color: var(--white);
+}
+
 .dashboard-nav .nav-icon {
   font-size: 1.25rem;
+  color: var(--navy-blue);
+}
+
+/* Font Awesome Icons */
+.fas,
+.far,
+.fab {
+  color: var(--navy-blue);
 }
 
 /* Dashboard Main */
@@ -172,6 +171,7 @@
 .stat-icon {
   font-size: 2.5rem;
   flex-shrink: 0;
+  color: var(--navy-blue);
 }
 
 .stat-info h3 {

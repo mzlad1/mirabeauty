@@ -91,31 +91,6 @@ const AdminDashboardPage = ({ currentUser }) => {
 
   return (
     <div className="admin-dashboard">
-      {/* Dashboard Header */}
-      <div className="dashboard-header">
-        <div className="container">
-          <div className="header-content">
-            <div className="header-info">
-              <h1>لوحة تحكم الإدارة</h1>
-              <p>مرحباً {currentUser.name} - إدارة شاملة لمركز ميرا بيوتي</p>
-            </div>
-            <div className="header-actions">
-              <select
-                value={selectedTimeframe}
-                onChange={(e) => setSelectedTimeframe(e.target.value)}
-                className="timeframe-select"
-              >
-                <option value="today">اليوم</option>
-                <option value="thisWeek">هذا الأسبوع</option>
-                <option value="thisMonth">هذا الشهر</option>
-                <option value="thisYear">هذا العام</option>
-              </select>
-              <button className="btn-primary">تقرير جديد</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Dashboard Content */}
       <section className="dashboard-content">
         <div className="container">
@@ -129,7 +104,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                   }`}
                   onClick={() => setActiveTab("overview")}
                 >
-                  <span className="nav-icon">📊</span>
+                  <i className="nav-icon fas fa-chart-pie"></i>
                   نظرة عامة
                 </button>
                 <button
@@ -138,8 +113,8 @@ const AdminDashboardPage = ({ currentUser }) => {
                   }`}
                   onClick={() => setActiveTab("appointments")}
                 >
-                  <span className="nav-icon">📅</span>
-                  إدارة المواعيد
+                  <i className="nav-icon fas fa-calendar-alt"></i>
+                  المواعيد
                 </button>
                 <button
                   className={`nav-item ${
@@ -147,8 +122,8 @@ const AdminDashboardPage = ({ currentUser }) => {
                   }`}
                   onClick={() => setActiveTab("customers")}
                 >
-                  <span className="nav-icon">👥</span>
-                  إدارة العملاء
+                  <i className="nav-icon fas fa-users"></i>
+                  العملاء
                 </button>
                 <button
                   className={`nav-item ${
@@ -156,8 +131,8 @@ const AdminDashboardPage = ({ currentUser }) => {
                   }`}
                   onClick={() => setActiveTab("staff")}
                 >
-                  <span className="nav-icon">👩‍💼</span>
-                  إدارة الموظفين
+                  <i className="nav-icon fas fa-user-tie"></i>
+                  الموظفات
                 </button>
                 <button
                   className={`nav-item ${
@@ -165,8 +140,8 @@ const AdminDashboardPage = ({ currentUser }) => {
                   }`}
                   onClick={() => setActiveTab("services")}
                 >
-                  <span className="nav-icon">💆‍♀️</span>
-                  إدارة الخدمات
+                  <i className="nav-icon fas fa-spa"></i>
+                  الخدمات
                 </button>
                 <button
                   className={`nav-item ${
@@ -174,8 +149,8 @@ const AdminDashboardPage = ({ currentUser }) => {
                   }`}
                   onClick={() => setActiveTab("reports")}
                 >
-                  <span className="nav-icon">📈</span>
-                  التقارير والإحصائيات
+                  <i className="nav-icon fas fa-chart-line"></i>
+                  التقارير
                 </button>
                 <button
                   className={`nav-item ${
@@ -183,8 +158,8 @@ const AdminDashboardPage = ({ currentUser }) => {
                   }`}
                   onClick={() => setActiveTab("settings")}
                 >
-                  <span className="nav-icon">⚙️</span>
-                  إعدادات النظام
+                  <i className="nav-icon fas fa-cog"></i>
+                  الإعدادات
                 </button>
               </nav>
             </aside>
@@ -194,12 +169,27 @@ const AdminDashboardPage = ({ currentUser }) => {
               {/* Overview Tab */}
               {activeTab === "overview" && (
                 <div className="tab-content">
-                  <h2>نظرة عامة</h2>
+                  <div className="tab-header">
+                    <h2>نظرة عامة</h2>
+                    <div className="overview-actions">
+                      <select
+                        value={selectedTimeframe}
+                        onChange={(e) => setSelectedTimeframe(e.target.value)}
+                        className="timeframe-select"
+                      >
+                        <option value="today">اليوم</option>
+                        <option value="thisWeek">هذا الأسبوع</option>
+                        <option value="thisMonth">هذا الشهر</option>
+                        <option value="thisYear">هذا العام</option>
+                      </select>
+                      <button className="btn-primary">تقرير جديد</button>
+                    </div>
+                  </div>
 
                   {/* Statistics Cards */}
                   <div className="stats-grid">
                     <div className="stat-card revenue">
-                      <div className="stat-icon">💰</div>
+                      <i className="stat-icon fas fa-dollar-sign"></i>
                       <div className="stat-info">
                         <h3>{totalRevenue.toLocaleString()} شيكل</h3>
                         <p>إجمالي الإيرادات</p>
@@ -209,7 +199,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                       </div>
                     </div>
                     <div className="stat-card appointments">
-                      <div className="stat-icon">📅</div>
+                      <i className="stat-icon fas fa-calendar-check"></i>
                       <div className="stat-info">
                         <h3>{totalAppointments}</h3>
                         <p>إجمالي المواعيد</p>
@@ -219,7 +209,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                       </div>
                     </div>
                     <div className="stat-card customers">
-                      <div className="stat-icon">👥</div>
+                      <i className="stat-icon fas fa-user-friends"></i>
                       <div className="stat-info">
                         <h3>{totalCustomers}</h3>
                         <p>إجمالي العملاء</p>
@@ -229,7 +219,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                       </div>
                     </div>
                     <div className="stat-card completion">
-                      <div className="stat-icon">✅</div>
+                      <i className="stat-icon fas fa-check-circle"></i>
                       <div className="stat-info">
                         <h3>
                           {Math.round(
@@ -275,19 +265,19 @@ const AdminDashboardPage = ({ currentUser }) => {
                     <h3>إجراءات سريعة</h3>
                     <div className="actions-grid">
                       <button className="action-card">
-                        <span className="action-icon">📝</span>
+                        <i className="action-icon fas fa-edit"></i>
                         <span className="action-text">حجز موعد جديد</span>
                       </button>
                       <button className="action-card">
-                        <span className="action-icon">👤</span>
+                        <i className="action-icon fas fa-user"></i>
                         <span className="action-text">إضافة عميل جديد</span>
                       </button>
                       <button className="action-card">
-                        <span className="action-icon">💼</span>
+                        <i className="action-icon fas fa-briefcase"></i>
                         <span className="action-text">إضافة موظف</span>
                       </button>
                       <button className="action-card">
-                        <span className="action-icon">📊</span>
+                        <i className="action-icon fas fa-chart-bar"></i>
                         <span className="action-text">إنشاء تقرير</span>
                       </button>
                     </div>
@@ -573,7 +563,8 @@ const AdminDashboardPage = ({ currentUser }) => {
                       <h3>تقرير الإيرادات</h3>
                       <div className="report-chart">
                         <div className="chart-placeholder">
-                          📊 مخطط الإيرادات الشهرية
+                          <i className="fas fa-chart-area"></i> مخطط الإيرادات
+                          الشهرية
                         </div>
                       </div>
                       <button className="btn-secondary">تحميل التقرير</button>
@@ -641,7 +632,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                           <label>رقم الهاتف</label>
                           <input
                             type="tel"
-                            value="+966 11 234 5678"
+                            value="+970 11 234 5678"
                             className="form-input"
                           />
                         </div>
