@@ -1,5 +1,101 @@
 /* BookingPage.css - Booking Page Specific Styles */
 
+/* Category Selection */
+.category-selection {
+  background-color: var(--white);
+  padding: 4rem 0;
+}
+
+.category-selection h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  color: var(--navy-blue);
+  margin-bottom: 3rem;
+}
+
+.category-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.category-card {
+  background: var(--white);
+  border-radius: 1.5rem;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid var(--border-color);
+  box-shadow: 0 6px 24px rgba(11, 34, 53, 0.06);
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(11, 34, 53, 0.12);
+  border-color: var(--gold);
+}
+
+.category-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+.category-card h3 {
+  color: var(--navy-blue);
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.category-card p {
+  color: var(--charcoal);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  opacity: 0.8;
+}
+
+.category-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.category-card li {
+  color: var(--charcoal);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+  opacity: 0.7;
+}
+
+.category-card li:last-child {
+  border-bottom: none;
+}
+
+/* Step Header */
+.step-header {
+  margin-bottom: 2rem;
+}
+
+.back-to-category {
+  background: var(--gold);
+  color: var(--white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.back-to-category:hover {
+  background: #b8921f;
+  transform: translateY(-2px);
+}
+
 /* Page Header */
 .booking-page .page-header {
   background: linear-gradient(135deg, var(--navy-blue) 0%, #0f2a5a 100%);
@@ -29,7 +125,7 @@
 .login-card {
   background: var(--white);
   border-radius: 1.5rem;
-  box-shadow: 0 6px 32px 0 rgba(40, 30, 10, 0.10), 0 1.5px 0 0 var(--gold);
+  box-shadow: 0 6px 32px 0 rgba(40, 30, 10, 0.1), 0 1.5px 0 0 var(--gold);
   border: none;
   padding: 3rem;
   text-align: center;
@@ -98,7 +194,11 @@
   top: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
   opacity: 0;
   transition: opacity 0.3s;
   pointer-events: none;
@@ -553,6 +653,23 @@
 
   .booking-step {
     padding: 1.5rem;
+  }
+
+  .category-cards {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .category-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .category-icon {
+    font-size: 3rem;
+  }
+
+  .category-card h3 {
+    font-size: 1.5rem;
   }
 
   .step-header {

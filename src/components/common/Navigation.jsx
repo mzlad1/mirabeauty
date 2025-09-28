@@ -36,7 +36,6 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
           </div>
           <div className="logo-text">
             <h2>Mira Beauty Clinic</h2>
-            <span>مركز العناية والجمال</span>
           </div>
         </div>
 
