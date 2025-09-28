@@ -250,7 +250,7 @@
 }
 
 .loyalty-card {
-  background-color: var(--ivory);
+  background-color: var(--white);
   padding: 2rem;
   border: 2px solid var(--border-color);
 }
@@ -335,7 +335,7 @@
 
 .appointment-item,
 .history-item {
-  background-color: var(--ivory);
+  background-color: var(--white);
   padding: 1.5rem;
   border: 2px solid var(--border-color);
   transition: all 0.3s ease;

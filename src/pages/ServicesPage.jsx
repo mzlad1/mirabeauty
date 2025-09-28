@@ -77,10 +77,7 @@ const ServicesPage = () => {
                       <span className="detail-label">المدة:</span>
                       <span className="detail-value">{service.duration}</span>
                     </div>
-                    <div className="service-price">
-                      <span className="price-label">السعر:</span>
-                      <span className="price-value">{service.price}</span>
-                    </div>
+
                   </div>
                   <div className="service-actions">
                     <button
@@ -115,28 +112,18 @@ const ServicesPage = () => {
             <h2>مميزات خدماتنا</h2>
             <p>نحن نضمن لك أفضل تجربة وأعلى معايير الجودة</p>
           </div>
-          <div className="benefits-grid grid-4">
-            <div className="benefit-card">
-              <div className="benefit-icon">🏆</div>
-              <h4>جودة عالية</h4>
-              <p>خدمات بأعلى معايير الجودة العالمية</p>
+            <div>
+              <ul>
+                <li>جودة عالية
+خدمات بأعلى معايير الجودة العالمية</li>
+                <li>نتائج سريعة
+نتائج واضحة ومرضية من الجلسة الأولى</li>
+                <li>آمان تام
+بروتوكولات صحية صارمة وأجهزة معقمة</li>
+                <li>خبرة متميزة
+فريق متخصص بخبرة تزيد عن 10 سنوات</li>
+              </ul>
             </div>
-            <div className="benefit-card">
-              <div className="benefit-icon">⚡</div>
-              <h4>نتائج سريعة</h4>
-              <p>نتائج واضحة ومرضية من الجلسة الأولى</p>
-            </div>
-            <div className="benefit-card">
-              <div className="benefit-icon">🛡️</div>
-              <h4>آمان تام</h4>
-              <p>بروتوكولات صحية صارمة وأجهزة معقمة</p>
-            </div>
-            <div className="benefit-card">
-              <div className="benefit-icon">💎</div>
-              <h4>خبرة متميزة</h4>
-              <p>فريق متخصص بخبرة تزيد عن 10 سنوات</p>
-            </div>
-          </div>
         </div>
       </section>
 

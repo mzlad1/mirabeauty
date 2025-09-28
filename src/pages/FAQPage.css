@@ -26,41 +26,7 @@
   margin-bottom: 2rem;
 }
 
-/* Search Box */
-.search-box {
-  position: relative;
-  margin-bottom: 2rem;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-}
 
-.search-input {
-  width: 100%;
-  padding: 15px 50px 15px 20px;
-  border: 2px solid var(--border-color);
-  background-color: var(--ivory);
-  font-size: 1rem;
-  color: var(--charcoal);
-  direction: rtl;
-  transition: all 0.3s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--gold);
-  background-color: var(--white);
-}
-
-.search-icon {
-  position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 1.25rem;
-  color: var(--charcoal);
-  opacity: 0.6;
-}
 
 /* Category Filter */
 .category-filter {
@@ -117,7 +83,7 @@
 .faq-question {
   width: 100%;
   padding: 1.5rem 2rem;
-  background-color: transparent;
+  background-color: white;
   border: none;
   text-align: right;
   cursor: pointer;

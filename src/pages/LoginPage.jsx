@@ -86,13 +86,6 @@ const LoginPage = ({ setCurrentUser }) => {
 
   return (
     <div className="login-page">
-      {/* Page Header */}
-      <div className="page-header">
-        <div className="container">
-          <h1>تسجيل الدخول</h1>
-          <p>ادخلي إلى حسابك للوصول إلى خدماتنا المميزة</p>
-        </div>
-      </div>
 
       {/* Login Content */}
       <section className="login-content section">

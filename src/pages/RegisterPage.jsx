@@ -139,13 +139,6 @@ const RegisterPage = ({ setCurrentUser }) => {
 
   return (
     <div className="register-page">
-      {/* Page Header */}
-      <div className="page-header">
-        <div className="container">
-          <h1>إنشاء حساب جديد</h1>
-          <p>انضمي إلى عائلة ميرا بيوتي واستمتعي بخدماتنا المميزة</p>
-        </div>
-      </div>
 
       {/* Register Content */}
       <section className="register-content section">

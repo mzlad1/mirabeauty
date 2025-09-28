@@ -201,7 +201,7 @@
 
 /* Login Benefits */
 .login-benefits {
-  background-color: var(--ivory);
+  background-color: var(--white);
   padding: 3rem 2rem;
   border: 2px solid var(--border-color);
 }

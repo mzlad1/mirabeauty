@@ -82,13 +82,6 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
 
   return (
     <div className="profile-page">
-      {/* Page Header */}
-      <div className="page-header">
-        <div className="container">
-          <h1>الملف الشخصي</h1>
-          <p>إدارة معلوماتك ومتابعة تقدم علاجاتك</p>
-        </div>
-      </div>
 
       {/* Profile Content */}
       <section className="profile-content section">

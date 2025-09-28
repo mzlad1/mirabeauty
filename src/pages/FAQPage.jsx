@@ -125,32 +125,7 @@ const FAQPage = () => {
       <section className="faq-content section">
         <div className="container">
           {/* Search and Filter */}
-          <div className="faq-controls">
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder="ابحثي عن سؤالك..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-              <span className="search-icon">🔍</span>
-            </div>
 
-            <div className="category-filter">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  className={`category-btn ${
-                    selectedCategory === category.id ? "active" : ""
-                  }`}
-                  onClick={() => setSelectedCategory(category.id)}
-                >
-                  {category.name}
-                </button>
-              ))}
-            </div>
-          </div>
 
           {/* FAQ List */}
           <div className="faq-list">
@@ -192,45 +167,7 @@ const FAQPage = () => {
 
 
       {/* Quick Tips */}
-      <section className="quick-tips section">
-        <div className="container">
-          <h2>نصائح سريعة</h2>
-          <div className="tips-grid">
-            <div className="tip-card">
-              <div className="tip-icon">💡</div>
-              <h3>نصيحة للحجز</h3>
-              <p>
-                احجزي موعدك مبكراً للحصول على الوقت المناسب لك، خاصة في نهاية
-                الأسبوع والمواسم الخاصة.
-              </p>
-            </div>
-            <div className="tip-card">
-              <div className="tip-icon">⏰</div>
-              <h3>قبل الجلسة</h3>
-              <p>
-                تأكدي من قراءة تعليمات التحضير المرسلة إليك عبر الرسائل النصية
-                أو البريد الإلكتروني.
-              </p>
-            </div>
-            <div className="tip-card">
-              <div className="tip-icon">📱</div>
-              <h3>تطبيق الجوال</h3>
-              <p>
-                حملي تطبيقنا للحصول على تذكيرات المواعيد وعروض خاصة وإدارة
-                حجوزاتك بسهولة.
-              </p>
-            </div>
-            <div className="tip-card">
-              <div className="tip-icon">🎁</div>
-              <h3>نقاط الولاء</h3>
-              <p>
-                اجمعي نقاط مع كل زيارة واستبدليها بخصومات وخدمات مجانية في
-                زياراتك القادمة.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+
     </div>
   );
 };

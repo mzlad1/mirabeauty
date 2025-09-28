@@ -82,12 +82,6 @@ const StaffDashboardPage = ({ currentUser }) => {
       <div className="dashboard-header">
         <div className="container">
           <div className="header-content">
-            <div className="header-info">
-              <h1>لوحة تحكم الموظف</h1>
-              <p>
-                مرحباً {currentUser.name} - {currentUser.specialization}
-              </p>
-            </div>
             <div className="header-stats">
               <div className="header-stat">
                 <span className="stat-number">{todayAppointments.length}</span>

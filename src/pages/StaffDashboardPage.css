@@ -479,7 +479,7 @@
 .staff-dashboard .filter-date:focus,
 .staff-dashboard .filter-search:focus {
   outline: none;
-  border-color: #17a2b8;
+  border-color: navy-blue;
 }
 
 /* Appointments List */
@@ -490,7 +490,7 @@
 }
 
 .appointment-card {
-  background-color: var(--ivory);
+  background-color: var(--white);
   padding: 1.5rem;
   border: 2px solid var(--border-color);
   transition: all 0.3s ease;
@@ -541,6 +541,7 @@
   background-color: var(--white);
   padding: 0.5rem;
   border: 1px solid var(--border-color);
+  border-radius: 18px;
   font-size: 0.875rem;
   color: var(--charcoal);
 }

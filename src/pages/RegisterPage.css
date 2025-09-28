@@ -55,7 +55,7 @@
 .form-section {
   margin-bottom: 2.5rem;
   padding: 1.5rem;
-  background-color: var(--ivory);
+  background-color: var(--white);
   border: 2px solid var(--border-color);
 }
 
@@ -259,7 +259,7 @@
 
 /* Register Benefits */
 .register-benefits {
-  background-color: var(--ivory);
+  background-color: var(--white);
   padding: 2.5rem 2rem;
   border: 2px solid var(--border-color);
   height: fit-content;

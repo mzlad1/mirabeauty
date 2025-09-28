@@ -68,7 +68,8 @@
   grid-template-columns: 300px 1fr;
   gap: 2rem;
   background-color: var(--white);
-  border: 2px solid var(--border-color);
+  border: 1px solid rgba(184, 146, 31, 0.18);
+  border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s ease;
 }
@@ -189,7 +190,7 @@
   gap: 1rem;
   margin-bottom: 2rem;
   padding: 1rem;
-  background-color: var(--ivory);
+  background-color: white;
 }
 
 .service-duration,
@@ -255,7 +256,7 @@
 
 /* Service Benefits */
 .service-benefits {
-  background-color: var(--ivory);
+  background-color: var(--white);
 }
 
 .benefits-grid {
