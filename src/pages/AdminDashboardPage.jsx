@@ -305,7 +305,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                             <span className="activity-time">
                               {new Date(
                                 appointment.createdAt
-                              ).toLocaleDateString("en-US")}
+                              ).toLocaleDateString("ar-SA")}
                             </span>
                           </div>
                           <span

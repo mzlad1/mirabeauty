@@ -1,4 +1,4 @@
-/* Footer.css - New Clean Footer Design */
+/* Footer.css - Footer Component Styles */
 
 .footer {
   background-color: var(--navy-blue);
@@ -8,51 +8,72 @@
 
 /* Footer Content */
 .footer-content {
-  padding: 3rem 0 2rem;
+  padding: 2rem 0 1rem;
 }
 
 .footer-sections {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 3rem;
-  text-align: center;
-}
-
-.footer-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Company Section */
-.company-section {
+  grid-template-columns: 1.4fr 1fr 1.2fr;
   gap: 1.5rem;
 }
 
-.footer-logo {
+/* Center the brand title in the first (left) section */
+.footer-sections .footer-section:first-child {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
+  text-align: center;
 }
-
-.logo-image {
-  width: 160px;
-  height: 160px;
-  object-fit: contain;
+.footer-sections .footer-section:first-child .footer-logo {
+  justify-content: center;
+  width: 100%;
 }
-
-.company-title {
-  color: var(--white);
-  font-size: 1.75rem;
-  font-weight: 700;
+.footer-sections .footer-section:first-child .logo-text h3 {
   margin: 0;
 }
 
-.company-subtitle {
+.footer-section h4 {
   color: var(--gold);
-  font-size: 1rem;
-  margin: 0 0 1.5rem 0;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* Shift "تواصل معنا" heading to the right */
+.footer-section:last-child h4 {
+  text-align: right;
+  padding-right: 1rem;
+}
+
+/* Footer Logo */
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.footer-logo .logo-icon {
+  font-size: 2rem;
+  color: var(--gold);
+}
+
+.footer-logo .logo-text h3 {
+  color: var(--white);
+  font-size: 1.5rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.footer-logo .logo-text span {
+  color: var(--white);
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.footer-description {
+  line-height: 1.6;
+  margin-bottom: 2rem;
   opacity: 0.9;
 }
 
@@ -60,34 +81,27 @@
 .social-links {
   display: flex;
   gap: 1rem;
-  justify-content: center;
 }
 
 .social-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 45px;
-  height: 45px;
+  width: 40px;
+  height: 40px;
   background-color: rgba(255, 255, 255, 0.1);
   color: var(--white);
   text-decoration: none;
-  border-radius: 50%;
   transition: all 0.3s ease;
 }
 
 .social-link:hover {
   background-color: var(--gold);
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(184, 146, 31, 0.3);
 }
 
-/* Section Headings */
-.footer-section h4 {
-  color: var(--gold);
-  margin: 0 0 1.5rem 0;
+.social-icon {
   font-size: 1.25rem;
-  font-weight: 600;
 }
 
 /* Footer Links */
@@ -95,160 +109,79 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
 }
 
-.footer-links button {
+.footer-links li {
+  margin-bottom: 0.75rem;
+}
+
+.footer-links button,
+.footer-links a {
   background: none;
   border: none;
   color: var(--white);
+  text-decoration: none;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+  cursor: pointer;
   font-family: inherit;
   font-size: 1rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  transition: all 0.3s ease;
-  opacity: 0.8;
+  padding: 0;
+  text-align: right;
+  width: 100%;
 }
 
-.footer-links button:hover {
-  color: var(--gold);
+.footer-links button:hover,
+.footer-links a:hover {
   opacity: 1;
-  transform: translateX(-5px);
+  color: var(--gold);
+  padding-right: 5px;
 }
 
 /* Contact Info */
 .contact-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem 1.25rem;
 }
 
 .contact-item {
   display: flex;
-  align-items: flex-start;
   gap: 1rem;
-  max-width: 280px;
-  text-align: right;
+  align-items: flex-start;
 }
+
+/* Make label and value in one line on larger screens */
+.contact-inline .contact-details {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.contact-inline .contact-details strong { margin: 0; }
+.contact-inline .contact-details p { margin: 0; }
 
 .contact-icon {
   font-size: 1.25rem;
-  min-width: 24px;
-  text-align: center;
-}
-
-.contact-text {
-  flex: 1;
-}
-
-.contact-text strong {
-  display: block;
   color: var(--gold);
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-  font-size: 0.95rem;
-}
-
-.contact-text p {
-  margin: 0;
-  opacity: 0.9;
-  line-height: 1.4;
-  font-size: 0.9rem;
-}
-
-/* Bottom Footer */
-.footer-bottom {
-  background-color: rgba(0, 0, 0, 0.2);
-  padding: 1.5rem 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  text-align: center;
-}
-
-.footer-bottom p {
-  margin: 0;
-  opacity: 0.8;
-  font-size: 0.9rem;
-}
-
-/* Floating WhatsApp Button */
-.floating-actions {
-  position: fixed;
-  bottom: 2rem;
-  left: 2rem;
-  z-index: 1000;
-}
-
-.floating-btn {
-  display: flex;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
-  background-color: #25d366;
-  color: white;
-  border-radius: 50%;
-  text-decoration: none;
-  box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3);
-  transition: all 0.3s ease;
 }
 
-.floating-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 25px rgba(37, 211, 102, 0.4);
+.contact-details strong {
+  display: block;
+  color: var(--gold);
+  margin-bottom: 0.25rem;
+  font-weight: 600;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .footer-sections {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-    text-align: center;
-  }
-
-  .footer-content {
-    padding: 2rem 0 1.5rem;
-  }
-
-  .company-title {
-    font-size: 1.5rem;
-  }
-
-  .contact-item {
-    max-width: 100%;
-    justify-content: center;
-  }
-
-  .floating-actions {
-    bottom: 1.5rem;
-    left: 1.5rem;
-  }
-
-  .floating-btn {
-    width: 55px;
-    height: 55px;
-  }
-}
-
-@media (max-width: 480px) {
-  .footer-sections {
-    gap: 2rem;
-  }
-
-  .social-links {
-    gap: 0.75rem;
-  }
-
-  .social-link {
-    width: 40px;
-    height: 40px;
-  }
-
-  .contact-item {
-    gap: 0.75rem;
-  }
+.contact-details p {
+  margin: 0;
+  opacity: 0.9;
+  line-height: 1.5;
 }
 
 /* Newsletter Section */
@@ -466,15 +399,9 @@
     justify-content: center;
   }
 
-  .contact-info {
-    align-items: center;
-  }
-  .contact-inline .contact-details {
-    display: block;
-  }
-  .contact-inline .contact-details p {
-    margin-top: 0.25rem;
-  }
+  .contact-info { grid-template-columns: 1fr; }
+  .contact-inline .contact-details { display: block; }
+  .contact-inline .contact-details p { margin-top: 0.25rem; }
 
   .contact-item {
     flex-direction: column;

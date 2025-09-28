@@ -279,7 +279,7 @@ const StaffDashboardPage = ({ currentUser }) => {
                   <div className="schedule-view">
                     <div className="schedule-header">
                       <h3>
-                        {new Date(selectedDate).toLocaleDateString("en-US", {
+                        {new Date(selectedDate).toLocaleDateString("ar-SA", {
                           weekday: "long",
                           year: "numeric",
                           month: "long",

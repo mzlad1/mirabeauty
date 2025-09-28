@@ -189,6 +189,8 @@ const FAQPage = () => {
         </div>
       </section>
 
+
+
       {/* Quick Tips */}
       <section className="quick-tips section">
         <div className="container">
@@ -210,7 +212,14 @@ const FAQPage = () => {
                 أو البريد الإلكتروني.
               </p>
             </div>
-
+            <div className="tip-card">
+              <div className="tip-icon">📱</div>
+              <h3>تطبيق الجوال</h3>
+              <p>
+                حملي تطبيقنا للحصول على تذكيرات المواعيد وعروض خاصة وإدارة
+                حجوزاتك بسهولة.
+              </p>
+            </div>
             <div className="tip-card">
               <div className="tip-icon">🎁</div>
               <h3>نقاط الولاء</h3>
