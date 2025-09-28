@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./BookingPage.css";
 import { sampleServices } from "../data/sampleServices";
 import { sampleUsers } from "../data/sampleUsers";
 
-const BookingPage = ({ currentUser, setCurrentPage }) => {
+const BookingPage = ({ currentUser }) => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState(""); // إضافة حالة لنوع الجلسة
   const [bookingData, setBookingData] = useState({
@@ -62,7 +64,7 @@ const BookingPage = ({ currentUser, setCurrentPage }) => {
     // Here you would normally send the booking data to your backend
     console.log("Booking submitted:", bookingData);
     alert("تم حجز موعدك بنجاح! سيتم التواصل معك قريباً لتأكيد الموعد.");
-    setCurrentPage("profile");
+    navigate("/profile");
   };
 
   const selectedService = sampleServices.find(
@@ -89,13 +91,13 @@ const BookingPage = ({ currentUser, setCurrentPage }) => {
               <div className="login-actions">
                 <button
                   className="btn-primary"
-                  onClick={() => setCurrentPage("login")}
+                  onClick={() => navigate("/login")}
                 >
                   تسجيل الدخول
                 </button>
                 <button
                   className="btn-secondary"
-                  onClick={() => setCurrentPage("register")}
+                  onClick={() => navigate("/register")}
                 >
                   إنشاء حساب جديد
                 </button>

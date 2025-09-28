@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./ServicesPage.css";
 import { sampleServices } from "../data/sampleServices";
 
-const ServicesPage = ({ setCurrentPage }) => {
+const ServicesPage = () => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [bookmarkedServices, setBookmarkedServices] = useState([]);
@@ -91,7 +91,7 @@ const ServicesPage = ({ setCurrentPage }) => {
                   </div>
                   <button
                     className="book-all-btn btn-primary"
-                    onClick={() => setCurrentPage("book")}
+                    onClick={() => navigate("/book")}
                   >
                     احجز الكل
                   </button>
@@ -163,18 +163,10 @@ const ServicesPage = ({ setCurrentPage }) => {
 
                       <div className="service-actions">
                         <button
-                          className={`book-service-btn ${
-                            !service.available ? "disabled" : ""
-                          }`}
-                          onClick={() =>
-                            service.available !== false &&
-                            setCurrentPage("book")
-                          }
-                          disabled={service.available === false}
+                          className="book-service-btn"
+                          onClick={() => navigate("/book")}
                         >
-                          {service.available !== false
-                            ? "احجز الآن"
-                            : "غير متاح"}
+                          احجز الآن
                         </button>
                         <button
                           className="bookmark-btn btn-secondary"
