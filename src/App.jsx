@@ -11,6 +11,7 @@ import "./App.css";
 import HomePage from "./pages/HomePage";
 import ServicesPage from "./pages/ServicesPage";
 import ProductsPage from "./pages/ProductsPage";
+import ProductDetailsPage from "./pages/ProductDetailsPage";
 import BookingPage from "./pages/BookingPage";
 import FAQPage from "./pages/FAQPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -80,6 +81,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/products" element={<ProductsPage />} />
+            <Route path="/products/:id" element={<ProductDetailsPage />} />
             <Route
               path="/book"
               element={<BookingPage currentUser={currentUser} />}

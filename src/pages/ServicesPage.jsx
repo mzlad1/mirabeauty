@@ -127,6 +127,24 @@ const ServicesPage = () => {
                           %
                         </div>
                       )}
+                      <button
+                        className="service-bookmark-icon"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          addToBookmarks(service);
+                        }}
+                        title="احفظ الخدمة"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z" />
+                        </svg>
+                      </button>
                     </div>
 
                     <div className="service-info">
@@ -165,12 +183,6 @@ const ServicesPage = () => {
                           onClick={() => navigate("/book")}
                         >
                           احجز الآن
-                        </button>
-                        <button
-                          className="bookmark-btn btn-secondary"
-                          onClick={() => addToBookmarks(service)}
-                        >
-                          احفظ
                         </button>
                       </div>
                     </div>

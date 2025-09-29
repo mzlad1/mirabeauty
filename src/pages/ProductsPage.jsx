@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ProductsPage.css";
 import { sampleProducts } from "../data/sampleProducts";
 
 const ProductsPage = ({ setCurrentPage }) => {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [cart, setCart] = useState([]);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
@@ -176,7 +178,12 @@ const ProductsPage = ({ setCurrentPage }) => {
 
               <div className="products-grid">
                 {filteredProducts.map((product) => (
-                  <div key={product.id} className="product-card">
+                  <div
+                    key={product.id}
+                    className="product-card"
+                    onClick={() => navigate(`/products/${product.id}`)}
+                    style={{ cursor: "pointer" }}
+                  >
                     <div className="product-image">
                       <img src={product.image} alt={product.name} />
                       {product.originalPrice && (
@@ -194,6 +201,26 @@ const ProductsPage = ({ setCurrentPage }) => {
                       {!product.inStock && (
                         <div className="out-of-stock-badge">نفذ من المخزن</div>
                       )}
+                      {product.inStock && (
+                        <button
+                          className="product-add-to-cart-icon"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            addToCart(product);
+                          }}
+                          title="إضافة إلى السلة"
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M7 18c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-0.16 0.28-0.25 0.61-0.25 0.96 0 1.1 0.9 2 2 2h12v-2H7.42c-0.14 0-0.25-0.11-0.25-0.25l0.03-0.12L8.1 13h7.45c0.75 0 1.41-0.42 1.75-1.03L21.7 4H5.21l-0.94-2H1zm16 16c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2z" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
 
                     <div className="product-info">
@@ -201,9 +228,9 @@ const ProductsPage = ({ setCurrentPage }) => {
                         {product.categoryName}
                       </div>
                       <h3>{product.name}</h3>
-                      <p className="product-description">
+                      {/* <p className="product-description">
                         {product.description}
-                      </p>
+                      </p> */}
 
                       <div className="product-rating">
                         <div className="stars">
@@ -225,16 +252,13 @@ const ProductsPage = ({ setCurrentPage }) => {
 
                       <div className="product-actions">
                         <button
-                          className={`add-to-cart-btn ${
-                            !product.inStock ? "disabled" : ""
-                          }`}
-                          onClick={() => product.inStock && addToCart(product)}
-                          disabled={!product.inStock}
+                          className="quick-view-btn btn-secondary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/products/${product.id}`);
+                          }}
                         >
-                          {product.inStock ? "أضف للسلة" : "غير متوفر"}
-                        </button>
-                        <button className="quick-view-btn btn-secondary">
-                          عرض سريع
+                          عرض التفاصيل
                         </button>
                       </div>
                     </div>
