@@ -39,18 +39,18 @@ const ServicesPage = () => {
   };
 
   return (
-    <div className="services-page">
+    <div className="services-page-container">
       {/* Services Content */}
-      <section className="services-content section">
+      <section className="services-page-content section">
         <div className="container">
-          <div className="services-layout">
+          <div className="services-page-layout">
             {/* Sidebar */}
-            <aside className="services-sidebar">
+            <aside className="services-page-sidebar">
               {/* Category Filter */}
-              <div className="filter-section">
+              <div className="services-page-filter-section">
                 <h3>تصفح حسب الفئة</h3>
                 <select
-                  className="filter-dropdown"
+                  className="services-page-filter-dropdown"
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                 >
@@ -64,23 +64,26 @@ const ServicesPage = () => {
 
               {/* Bookmarked Services */}
               {bookmarkedServices.length > 0 && (
-                <div className="bookmarks-section">
+                <div className="services-page-bookmarks-section">
                   <h3>الخدمات المحفوظة ({bookmarkedServices.length})</h3>
-                  <div className="bookmark-items">
+                  <div className="services-page-bookmark-items">
                     {bookmarkedServices.map((item) => (
-                      <div key={item.id} className="bookmark-item">
-                        <div className="bookmark-item-info">
+                      <div
+                        key={item.id}
+                        className="services-page-bookmark-item"
+                      >
+                        <div className="services-page-bookmark-item-info">
                           <img src={item.image} alt={item.name} />
                           <div>
                             <h4>{item.name}</h4>
-                            <span className="bookmark-item-duration">
+                            <span className="services-page-bookmark-item-duration">
                               {item.duration}
                             </span>
                           </div>
                         </div>
                         <button
                           onClick={() => removeFromBookmarks(item.id)}
-                          className="remove-bookmark-btn"
+                          className="services-page-remove-bookmark-btn"
                         >
                           ×
                         </button>
@@ -88,7 +91,7 @@ const ServicesPage = () => {
                     ))}
                   </div>
                   <button
-                    className="book-all-btn btn-primary"
+                    className="services-page-book-all-btn btn-primary"
                     onClick={() => navigate("/book")}
                   >
                     احجز الكل
@@ -98,25 +101,25 @@ const ServicesPage = () => {
             </aside>
 
             {/* Services Grid */}
-            <main className="services-main">
-              <div className="services-header">
+            <main className="services-page-main">
+              <div className="services-page-header">
                 <h2>
                   {selectedCategory === "all"
                     ? "جميع الخدمات"
                     : categories.find((c) => c.id === selectedCategory)?.name}
                 </h2>
-                <span className="services-count">
+                <span className="services-page-count">
                   {filteredServices.length} خدمة
                 </span>
               </div>
 
-              <div className="services-grid">
+              <div className="services-page-grid">
                 {filteredServices.map((service) => (
-                  <div key={service.id} className="service-card">
-                    <div className="service-image">
+                  <div key={service.id} className="services-page-card">
+                    <div className="services-page-image">
                       <img src={service.image} alt={service.name} />
                       {service.originalPrice && (
-                        <div className="discount-badge">
+                        <div className="services-page-discount-badge">
                           خصم{" "}
                           {Math.round(
                             (1 -
@@ -128,7 +131,7 @@ const ServicesPage = () => {
                         </div>
                       )}
                       <button
-                        className="service-bookmark-icon"
+                        className="services-page-bookmark-icon"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -147,39 +150,39 @@ const ServicesPage = () => {
                       </button>
                     </div>
 
-                    <div className="service-info">
-                      <div className="service-category">
+                    <div className="services-page-info">
+                      <div className="services-page-category">
                         {service.categoryName}
                       </div>
                       <h3>{service.name}</h3>
-                      <p className="service-description">
+                      <p className="services-page-description">
                         {service.description}
                       </p>
 
-                      <div className="service-rating">
-                        <div className="stars">
+                      <div className="services-page-rating">
+                        <div className="services-page-stars">
                           {"⭐".repeat(Math.floor(service.rating || 5))}
                         </div>
-                        <span className="rating-text">
+                        <span className="services-page-rating-text">
                           {service.rating || 5} ({service.reviewsCount || 25}{" "}
                           تقييم)
                         </span>
                       </div>
 
-                      <div className="service-price">
-                        <span className="current-price">
+                      <div className="services-page-price">
+                        <span className="services-page-current-price">
                           {service.price || "اتصل للاستفسار"}
                         </span>
                         {service.originalPrice && (
-                          <span className="original-price">
+                          <span className="services-page-original-price">
                             {service.originalPrice}
                           </span>
                         )}
                       </div>
 
-                      <div className="service-actions">
+                      <div className="services-page-actions">
                         <button
-                          className="book-service-btn"
+                          className="services-page-book-btn"
                           onClick={() => navigate("/book")}
                         >
                           احجز الآن
@@ -192,7 +195,7 @@ const ServicesPage = () => {
 
               {/* No Services Message */}
               {filteredServices.length === 0 && (
-                <div className="no-services">
+                <div className="services-page-no-services">
                   <h3>لا توجد خدمات في هذه الفئة حالياً</h3>
                   <p>يرجى اختيار فئة أخرى أو العودة لاحقاً</p>
                 </div>
@@ -203,17 +206,17 @@ const ServicesPage = () => {
       </section>
 
       {/* Service Why Choose Us Section */}
-      <section className="why-choose-services section">
+      <section className="services-page-why-choose section">
         <div className="container">
-          <div className="why-grid">
-            <div className="why-heading text-right">
+          <div className="services-page-why-grid">
+            <div className="services-page-why-heading text-right">
               <h2>لماذا خدماتنا؟</h2>
               <p>
                 خدماتنا تمنحك نتائج فعالة بأمان وجودة عالية، مع اهتمام كامل
                 بصحتك وجمالك.
               </p>
             </div>
-            <div className="why-points">
+            <div className="services-page-why-points">
               <ul>
                 <li>أجهزة حديثة ومعتمدة عالمياً</li>
                 <li>فريق متخصص بخبرة تزيد عن 10 سنوات</li>

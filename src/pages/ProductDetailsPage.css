@@ -259,6 +259,7 @@
   border: 2px solid var(--border-color);
   border-radius: 12px;
   overflow: hidden;
+  width: fit-content;
 }
 
 .product-details-quantity-btn {
@@ -538,6 +539,7 @@
   box-shadow: 0 4px 16px rgba(7, 22, 38, 0.08);
   transition: all 0.3s ease;
   border: 1px solid var(--border-color);
+  cursor: pointer;
 }
 
 .product-details-related-product-card:hover {
@@ -592,23 +594,6 @@
   font-size: 0.9rem;
   color: var(--text-secondary);
   text-decoration: line-through;
-}
-
-.product-details-view-product-btn {
-  background: linear-gradient(135deg, var(--gold) 0%, #d4a843 100%);
-  color: var(--white);
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 100%;
-}
-
-.product-details-view-product-btn:hover {
-  background: linear-gradient(135deg, var(--navy-blue) 0%, #0f2a5a 100%);
-  transform: translateY(-1px);
 }
 
 /* Toast Notification */
@@ -733,8 +718,13 @@
 
   .product-details-quantity-selector {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
     gap: 0.5rem;
+  }
+
+  .product-details-quantity-controls {
+    width: fit-content;
+    min-width: 140px;
   }
 
   .product-details-add-to-cart-btn {
@@ -790,7 +780,8 @@
 
 @media (max-width: 480px) {
   .product-details-related-products-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
   }
 
   .product-details-ingredients-list {

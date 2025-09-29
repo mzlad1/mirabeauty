@@ -19,6 +19,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import StaffDashboardPage from "./pages/StaffDashboardPage";
+import CartPage from "./pages/CartPage";
 
 // Import Components
 import Navigation from "./components/common/Navigation";
@@ -82,6 +83,7 @@ function App() {
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/products/:id" element={<ProductDetailsPage />} />
+            <Route path="/cart" element={<CartPage />} />
             <Route
               path="/book"
               element={<BookingPage currentUser={currentUser} />}

@@ -6,7 +6,6 @@ import { sampleProducts } from "../data/sampleProducts";
 const ProductsPage = ({ setCurrentPage }) => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [cart, setCart] = useState([]);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
   const categories = [
@@ -29,20 +28,24 @@ const ProductsPage = ({ setCurrentPage }) => {
         );
 
   const addToCart = (product) => {
-    const existingItem = cart.find((item) => item.id === product.id);
+    const savedCart = localStorage.getItem("cartItems");
+    const cartItems = savedCart ? JSON.parse(savedCart) : [];
+
+    const existingItem = cartItems.find((item) => item.id === product.id);
+    let updatedCart;
+
     if (existingItem) {
-      setCart(
-        cart.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
+      updatedCart = cartItems.map((item) =>
+        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
       );
       showToast(`تم زيادة كمية ${product.name} في السلة`, "success");
     } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
+      updatedCart = [...cartItems, { ...product, quantity: 1 }];
       showToast(`تم إضافة ${product.name} للسلة بنجاح`, "success");
     }
+
+    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+    window.dispatchEvent(new Event("cartUpdated"));
   };
 
   const showToast = (message, type) => {
@@ -50,33 +53,6 @@ const ProductsPage = ({ setCurrentPage }) => {
     setTimeout(() => {
       setToast({ show: false, message: "", type: "" });
     }, 3000);
-  };
-
-  const removeFromCart = (productId) => {
-    setCart(cart.filter((item) => item.id !== productId));
-  };
-
-  const updateQuantity = (productId, newQuantity) => {
-    if (newQuantity === 0) {
-      removeFromCart(productId);
-    } else {
-      setCart(
-        cart.map((item) =>
-          item.id === productId ? { ...item, quantity: newQuantity } : item
-        )
-      );
-    }
-  };
-
-  const getTotalItems = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
-  };
-
-  const getTotalPrice = () => {
-    return cart.reduce((total, item) => {
-      const price = parseInt(item.price.replace(" شيكل", ""));
-      return total + price * item.quantity;
-    }, 0);
   };
 
   return (
@@ -88,11 +64,7 @@ const ProductsPage = ({ setCurrentPage }) => {
         <div className="container">
           <div className="products-layout">
             {/* Sidebar */}
-            <aside
-              className={`products-sidebar ${
-                cart.length > 0 ? "non-sticky" : ""
-              }`}
-            >
+            <aside className="products-sidebar">
               {/* Category Filter */}
               <div className="filter-section">
                 <h3>تصفح حسب الفئة</h3>
@@ -108,59 +80,6 @@ const ProductsPage = ({ setCurrentPage }) => {
                   ))}
                 </select>
               </div>
-
-              {/* Shopping Cart */}
-              {cart.length > 0 && (
-                <div className="cart-section">
-                  <div className="cart-header">
-                    <div className="cart-icon-container">
-                      <i className="fas fa-shopping-cart"></i>
-                      <span className="cart-badge">{getTotalItems()}</span>
-                    </div>
-                    <h3>سلة التسوق </h3>
-                  </div>
-                  <div className="cart-items">
-                    {cart.map((item) => (
-                      <div key={item.id} className="cart-item">
-                        <div className="cart-item-info">
-                          <img src={item.image} alt={item.name} />
-                          <div>
-                            <h4>{item.name}</h4>
-                            <span className="cart-item-price">
-                              {item.price}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="quantity-controls">
-                          <button
-                            onClick={() =>
-                              updateQuantity(item.id, item.quantity - 1)
-                            }
-                            className="quantity-btn"
-                          >
-                            -
-                          </button>
-                          <span className="quantity">{item.quantity}</span>
-                          <button
-                            onClick={() =>
-                              updateQuantity(item.id, item.quantity + 1)
-                            }
-                            className="quantity-btn"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="cart-total">
-                    <strong>المجموع: {getTotalPrice()} شيكل</strong>
-                  </div>
-                  <button className="checkout-btn btn-primary">
-                    إتمام الشراء
-                  </button>
-                </div>
-              )}
             </aside>
 
             {/* Products Grid */}
@@ -248,18 +167,6 @@ const ProductsPage = ({ setCurrentPage }) => {
                             {product.originalPrice}
                           </span>
                         )}
-                      </div>
-
-                      <div className="product-actions">
-                        <button
-                          className="quick-view-btn btn-secondary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/products/${product.id}`);
-                          }}
-                        >
-                          عرض التفاصيل
-                        </button>
                       </div>
                     </div>
                   </div>

@@ -52,6 +52,25 @@ const ProductDetailsPage = () => {
 
   const handleAddToCart = () => {
     if (product && product.inStock) {
+      const savedCart = localStorage.getItem("cartItems");
+      const cartItems = savedCart ? JSON.parse(savedCart) : [];
+
+      const existingItem = cartItems.find((item) => item.id === product.id);
+      let updatedCart;
+
+      if (existingItem) {
+        updatedCart = cartItems.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      } else {
+        updatedCart = [...cartItems, { ...product, quantity }];
+      }
+
+      localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+      window.dispatchEvent(new Event("cartUpdated"));
+
       showToast(
         `تم إضافة ${quantity} من ${product.name} للسلة بنجاح`,
         "success"
@@ -389,6 +408,7 @@ const ProductDetailsPage = () => {
                 <div
                   key={relatedProduct.id}
                   className="product-details-related-product-card"
+                  onClick={() => navigate(`/products/${relatedProduct.id}`)}
                 >
                   <div className="product-details-related-product-image">
                     <img src={relatedProduct.image} alt={relatedProduct.name} />
@@ -405,12 +425,6 @@ const ProductDetailsPage = () => {
                         </span>
                       )}
                     </div>
-                    <button
-                      className="product-details-view-product-btn"
-                      onClick={() => navigate(`/products/${relatedProduct.id}`)}
-                    >
-                      عرض المنتج
-                    </button>
                   </div>
                 </div>
               ));
