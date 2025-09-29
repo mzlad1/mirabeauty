@@ -104,7 +104,7 @@
 }
 
 .consultation-card .flip-card-back {
-  background: linear-gradient(135deg, var(--ivory) 0%, var(--white) 100%);
+  background: linear-gradient(135deg, var(--white) 0%, var(--white) 100%);
   border: 3px solid var(--gold);
 }
 
@@ -166,31 +166,6 @@
 }
 
 .flip-card-back li:last-child {
-  border-bottom: none;
-}
-
-/* Special styling for consultation card */
-.consultation-card .flip-card-inner {
-  border: 3px solid var(--gold);
-}
-
-.consultation-card .category-overlay h3 {
-  color: var(--white);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-}
-
-.consultation-card .flip-card-back {
-  background: linear-gradient(135deg, var(--ivory) 0%, var(--white) 100%);
-  border: 3px solid var(--gold);
-}
-
-.consultation-card .flip-card-back h3 {
-  color: var(--gold);
-}
-
-.consultation-card .flip-card-back li:last-child {
-  color: var(--gold);
-  font-weight: 600;
   border-bottom: none;
 }
 
@@ -426,7 +401,7 @@
 }
 
 .back-btn {
-  background-color: var(--ivory);
+  background-color: var(--white);
   color: var(--navy-blue);
   border: 2px solid var(--border-color);
   padding: 8px 16px;
@@ -459,7 +434,7 @@
   border: 2px solid var(--border-color);
   cursor: pointer;
   transition: all 0.3s ease;
-  background-color: var(--ivory);
+  background-color: var(--white);
 }
 
 .service-option:hover {
@@ -507,7 +482,7 @@
 
 /* Selected Service Info */
 .selected-service-info {
-  background-color: var(--ivory);
+  background-color: var(--white);
   padding: 1.5rem;
   margin-bottom: 2rem;
   border: 2px solid var(--gold);
@@ -537,7 +512,7 @@
   border: 2px solid var(--border-color);
   cursor: pointer;
   transition: all 0.3s ease;
-  background-color: var(--ivory);
+  background-color: var(--white);
 }
 
 .staff-option:hover {
@@ -576,7 +551,7 @@
 
 /* Selected Info */
 .selected-info {
-  background-color: var(--ivory);
+  background-color: var(--white);
   padding: 1.5rem;
   margin-bottom: 2rem;
   border: 2px solid var(--gold);
@@ -632,7 +607,7 @@
 
 .time-slot:hover {
   border-color: var(--gold);
-  background-color: var(--ivory);
+  background-color: var(--white);
 }
 
 .time-slot.selected {
@@ -643,7 +618,7 @@
 
 /* Booking Summary */
 .booking-summary {
-  background-color: var(--ivory);
+  background-color: var(--white);
   padding: 2rem;
   margin-bottom: 2rem;
   border: 2px solid var(--border-color);
@@ -719,6 +694,7 @@
   font-size: 1.125rem;
   font-weight: 700;
   margin-bottom: 1rem;
+  background-color: var(--navy-blue);
 }
 
 .booking-note {
@@ -862,8 +838,7 @@
 }
 
 .consultation-header {
-  text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;
 }
 
 .consultation-header h2 {
@@ -881,47 +856,71 @@
 }
 
 .consultation-content {
+  background: linear-gradient(135deg, var(--navy-blue) 0%, #1a4b6b 100%);
+  padding: 4rem 2rem;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.consultation-content::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--gold) 0%,
+    #ffcc00 50%,
+    var(--gold) 100%
+  );
+}
+
+.consultation-why-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
   align-items: start;
 }
 
-.consultation-info {
-  display: grid;
-  gap: 2rem;
+.consultation-why-heading h2 {
+  color: var(--gold);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
 }
 
-.info-card {
-  background: var(--ivory);
-  padding: 2rem;
-  border-radius: 1rem;
-  border: 2px solid var(--border-color);
-  text-align: center;
-  transition: all 0.3s ease;
+.consultation-why-heading p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  line-height: 1.7;
 }
 
-.info-card:hover {
-  border-color: var(--gold);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(11, 34, 53, 0.1);
+.consultation-why-points ul {
+  list-style: none;
+  padding: 0;
 }
 
-.info-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+.consultation-why-points li {
+  color: white;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  padding-right: 2rem;
+  position: relative;
 }
 
-.info-card h3 {
-  color: var(--navy-blue);
-  margin-bottom: 0.75rem;
-  font-size: 1.25rem;
-}
-
-.info-card p {
-  color: var(--charcoal);
-  opacity: 0.8;
-  line-height: 1.5;
+.consultation-why-points li::before {
+  content: "✓";
+  position: absolute;
+  right: 0;
+  top: 0;
+  color: var(--gold);
+  font-weight: bold;
+  font-size: 1.2rem;
 }
 
 .consultation-form-container {
@@ -974,10 +973,9 @@
 }
 
 .consultation-btn {
-  background: linear-gradient(135deg, var(--gold) 0%, #b8921f 100%);
+  background: var(--navy-blue);
   color: var(--white);
   padding: 15px 40px;
-  font-size: 1.25rem;
   font-weight: 700;
   border: none;
   border-radius: 2rem;
@@ -1040,6 +1038,24 @@
 .booking-cta {
   background: linear-gradient(135deg, var(--navy-blue) 0%, #0f2a5a 100%);
   color: var(--white);
+  position: relative;
+}
+
+.booking-cta::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--gold) 20%,
+    var(--gold) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 2px 8px rgba(184, 146, 31, 0.3);
 }
 
 .booking-cta .cta-content h2 {
@@ -1087,5 +1103,22 @@
   .booking-cta .cta-buttons button {
     width: 100%;
     max-width: 300px;
+  }
+
+  .consultation-why-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .consultation-content {
+    padding: 2rem 1rem;
+  }
+
+  .consultation-why-heading h2 {
+    font-size: 2rem;
+  }
+
+  .consultation-why-points li {
+    font-size: 1rem;
   }
 }

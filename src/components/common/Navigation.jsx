@@ -108,7 +108,9 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
                     className="dropdown-item"
                     onClick={() => handleNavigation("/profile")}
                   >
-                    <span className="dropdown-icon">👤</span>
+                    <span className="dropdown-icon">
+                      <i className="fas fa-user"></i>
+                    </span>
                     الملف الشخصي
                   </button>
                 )}
@@ -118,12 +120,16 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
                     className="dropdown-item"
                     onClick={() => handleNavigation("/dashboard")}
                   >
-                    <span className="dropdown-icon">📊</span>
+                    <span className="dropdown-icon">
+                      <i className="fas fa-tachometer-alt"></i>
+                    </span>
                     لوحة التحكم
                   </button>
                 )}
                 <button className="dropdown-item logout" onClick={handleLogout}>
-                  <span className="dropdown-icon">🚪</span>
+                  <span className="dropdown-icon">
+                    <i className="fas fa-sign-out-alt"></i>
+                  </span>
                   تسجيل الخروج
                 </button>
               </div>
@@ -157,9 +163,10 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
       </div>
 
       {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="mobile-menu-overlay"
+          className="mobile-menu-overlay active"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}

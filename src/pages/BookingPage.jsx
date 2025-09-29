@@ -207,7 +207,7 @@ const BookingPage = ({ currentUser }) => {
               <div className="booking-step">
                 <div className="step-header">
                   <button
-                    className="back-to-category"
+                    className="back-btn"
                     onClick={() => setSelectedCategory("")}
                   >
                     ← العودة لاختيار نوع الجلسة
@@ -461,36 +461,29 @@ const BookingPage = ({ currentUser }) => {
           <div className="container">
             <div className="consultation-header">
               <button
-                className="back-to-category"
+                className="back-btn"
                 onClick={() => setSelectedCategory("")}
               >
                 ← العودة لاختيار نوع الجلسة
               </button>
-              <h2>حجز استشارة مجانية</h2>
-              <p>احصلي على تقييم شخصي مجاني لاحتياجاتك الجمالية</p>
             </div>
 
             <div className="consultation-content">
-              <div className="consultation-info">
-                <div className="info-card">
-                  <div className="info-icon">📋</div>
-                  <h3>تحليل شامل</h3>
-                  <p>تقييم نوع بشرتك وتحديد المشاكل والحلول المناسبة</p>
+              <div className="consultation-why-grid">
+                <div className="consultation-why-heading text-right">
+                  <h2>لماذا الاستشارة المجانية؟</h2>
+                  <p>
+                    احصلي على تقييم شخصي مجاني لاحتياجاتك الجمالية مع خبراء
+                    متخصصين
+                  </p>
                 </div>
-                <div className="info-card">
-                  <div className="info-icon">👩‍⚕️</div>
-                  <h3>استشارة متخصصة</h3>
-                  <p>مع أخصائيات معتمدات ذوات خبرة عالية</p>
-                </div>
-                <div className="info-card">
-                  <div className="info-icon">🎯</div>
-                  <h3>خطة شخصية</h3>
-                  <p>وضع برنامج علاجي مخصص يناسب احتياجاتك</p>
-                </div>
-                <div className="info-card">
-                  <div className="info-icon">💰</div>
-                  <h3>مجانية تماماً</h3>
-                  <p>استشارة 30 دقيقة بدون أي تكلفة</p>
+                <div className="consultation-why-points">
+                  <ul>
+                    <li>تحليل شامل لنوع بشرتك وتحديد المشاكل</li>
+                    <li>استشارة مع أخصائيات معتمدات ذوات خبرة عالية</li>
+                    <li>وضع برنامج علاجي مخصص يناسب احتياجاتك</li>
+                    <li>استشارة 30 دقيقة مجانية تماماً بدون أي تكلفة</li>
+                  </ul>
                 </div>
               </div>
 
@@ -661,29 +654,31 @@ const BookingPage = ({ currentUser }) => {
         </section>
       )}
 
-      {/* Call to Action */}
-      <section className="booking-cta section">
-        <div className="container">
-          <div className="cta-content text-center">
-            <h2>مستعدة لتجربة التميز؟</h2>
-            <p>احجزي استشارة مجانية اليوم واكتشفي الخدمة المناسبة لك</p>
-            <div className="cta-buttons">
-              <button
-                className="btn-primary"
-                onClick={() => setSelectedCategory("consultation")}
-              >
-                احجزي استشارة مجانية
-              </button>
-              <button
-                className="btn-secondary"
-                onClick={() => setCurrentPage("faq")}
-              >
-                الأسئلة الشائعة
-              </button>
+      {/* Call to Action - Only show when no category is selected */}
+      {!selectedCategory && (
+        <section className="booking-cta section">
+          <div className="container">
+            <div className="cta-content text-center">
+              <h2>مستعدة لتجربة التميز؟</h2>
+              <p>احجزي استشارة مجانية اليوم واكتشفي الخدمة المناسبة لك</p>
+              <div className="cta-buttons">
+                <button
+                  className="btn-primary"
+                  onClick={() => setSelectedCategory("consultation")}
+                >
+                  احجزي استشارة مجانية
+                </button>
+                <button
+                  className="btn-secondary"
+                  onClick={() => navigate("/faq")}
+                >
+                  الأسئلة الشائعة
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 };

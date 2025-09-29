@@ -5,6 +5,7 @@ import { sampleProducts } from "../data/sampleProducts";
 const ProductsPage = ({ setCurrentPage }) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [cart, setCart] = useState([]);
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
   const categories = [
     { id: "all", name: "جميع المنتجات" },
@@ -35,9 +36,18 @@ const ProductsPage = ({ setCurrentPage }) => {
             : item
         )
       );
+      showToast(`تم زيادة كمية ${product.name} في السلة`, "success");
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
+      showToast(`تم إضافة ${product.name} للسلة بنجاح`, "success");
     }
+  };
+
+  const showToast = (message, type) => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast({ show: false, message: "", type: "" });
+    }, 3000);
   };
 
   const removeFromCart = (productId) => {
@@ -70,13 +80,17 @@ const ProductsPage = ({ setCurrentPage }) => {
   return (
     <div className="products-page">
       {/* New Top Header: Category Filter */}
-     
+
       {/* Products Content */}
       <section className="products-content section">
         <div className="container">
           <div className="products-layout">
             {/* Sidebar */}
-            <aside className="products-sidebar">
+            <aside
+              className={`products-sidebar ${
+                cart.length > 0 ? "non-sticky" : ""
+              }`}
+            >
               {/* Category Filter */}
               <div className="filter-section">
                 <h3>تصفح حسب الفئة</h3>
@@ -98,7 +112,13 @@ const ProductsPage = ({ setCurrentPage }) => {
               {/* Shopping Cart */}
               {cart.length > 0 && (
                 <div className="cart-section">
-                  <h3>سلة التسوق ({getTotalItems()})</h3>
+                  <div className="cart-header">
+                    <div className="cart-icon-container">
+                      <i className="fas fa-shopping-cart"></i>
+                      <span className="cart-badge">{getTotalItems()}</span>
+                    </div>
+                    <h3>سلة التسوق </h3>
+                  </div>
                   <div className="cart-items">
                     {cart.map((item) => (
                       <div key={item.id} className="cart-item">
@@ -242,7 +262,10 @@ const ProductsPage = ({ setCurrentPage }) => {
           <div className="why-grid">
             <div className="why-heading text-right">
               <h2>لماذا منتجاتنا؟</h2>
-              <p>منتجاتنا تمنحك نتائج فعالة بأمان وجودة عالية، مع اهتمام كامل بصحتك وجمالك.</p>
+              <p>
+                منتجاتنا تمنحك نتائج فعالة بأمان وجودة عالية، مع اهتمام كامل
+                بصحتك وجمالك.
+              </p>
             </div>
             <div className="why-points">
               <ul>
@@ -256,6 +279,15 @@ const ProductsPage = ({ setCurrentPage }) => {
         </div>
       </section>
 
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className={`toast toast-${toast.type}`}>
+          <div className="toast-content">
+            <i className="fas fa-check-circle toast-icon"></i>
+            <span className="toast-message">{toast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
