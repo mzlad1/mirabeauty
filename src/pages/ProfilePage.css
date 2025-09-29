@@ -121,7 +121,7 @@
 }
 
 .nav-item:hover {
-  background-color: var(--ivory);
+  background-color: #f9f8f7;
   color: var(--navy-blue);
 }
 
@@ -176,7 +176,7 @@
 }
 
 .stat-card {
-  background-color: var(--ivory);
+  background-color: #f9f8f7;
   padding: 1.5rem;
   border: 2px solid var(--border-color);
   display: flex;
@@ -220,7 +220,7 @@
 }
 
 .appointment-card {
-  background-color: var(--ivory);
+  background-color: #f9f8f7;
   padding: 1.5rem;
   border: 2px solid var(--gold);
   display: flex;
@@ -488,7 +488,7 @@
 
 /* Settings Section */
 .settings-section {
-  background-color: var(--ivory);
+  background-color: #f9f8f7;
   padding: 2rem;
   border: 2px solid var(--border-color);
 }
@@ -572,7 +572,7 @@
 .empty-state {
   text-align: center;
   padding: 3rem 2rem;
-  background-color: var(--ivory);
+  background-color: #f9f8f7;
   border: 2px solid var(--border-color);
 }
 

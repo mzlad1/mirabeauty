@@ -107,7 +107,7 @@
 .register-form .form-textarea:focus {
   outline: none;
   border-color: var(--gold);
-  background-color: var(--ivory);
+  background-color: #f9f8f7;
 }
 
 .register-form .form-input.error,

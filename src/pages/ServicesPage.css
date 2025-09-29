@@ -109,32 +109,29 @@
   font-size: 1.25rem;
 }
 
-.filter-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.filter-item {
-  padding: 10px 15px;
-  background-color: transparent;
+.filter-dropdown {
+  width: 100%;
+  padding: 12px 15px;
+  background-color: var(--white);
   color: var(--charcoal);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
   text-align: right;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 500;
+  font-size: 1rem;
+  direction: rtl;
 }
 
-.filter-item:hover {
-  background-color: var(--ivory);
+.filter-dropdown:hover {
   border-color: var(--gold);
 }
 
-.filter-item.active {
-  background-color: var(--gold);
-  color: var(--white);
-  border-color: var(--gold);
+.filter-dropdown:focus {
+  outline: none;
+  border-color: var(--navy-blue);
+  box-shadow: 0 0 0 3px rgba(11, 34, 53, 0.1);
 }
 
 /* Bookmarks Section */

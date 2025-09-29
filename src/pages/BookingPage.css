@@ -268,18 +268,28 @@
 }
 
 .login-actions button {
-  background: var(--gold);
-  color: var(--white);
   border-radius: 2rem;
-  border: none;
   box-shadow: 0 2px 8px rgba(40, 30, 10, 0.08);
   font-size: 1.1rem;
   font-weight: 700;
   padding: 14px 40px;
-  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s, border-color 0.3s;
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  border: 2px solid transparent;
+}
+
+.login-actions .btn-primary {
+  background: var(--gold);
+  color: var(--white);
+  border-color: var(--gold);
+}
+
+.login-actions .btn-secondary {
+  background: var(--white);
+  color: var(--navy-blue);
+  border-color: var(--navy-blue);
 }
 
 .login-actions button::after {
@@ -299,11 +309,19 @@
   pointer-events: none;
 }
 
-.login-actions button:hover,
-.login-actions button:focus {
-  background: var(--navy-blue);
-  color: var(--gold);
+.login-actions .btn-primary:hover,
+.login-actions .btn-primary:focus {
+  background: #b8921f;
+  color: var(--white);
   box-shadow: 0 4px 16px rgba(40, 30, 10, 0.12);
+}
+
+.login-actions .btn-secondary:hover,
+.login-actions .btn-secondary:focus {
+  background: var(--navy-blue);
+  color: var(--white);
+  border-color: var(--navy-blue);
+  box-shadow: 0 4px 16px rgba(11, 34, 53, 0.12);
 }
 
 .login-actions button:hover::after,
@@ -973,7 +991,7 @@
 }
 
 .consultation-btn {
-  background: var(--navy-blue);
+  background: var(--gold);
   color: var(--white);
   padding: 15px 40px;
   font-weight: 700;

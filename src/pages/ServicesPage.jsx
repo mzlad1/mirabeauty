@@ -49,19 +49,17 @@ const ServicesPage = () => {
               {/* Category Filter */}
               <div className="filter-section">
                 <h3>تصفح حسب الفئة</h3>
-                <div className="filter-list">
+                <select
+                  className="filter-dropdown"
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                >
                   {categories.map((category) => (
-                    <button
-                      key={category.id}
-                      className={`filter-item ${
-                        selectedCategory === category.id ? "active" : ""
-                      }`}
-                      onClick={() => setSelectedCategory(category.id)}
-                    >
+                    <option key={category.id} value={category.id}>
                       {category.name}
-                    </button>
+                    </option>
                   ))}
-                </div>
+                </select>
               </div>
 
               {/* Bookmarked Services */}

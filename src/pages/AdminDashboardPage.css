@@ -68,7 +68,7 @@
 }
 
 .dashboard-nav .nav-item:hover {
-  background-color: var(--ivory);
+  background-color: #f9f8f7;
   color: var(--navy-blue);
 }
 

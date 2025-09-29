@@ -749,7 +749,7 @@
   }
 
   .nav-link.active {
-    background-color: var(--ivory);
+    background-color: #f9f8f7;
   }
 
   /* Hide nav-actions initially on mobile */

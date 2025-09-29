@@ -26,8 +26,6 @@
   margin-bottom: 2rem;
 }
 
-
-
 /* Category Filter */
 .category-filter {
   display: flex;
@@ -38,7 +36,7 @@
 
 .category-btn {
   padding: 10px 20px;
-  background-color: var(--ivory);
+  background-color: #f9f8f7;
   color: var(--charcoal);
   border: 2px solid var(--border-color);
   cursor: pointer;
@@ -94,7 +92,7 @@
 }
 
 .faq-question:hover {
-  background-color: var(--ivory);
+  background-color: #f9f8f7;
 }
 
 .faq-item.active .faq-question {
@@ -132,7 +130,7 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease;
-  background-color: var(--ivory);
+  background-color: #f9f8f7;
 }
 
 .faq-item.active .faq-answer {
@@ -168,7 +166,7 @@
 
 /* FAQ Contact Section */
 .faq-contact {
-  background-color: var(--ivory);
+  background-color: #f9f8f7;
 }
 
 .contact-content {
@@ -257,7 +255,7 @@
 }
 
 .tip-card {
-  background-color: var(--ivory);
+  background-color: #f9f8f7;
   padding: 2rem;
   text-align: center;
   border: 2px solid var(--border-color);

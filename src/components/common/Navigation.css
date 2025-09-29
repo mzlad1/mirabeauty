@@ -87,7 +87,7 @@
 
 .nav-link:hover {
   color: var(--navy-blue);
-  background-color: var(--ivory);
+  background-color: #F9F8F7
 }
 
 .nav-link.active {
@@ -168,7 +168,7 @@
 }
 
 .user-info:hover {
-  background-color: var(--ivory);
+  background-color: #F9F8F7
 }
 
 .user-avatar {
@@ -239,7 +239,7 @@
 }
 
 .dropdown-item:hover {
-  background-color: var(--ivory);
+  background-color: #F9F8F7
   color: var(--navy-blue);
 }
 
@@ -373,7 +373,7 @@
   }
 
   .nav-link.active {
-    background-color: var(--ivory);
+    background-color: #F9F8F7
   }
 
   .nav-actions {
