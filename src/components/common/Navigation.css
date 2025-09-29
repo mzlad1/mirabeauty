@@ -87,7 +87,7 @@
 
 .nav-link:hover {
   color: var(--navy-blue);
-  background-color: #F9F8F7
+  background-color: #f9f8f7;
 }
 
 .nav-link.active {
@@ -168,7 +168,7 @@
 }
 
 .user-info:hover {
-  background-color: #F9F8F7
+  background-color: #f9f8f7;
 }
 
 .user-avatar {
@@ -176,6 +176,7 @@
   height: 40px;
   object-fit: cover;
   border: 2px solid var(--gold);
+  border-radius: 50%;
 }
 
 .user-details {
@@ -239,7 +240,7 @@
 }
 
 .dropdown-item:hover {
-  background-color: #F9F8F7
+  background-color: #f9f8f7;
   color: var(--navy-blue);
 }
 
@@ -373,7 +374,7 @@
   }
 
   .nav-link.active {
-    background-color: #F9F8F7
+    background-color: #f9f8f7;
   }
 
   .nav-actions {

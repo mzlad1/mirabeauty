@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
 import { sampleServices } from "../data/sampleServices";
 import { sampleTestimonials } from "../data/sampleTestimonials";
+import { sampleProducts } from "../data/sampleProducts";
+import PromotionalBanner from "../components/common/PromotionalBanner";
+import ProductCard from "../components/customer/ProductCard";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -15,7 +18,8 @@ const HomePage = () => {
             <div className="hero-text text-right">
               <h1>اكتشفي إشراقك الطبيعي</h1>
               <p className="hero-subtitle">
-                استمتعي بخدمات العناية المتقدمة وعلاجات الليزر في مركز ميرا بيوتي
+                استمتعي بخدمات العناية المتقدمة وعلاجات الليزر في مركز ميرا
+                بيوتي
               </p>
               <div className="text-right">
                 <button
@@ -65,13 +69,63 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Promotional Banner */}
+      <section className="promotional-banner-section">
+        <div className="container">
+          <PromotionalBanner
+            backgroundImage="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            headline="عروض حصرية على منتجات العناية الفاخرة"
+            subheading="وفري حتى 30% على مجموعات العناية المتكاملة والسيروم المتطور"
+            primaryButtonText="تسوقي الآن"
+            secondaryButtonText="اعرفي المزيد"
+            primaryButtonAction="/products"
+            secondaryButtonAction="/services"
+          />
+        </div>
+      </section>
+
+      {/* Top Sales */}
+      <section className="top-sales section">
+        <div className="container">
+          <div className="section-header text-center mb-3">
+            <h2>الأكثر مبيعاً</h2>
+            <p>اكتشفي منتجاتنا الأكثر شعبية وثقة من عميلاتنا</p>
+          </div>
+          <div className="products-grid grid-4">
+            {sampleProducts
+              .sort((a, b) => b.reviewsCount - a.reviewsCount)
+              .slice(0, 4)
+              .map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={(product) => {
+                    // Handle add to cart functionality
+                    console.log("Added to cart:", product.name);
+                  }}
+                />
+              ))}
+          </div>
+          <div className="text-center" style={{ marginTop: "2rem" }}>
+            <button
+              className="btn-primary"
+              onClick={() => navigate("/products")}
+            >
+              عرض جميع المنتجات
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Why Choose Us */}
       <section className="why-choose-us section">
         <div className="container">
           <div className="why-grid">
             <div className="why-heading text-right">
               <h2>لماذا تختاريننا؟</h2>
-              <p>نقدم لك تجربة فاخرة بمعايير طبية وتقنيات حديثة واهتمام شخصي.</p>
+              <p>
+                نقدم لك تجربة فاخرة بمعايير طبية وتقنيات حديثة واهتمام شخصي.
+              </p>
             </div>
             <div className="why-points">
               <ul>
