@@ -166,13 +166,15 @@ const LoginPage = ({ setCurrentUser }) => {
               </form>
 
               <div className="login-form-footer">
-                <p>ليس لديك حساب؟</p>
-                <button
-                  onClick={() => navigate("/register")}
-                  className="login-register-link"
-                >
-                  إنشاء حساب جديد
-                </button>
+                <p>
+                  ليس لديك حساب؟{" "}
+                  <button
+                    onClick={() => navigate("/register")}
+                    className="login-register-link"
+                  >
+                    إنشاء حساب جديد
+                  </button>
+                </p>
               </div>
             </div>
           </div>

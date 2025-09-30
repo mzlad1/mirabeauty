@@ -729,7 +729,7 @@
   }
   .hero-section {
     min-height: 480px;
-    padding: 40px 0;
+    /* padding: 40px 0; */
     background-position: center center;
     background-size: cover;
   }
@@ -764,14 +764,23 @@
     padding: 2rem 1.5rem;
   }
 
-  .cta-buttons {
-    flex-direction: column;
+  .cta-section {
+    min-height: 200px;
+    display: flex;
     align-items: center;
   }
 
+  .cta-buttons {
+    flex-direction: row;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
   .cta-buttons button {
-    width: 100%;
-    max-width: 300px;
+    width: auto;
+    padding: 12px 20px;
+    font-size: 1rem;
   }
 }
 
@@ -793,7 +802,7 @@
     font-size: 1rem;
   }
   .hero-section {
-    min-height: 500px;
+    min-height: 300px;
     background-position: center center;
     background-size: cover;
     display: flex;

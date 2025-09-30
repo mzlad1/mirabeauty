@@ -29,12 +29,8 @@
 
 /* Login Form Container */
 .login-page-form-container {
-  background-color: var(--white);
-  padding: 3rem;
-  border: 2px solid var(--border-color);
   width: 100%;
   max-width: 500px;
-  box-shadow: 0 8px 32px rgba(11, 34, 53, 0.1);
 }
 
 .login-form-header {
@@ -186,7 +182,7 @@
 /* Form Footer */
 .login-form-footer {
   text-align: center;
-  padding-top: 2rem;
+  padding-top: 1rem;
   border-top: 2px solid var(--border-color);
 }
 
@@ -215,7 +211,6 @@
   background: linear-gradient(135deg, var(--navy-blue) 0%, #0f2a5a 100%);
   color: var(--white);
   position: relative;
-  padding: 4rem 0;
 }
 
 .login-benefits::before {
@@ -368,7 +363,6 @@
   }
 
   .login-page-form-container {
-    padding: 2rem;
     max-width: 450px;
   }
 
@@ -396,9 +390,7 @@
 
 @media (max-width: 480px) {
   .login-page-form-container {
-    padding: 1.5rem;
     max-width: 100%;
-    margin: 0 1rem;
   }
 
   .login-form-header h2 {

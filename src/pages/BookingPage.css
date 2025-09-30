@@ -195,7 +195,6 @@
 .booking-page .page-header {
   background: linear-gradient(135deg, var(--navy-blue) 0%, #0f2a5a 100%);
   color: var(--white);
-  padding: 4rem 0;
 }
 
 .booking-page .page-header h1 {

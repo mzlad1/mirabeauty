@@ -1,12 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ProductsPage.css";
 import { sampleProducts } from "../data/sampleProducts";
+import CartOverlay from "../components/common/CartOverlay";
 
 const ProductsPage = ({ setCurrentPage }) => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cartItemsCount, setCartItemsCount] = useState(0);
+  const [cartItems, setCartItems] = useState([]);
 
   const categories = [
     { id: "all", name: "جميع المنتجات" },
@@ -19,6 +23,30 @@ const ProductsPage = ({ setCurrentPage }) => {
     { id: "sunscreen", name: "واقي الشمس" },
     { id: "body-care", name: "العناية بالجسم" },
   ];
+
+  useEffect(() => {
+    updateCartData();
+
+    const handleCartUpdate = () => {
+      updateCartData();
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdate);
+    return () => window.removeEventListener("cartUpdated", handleCartUpdate);
+  }, []);
+
+  const updateCartData = () => {
+    const savedCart = localStorage.getItem("cartItems");
+    if (savedCart) {
+      const items = JSON.parse(savedCart);
+      setCartItems(items);
+      const totalCount = items.reduce((sum, item) => sum + item.quantity, 0);
+      setCartItemsCount(totalCount);
+    } else {
+      setCartItems([]);
+      setCartItemsCount(0);
+    }
+  };
 
   const filteredProducts =
     selectedCategory === "all"
@@ -79,6 +107,22 @@ const ProductsPage = ({ setCurrentPage }) => {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              {/* Cart Section */}
+              <div className="cart-section">
+                <div
+                  className="cart-header"
+                  onClick={() => setIsCartOpen(true)}
+                >
+                  <div className="cart-icon-container">
+                    <i className="fas fa-shopping-cart"></i>
+                    {cartItemsCount > 0 && (
+                      <span className="cart-badge">{cartItemsCount}</span>
+                    )}
+                  </div>
+                  <h3>سلة التسوق</h3>
+                </div>
               </div>
             </aside>
 
@@ -143,9 +187,6 @@ const ProductsPage = ({ setCurrentPage }) => {
                     </div>
 
                     <div className="product-info">
-                      <div className="product-category">
-                        {product.categoryName}
-                      </div>
                       <h3>{product.name}</h3>
                       {/* <p className="product-description">
                         {product.description}
@@ -217,6 +258,9 @@ const ProductsPage = ({ setCurrentPage }) => {
           </div>
         </div>
       )}
+
+      {/* Cart Overlay */}
+      <CartOverlay isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </div>
   );
 };

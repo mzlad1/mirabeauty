@@ -146,15 +146,12 @@ const RegisterPage = ({ setCurrentUser }) => {
             {/* Registration Form */}
             <div className="register-form-container">
               <div className="form-header">
-                <h2>معلوماتك الشخصية</h2>
+                <h2>إنشاء حساب</h2>
                 <p>املئي البيانات التالية لإنشاء حسابك</p>
               </div>
 
               <form onSubmit={handleSubmit} className="register-form">
-                {/* Personal Information */}
                 <div className="form-section">
-                  <h3>المعلومات الأساسية</h3>
-
                   <div className="form-group">
                     <label htmlFor="name" className="form-label">
                       الاسم الكامل *
@@ -234,11 +231,6 @@ const RegisterPage = ({ setCurrentUser }) => {
                       <span className="field-error">{errors.birthDate}</span>
                     )}
                   </div>
-                </div>
-
-                {/* Account Security */}
-                <div className="form-section">
-                  <h3>أمان الحساب</h3>
 
                   <div className="form-row">
                     <div className="form-group">
@@ -285,11 +277,6 @@ const RegisterPage = ({ setCurrentUser }) => {
                       )}
                     </div>
                   </div>
-                </div>
-
-                {/* Beauty Profile */}
-                <div className="form-section">
-                  <h3>ملف العناية بالجمال</h3>
 
                   <div className="form-group">
                     <label htmlFor="skinType" className="form-label">
@@ -331,37 +318,36 @@ const RegisterPage = ({ setCurrentUser }) => {
                       disabled={loading}
                     />
                   </div>
-                </div>
 
-                {/* Terms and Conditions */}
-                <div className="form-group">
-                  <label
-                    className={`terms-checkbox ${
-                      errors.agreeToTerms ? "error" : ""
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      name="agreeToTerms"
-                      checked={formData.agreeToTerms}
-                      onChange={handleInputChange}
-                      disabled={loading}
-                    />
-                    <span className="checkmark"></span>
-                    <span className="terms-text">
-                      أوافق على{" "}
-                      <button type="button" className="terms-link">
-                        الشروط والأحكام
-                      </button>{" "}
-                      و
-                      <button type="button" className="terms-link">
-                        سياسة الخصوصية
-                      </button>
-                    </span>
-                  </label>
-                  {errors.agreeToTerms && (
-                    <span className="field-error">{errors.agreeToTerms}</span>
-                  )}
+                  <div className="form-group">
+                    <label
+                      className={`terms-checkbox ${
+                        errors.agreeToTerms ? "error" : ""
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        name="agreeToTerms"
+                        checked={formData.agreeToTerms}
+                        onChange={handleInputChange}
+                        disabled={loading}
+                      />
+                      <span className="checkmark"></span>
+                      <span className="terms-text">
+                        أوافق على{" "}
+                        <button type="button" className="terms-link">
+                          الشروط والأحكام
+                        </button>{" "}
+                        و
+                        <button type="button" className="terms-link">
+                          سياسة الخصوصية
+                        </button>
+                      </span>
+                    </label>
+                    {errors.agreeToTerms && (
+                      <span className="field-error">{errors.agreeToTerms}</span>
+                    )}
+                  </div>
                 </div>
 
                 <button

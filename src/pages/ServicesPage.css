@@ -5,7 +5,6 @@
   background: linear-gradient(135deg, var(--navy-blue) 0%, #0f2a5a 100%);
   color: var(--white);
   position: relative;
-  padding: 4rem 0;
 }
 
 .services-page-why-choose::before {

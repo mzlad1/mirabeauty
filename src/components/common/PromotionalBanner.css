@@ -209,7 +209,7 @@
 
 @media (max-width: 480px) {
   .promotional-banner {
-    height: 300px;
+    height: 200px;
     margin: 1rem 0;
   }
 
@@ -228,15 +228,17 @@
   }
 
   .promotional-banner-actions {
-    flex-direction: column;
-    gap: 0.625rem;
+    flex-direction: row;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
   }
 
   .promotional-banner-btn {
-    width: 100%;
-    max-width: 200px;
+    width: auto;
     padding: 12px 16px;
     font-size: 0.875rem;
+    min-width: 100px;
   }
 }
 

@@ -1,39 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import CartOverlay from "./CartOverlay";
 import "./Navigation.css";
 
 const Navigation = ({ currentUser, setCurrentUser }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [cartItemsCount, setCartItemsCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
-
-  useEffect(() => {
-    updateCartCount();
-
-    const handleCartUpdate = () => {
-      updateCartCount();
-    };
-
-    window.addEventListener("cartUpdated", handleCartUpdate);
-    return () => window.removeEventListener("cartUpdated", handleCartUpdate);
-  }, []);
-
-  const updateCartCount = () => {
-    const savedCart = localStorage.getItem("cartItems");
-    if (savedCart) {
-      const cartItems = JSON.parse(savedCart);
-      const totalCount = cartItems.reduce(
-        (sum, item) => sum + item.quantity,
-        0
-      );
-      setCartItemsCount(totalCount);
-    } else {
-      setCartItemsCount(0);
-    }
-  };
 
   const handleLogout = () => {
     setCurrentUser(null);
@@ -110,14 +82,6 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
             </button>
           </li>
         </ul>
-
-        {/* Cart Icon */}
-        <div className="cart-icon" onClick={() => setIsCartOpen(true)}>
-          <i className="fas fa-shopping-cart"></i>
-          {cartItemsCount > 0 && (
-            <span className="cart-badge">{cartItemsCount}</span>
-          )}
-        </div>
 
         {/* User Actions */}
         <div className="nav-actions">
@@ -205,9 +169,6 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
-
-      {/* Cart Overlay */}
-      <CartOverlay isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </nav>
   );
 };
