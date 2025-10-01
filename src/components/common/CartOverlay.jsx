@@ -2,22 +2,40 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CartOverlay.css";
 
-const CartOverlay = ({ isOpen, onClose }) => {
+const CartOverlay = ({ isOpen, onClose, fromAddToCart = false }) => {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
+  const [recentlyAddedId, setRecentlyAddedId] = useState(null);
 
   useEffect(() => {
     if (isOpen) {
       loadCartItems();
       document.body.style.overflow = "hidden";
+
+      // If opened from add-to-cart, find the most recently updated item
+      if (fromAddToCart) {
+        const savedCart = localStorage.getItem("cartItems");
+        if (savedCart) {
+          const items = JSON.parse(savedCart);
+          // Assume the last modified item is the recently added one
+          // In a real app, you'd track timestamps or pass the specific item ID
+          if (items.length > 0) {
+            const lastItem = items[items.length - 1];
+            setRecentlyAddedId(lastItem.id);
+            // Clear the highlight after animation
+            setTimeout(() => setRecentlyAddedId(null), 2000);
+          }
+        }
+      }
     } else {
       document.body.style.overflow = "unset";
+      setRecentlyAddedId(null);
     }
 
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
+  }, [isOpen, fromAddToCart]);
 
   useEffect(() => {
     const handleCartUpdate = () => {
@@ -78,7 +96,9 @@ const CartOverlay = ({ isOpen, onClose }) => {
   return (
     <>
       <div className="cart-overlay-backdrop" onClick={onClose} />
-      <div className="cart-overlay">
+      <div
+        className={`cart-overlay ${fromAddToCart ? "from-add-to-cart" : ""}`}
+      >
         <div className="cart-overlay-header">
           <h3>سلة التسوق</h3>
           <button className="cart-overlay-close" onClick={onClose}>
@@ -96,7 +116,12 @@ const CartOverlay = ({ isOpen, onClose }) => {
             <>
               <div className="cart-overlay-items">
                 {cartItems.slice(0, 3).map((item) => (
-                  <div key={item.id} className="cart-overlay-item">
+                  <div
+                    key={item.id}
+                    className={`cart-overlay-item ${
+                      recentlyAddedId === item.id ? "recently-added" : ""
+                    }`}
+                  >
                     <div
                       className="cart-overlay-item-image clickable"
                       onClick={() => {

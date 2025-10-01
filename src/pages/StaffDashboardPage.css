@@ -590,6 +590,7 @@
   font-size: 0.875rem;
   font-weight: 600;
   transition: all 0.3s ease;
+  border-radius: 20px;
 }
 
 .staff-dashboard .action-btn.confirm {
@@ -647,7 +648,7 @@
 }
 
 .staff-dashboard .customer-card:hover {
-  border-color: var(--navy-blue);
+  border-color: var(--gold);
   transform: translateY(-3px);
 }
 
@@ -975,7 +976,7 @@
   }
 
   .staff-dashboard .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   .staff-dashboard .stat-card {
@@ -997,7 +998,7 @@
   }
 
   .performance-stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   .feedback-header {

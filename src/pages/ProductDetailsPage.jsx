@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import "./ProductDetailsPage.css";
 import { sampleProducts } from "../data/sampleProducts";
 import CartOverlay from "../components/common/CartOverlay";
+import ProductCard from "../components/customer/ProductCard";
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
@@ -14,6 +15,8 @@ const ProductDetailsPage = () => {
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItemsCount, setCartItemsCount] = useState(0);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [cartOpenedFromAdd, setCartOpenedFromAdd] = useState(false);
 
   useEffect(() => {
     const foundProduct = sampleProducts.find((p) => p.id === parseInt(id));
@@ -76,7 +79,9 @@ const ProductDetailsPage = () => {
   };
 
   const handleAddToCart = () => {
-    if (product && product.inStock) {
+    if (product && product.inStock && !isAddingToCart) {
+      setIsAddingToCart(true);
+
       const savedCart = localStorage.getItem("cartItems");
       const cartItems = savedCart ? JSON.parse(savedCart) : [];
 
@@ -100,6 +105,13 @@ const ProductDetailsPage = () => {
         `تم إضافة ${quantity} من ${product.name} للسلة بنجاح`,
         "success"
       );
+
+      // Reset button state and open cart with smooth transition
+      setTimeout(() => {
+        setIsAddingToCart(false);
+        setCartOpenedFromAdd(true);
+        setIsCartOpen(true);
+      }, 800);
     }
   };
 
@@ -148,7 +160,10 @@ const ProductDetailsPage = () => {
             <div className="breadcrumb-cart-section">
               <div
                 className="breadcrumb-cart-header"
-                onClick={() => setIsCartOpen(true)}
+                onClick={() => {
+                  setCartOpenedFromAdd(false);
+                  setIsCartOpen(true);
+                }}
               >
                 <div className="breadcrumb-cart-icon-container">
                   <i className="fas fa-shopping-cart"></i>
@@ -273,13 +288,20 @@ const ProductDetailsPage = () => {
                 <button
                   className={`product-details-add-to-cart-btn ${
                     !product.inStock ? "disabled" : ""
-                  }`}
+                  } ${isAddingToCart ? "adding" : ""}`}
                   onClick={handleAddToCart}
-                  disabled={!product.inStock}
+                  disabled={!product.inStock || isAddingToCart}
                 >
-                  {product.inStock
-                    ? `أضف للسلة - ${product.price}`
-                    : "غير متوفر"}
+                  {isAddingToCart ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin"></i>
+                      <span>جاري الإضافة...</span>
+                    </>
+                  ) : product.inStock ? (
+                    `أضف للسلة - ${product.price}`
+                  ) : (
+                    "غير متوفر"
+                  )}
                 </button>
               </div>
 
@@ -429,8 +451,11 @@ const ProductDetailsPage = () => {
       {/* Related Products */}
       <section className="product-details-related-products section">
         <div className="container">
-          <h2>منتجات مشابهة</h2>
-          <div className="product-details-related-products-grid">
+          <div className="section-header text-center mb-3">
+            <h2>منتجات مشابهة</h2>
+            <p>اكتشفي منتجات أخرى قد تعجبك</p>
+          </div>
+          <div className="products-grid grid-4">
             {(() => {
               // First try to get products from same category
               let relatedProducts = sampleProducts.filter((p) => {
@@ -449,28 +474,44 @@ const ProductDetailsPage = () => {
               }
 
               return relatedProducts.slice(0, 4).map((relatedProduct) => (
-                <div
+                <ProductCard
                   key={relatedProduct.id}
-                  className="product-details-related-product-card"
-                  onClick={() => navigate(`/products/${relatedProduct.id}`)}
-                >
-                  <div className="product-details-related-product-image">
-                    <img src={relatedProduct.image} alt={relatedProduct.name} />
-                  </div>
-                  <div className="product-details-related-product-info">
-                    <h4>{relatedProduct.name}</h4>
-                    <div className="product-details-related-product-price">
-                      <span className="product-details-related-current-price">
-                        {relatedProduct.price}
-                      </span>
-                      {relatedProduct.originalPrice && (
-                        <span className="product-details-related-original-price">
-                          {relatedProduct.originalPrice}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                  product={relatedProduct}
+                  onAddToCart={(product) => {
+                    // Handle add to cart for related products
+                    const savedCart = localStorage.getItem("cartItems");
+                    const cartItems = savedCart ? JSON.parse(savedCart) : [];
+
+                    const existingItem = cartItems.find(
+                      (item) => item.id === product.id
+                    );
+                    let updatedCart;
+
+                    if (existingItem) {
+                      updatedCart = cartItems.map((item) =>
+                        item.id === product.id
+                          ? { ...item, quantity: item.quantity + 1 }
+                          : item
+                      );
+                      showToast(
+                        `تم زيادة كمية ${product.name} في السلة`,
+                        "success"
+                      );
+                    } else {
+                      updatedCart = [...cartItems, { ...product, quantity: 1 }];
+                      showToast(
+                        `تم إضافة ${product.name} للسلة بنجاح`,
+                        "success"
+                      );
+                    }
+
+                    localStorage.setItem(
+                      "cartItems",
+                      JSON.stringify(updatedCart)
+                    );
+                    window.dispatchEvent(new Event("cartUpdated"));
+                  }}
+                />
               ));
             })()}
           </div>
@@ -492,7 +533,14 @@ const ProductDetailsPage = () => {
       )}
 
       {/* Cart Overlay */}
-      <CartOverlay isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <CartOverlay
+        isOpen={isCartOpen}
+        onClose={() => {
+          setIsCartOpen(false);
+          setCartOpenedFromAdd(false);
+        }}
+        fromAddToCart={cartOpenedFromAdd}
+      />
     </div>
   );
 };

@@ -3,7 +3,7 @@
 /* Overview Actions within Tab Header */
 .admin-dashboard .tab-header .overview-actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   align-items: center;
 }
 
@@ -101,6 +101,7 @@
   background-color: var(--white);
   border: 2px solid var(--border-color);
   min-height: 600px;
+  margin-bottom: 1rem;
 }
 
 .tab-content {
@@ -127,6 +128,7 @@
   margin: 0;
   padding: 0;
   border: none;
+  font-size: 1.3rem;
 }
 
 /* Statistics Grid */
@@ -465,6 +467,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   transition: all 0.3s ease;
+  border-radius: 20px;
 }
 
 .action-btn.edit {
@@ -579,6 +582,7 @@
   flex: 1;
   padding: 8px 12px;
   text-align: center;
+  border-radius: 20px;
 }
 
 /* Staff Grid */
@@ -780,8 +784,6 @@
 
 .settings-section {
   background-color: var(--white);
-  padding: 2rem;
-  border: 2px solid var(--border-color);
 }
 
 .settings-section h3 {
@@ -793,12 +795,10 @@
 
 .settings-form {
   display: grid;
-  gap: 1rem;
 }
 
 .settings-form .form-group {
   display: grid;
-  gap: 0.5rem;
 }
 
 .settings-form .form-group label {
@@ -879,7 +879,7 @@
   }
 
   .today-stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   .actions-grid {
@@ -919,7 +919,7 @@
   }
 
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   .stat-card {
@@ -930,7 +930,7 @@
   }
 
   .actions-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   .today-overview {
@@ -948,8 +948,122 @@
   .services-table td {
     padding: 0.75rem;
   }
+}
+/* Tables */
+.appointments-table,
+.services-table {
+  width: 100%;
+  background-color: var(--white);
+  border: 2px solid var(--border-color);
+  overflow-x: auto;
+}
 
-  .settings-section {
-    padding: 1.5rem;
+.appointments-table table,
+.services-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.appointments-table th,
+.services-table th,
+.appointments-table td,
+.services-table td {
+  padding: 1rem;
+  text-align: right;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.appointments-table th,
+.services-table th {
+  background-color: var(--navy-blue);
+  color: var(--white);
+  font-weight: 600;
+}
+
+/* Responsive Tables - Mobile Card Layout */
+@media (max-width: 768px) {
+  .appointments-table,
+  .services-table {
+    border: none;
+    overflow-x: visible;
+  }
+
+  .appointments-table table,
+  .services-table table {
+    border: none;
+  }
+
+  /* Hide table headers */
+  .appointments-table thead,
+  .services-table thead {
+    display: none;
+  }
+
+  /* Display table body as blocks */
+  .appointments-table tbody,
+  .services-table tbody,
+  .appointments-table tr,
+  .services-table tr {
+    display: block;
+  }
+
+  /* Style each row as a card */
+  .appointments-table tr,
+  .services-table tr {
+    margin-bottom: 1rem;
+    border: 2px solid var(--border-color);
+    background-color: var(--white);
+    padding: 1rem;
+  }
+
+  .appointments-table tr:last-child,
+  .services-table tr:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Display cells as flex items with labels */
+  .appointments-table td,
+  .services-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+  }
+
+  .appointments-table td:last-child,
+  .services-table td:last-child {
+    border-bottom: none;
+  }
+
+  /* Add labels to cells using data attributes */
+  .appointments-table td::before,
+  .services-table td::before {
+    font-weight: 600;
+    color: var(--navy-blue);
+    margin-left: 1rem;
+    flex-shrink: 0;
+  }
+
+  /* Adjust specific cell content alignment */
+  .appointments-table td > *,
+  .services-table td > * {
+    text-align: left;
+  }
+
+  /* Make action buttons stack better on mobile */
+  .appointments-table .table-actions,
+  .services-table .table-actions {
+    flex-direction: row;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* Adjust customer info for mobile */
+  .appointments-table .customer-info,
+  .services-table .customer-info {
+    text-align: left;
   }
 }

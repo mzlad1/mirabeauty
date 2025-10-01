@@ -182,7 +182,6 @@
 .user-details {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
 }
 
 .user-name {
@@ -381,7 +380,6 @@
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    left: 2rem;
     background-color: var(--white);
     padding: 1rem;
     border-top: 2px solid var(--border-color);

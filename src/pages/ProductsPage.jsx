@@ -11,6 +11,7 @@ const ProductsPage = ({ setCurrentPage }) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItemsCount, setCartItemsCount] = useState(0);
   const [cartItems, setCartItems] = useState([]);
+  const [cartOpenedFromAdd, setCartOpenedFromAdd] = useState(false);
 
   const categories = [
     { id: "all", name: "جميع المنتجات" },
@@ -74,6 +75,12 @@ const ProductsPage = ({ setCurrentPage }) => {
 
     localStorage.setItem("cartItems", JSON.stringify(updatedCart));
     window.dispatchEvent(new Event("cartUpdated"));
+
+    // Open cart overlay after adding item with animation flag
+    setTimeout(() => {
+      setCartOpenedFromAdd(true);
+      setIsCartOpen(true);
+    }, 500);
   };
 
   const showToast = (message, type) => {
@@ -85,7 +92,43 @@ const ProductsPage = ({ setCurrentPage }) => {
 
   return (
     <div className="products-page">
-      {/* New Top Header: Category Filter */}
+      {/* Breadcrumb with Cart Icon */}
+      <section className="products-breadcrumb-section">
+        <div className="container">
+          <div className="breadcrumb-container">
+            <nav className="products-breadcrumb">
+              <button
+                onClick={() => navigate("/")}
+                className="products-breadcrumb-link"
+              >
+                الرئيسية
+              </button>
+              <span className="products-breadcrumb-separator">/</span>
+              <span className="products-breadcrumb-current">المنتجات</span>
+            </nav>
+
+            {/* Cart Icon */}
+            <div className="breadcrumb-cart-section">
+              <div
+                className="breadcrumb-cart-header"
+                onClick={() => {
+                  setCartOpenedFromAdd(false);
+                  setIsCartOpen(true);
+                }}
+              >
+                <div className="breadcrumb-cart-icon-container">
+                  <i className="fas fa-shopping-cart"></i>
+                  {cartItemsCount > 0 && (
+                    <span className="breadcrumb-cart-badge">
+                      {cartItemsCount}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Products Content */}
       <section className="products-content section">
@@ -244,7 +287,14 @@ const ProductsPage = ({ setCurrentPage }) => {
       )}
 
       {/* Cart Overlay */}
-      <CartOverlay isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <CartOverlay
+        isOpen={isCartOpen}
+        onClose={() => {
+          setIsCartOpen(false);
+          setCartOpenedFromAdd(false);
+        }}
+        fromAddToCart={cartOpenedFromAdd}
+      />
     </div>
   );
 };

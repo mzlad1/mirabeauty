@@ -466,6 +466,30 @@
   box-shadow: 0 2px 8px rgba(149, 165, 166, 0.2);
 }
 
+.product-details-add-to-cart-btn.adding {
+  background: linear-gradient(135deg, var(--gold) 0%, #d4a843 100%);
+  transform: scale(0.98);
+  cursor: wait;
+}
+
+.product-details-add-to-cart-btn.adding i {
+  margin-left: 8px;
+  animation: spin 1s linear infinite;
+}
+
+.product-details-add-to-cart-btn.adding span {
+  display: inline-block;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Product Features */
 .product-details-features {
   display: flex;

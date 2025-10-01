@@ -489,8 +489,6 @@
 /* Settings Section */
 .settings-section {
   background-color: #f9f8f7;
-  padding: 2rem;
-  border: 2px solid var(--border-color);
 }
 
 .section-header {
@@ -519,13 +517,10 @@
 
 .settings-form {
   display: grid;
-  gap: 1.5rem;
 }
 
 .settings-form .form-group {
   background-color: var(--white);
-  padding: 1.25rem;
-  border: 2px solid var(--border-color);
 }
 
 .settings-form .form-label {
@@ -608,7 +603,7 @@
 
   .profile-nav {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(1, 1fr);
   }
 
   .nav-item {
@@ -700,14 +695,10 @@
   }
 
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   .stat-card {
-    padding: 1rem;
-  }
-
-  .settings-section {
     padding: 1rem;
   }
 
