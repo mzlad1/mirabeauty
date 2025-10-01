@@ -108,22 +108,6 @@ const ProductsPage = ({ setCurrentPage }) => {
                   ))}
                 </select>
               </div>
-
-              {/* Cart Section */}
-              <div className="cart-section">
-                <div
-                  className="cart-header"
-                  onClick={() => setIsCartOpen(true)}
-                >
-                  <div className="cart-icon-container">
-                    <i className="fas fa-shopping-cart"></i>
-                    {cartItemsCount > 0 && (
-                      <span className="cart-badge">{cartItemsCount}</span>
-                    )}
-                  </div>
-                  <h3>سلة التسوق</h3>
-                </div>
-              </div>
             </aside>
 
             {/* Products Grid */}

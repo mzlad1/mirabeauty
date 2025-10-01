@@ -159,7 +159,7 @@ const ServicesPage = () => {
                         {service.description}
                       </p>
 
-                      <div className="services-page-rating">
+                      {/* <div className="services-page-rating">
                         <div className="services-page-stars">
                           {"⭐".repeat(Math.floor(service.rating || 5))}
                         </div>
@@ -178,7 +178,7 @@ const ServicesPage = () => {
                             {service.originalPrice}
                           </span>
                         )}
-                      </div>
+                      </div> */}
 
                       <div className="services-page-actions">
                         <button

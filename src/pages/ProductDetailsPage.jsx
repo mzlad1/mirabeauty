@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./ProductDetailsPage.css";
 import { sampleProducts } from "../data/sampleProducts";
+import CartOverlay from "../components/common/CartOverlay";
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
@@ -11,6 +12,8 @@ const ProductDetailsPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cartItemsCount, setCartItemsCount] = useState(0);
 
   useEffect(() => {
     const foundProduct = sampleProducts.find((p) => p.id === parseInt(id));
@@ -42,6 +45,28 @@ const ProductDetailsPage = () => {
       });
     }
   }, [id]);
+
+  useEffect(() => {
+    updateCartData();
+
+    const handleCartUpdate = () => {
+      updateCartData();
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdate);
+    return () => window.removeEventListener("cartUpdated", handleCartUpdate);
+  }, []);
+
+  const updateCartData = () => {
+    const savedCart = localStorage.getItem("cartItems");
+    if (savedCart) {
+      const items = JSON.parse(savedCart);
+      const totalCount = items.reduce((sum, item) => sum + item.quantity, 0);
+      setCartItemsCount(totalCount);
+    } else {
+      setCartItemsCount(0);
+    }
+  };
 
   const showToast = (message, type) => {
     setToast({ show: true, message, type });
@@ -98,25 +123,44 @@ const ProductDetailsPage = () => {
       {/* Breadcrumb */}
       <section className="product-details-breadcrumb-section">
         <div className="container">
-          <nav className="product-details-breadcrumb">
-            <button
-              onClick={() => navigate("/")}
-              className="product-details-breadcrumb-link"
-            >
-              الرئيسية
-            </button>
-            <span className="product-details-breadcrumb-separator">/</span>
-            <button
-              onClick={() => navigate("/products")}
-              className="product-details-breadcrumb-link"
-            >
-              المنتجات
-            </button>
-            <span className="product-details-breadcrumb-separator">/</span>
-            <span className="product-details-breadcrumb-current">
-              {product.name}
-            </span>
-          </nav>
+          <div className="breadcrumb-container">
+            <nav className="product-details-breadcrumb">
+              <button
+                onClick={() => navigate("/")}
+                className="product-details-breadcrumb-link"
+              >
+                الرئيسية
+              </button>
+              <span className="product-details-breadcrumb-separator">/</span>
+              <button
+                onClick={() => navigate("/products")}
+                className="product-details-breadcrumb-link"
+              >
+                المنتجات
+              </button>
+              <span className="product-details-breadcrumb-separator">/</span>
+              <span className="product-details-breadcrumb-current">
+                {product.name}
+              </span>
+            </nav>
+
+            {/* Cart Icon */}
+            <div className="breadcrumb-cart-section">
+              <div
+                className="breadcrumb-cart-header"
+                onClick={() => setIsCartOpen(true)}
+              >
+                <div className="breadcrumb-cart-icon-container">
+                  <i className="fas fa-shopping-cart"></i>
+                  {cartItemsCount > 0 && (
+                    <span className="breadcrumb-cart-badge">
+                      {cartItemsCount}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -446,6 +490,9 @@ const ProductDetailsPage = () => {
           </div>
         </div>
       )}
+
+      {/* Cart Overlay */}
+      <CartOverlay isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </div>
   );
 };

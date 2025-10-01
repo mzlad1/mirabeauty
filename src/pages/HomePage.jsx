@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
 import { sampleServices } from "../data/sampleServices";
@@ -9,10 +9,43 @@ import ProductCard from "../components/customer/ProductCard";
 
 const HomePage = () => {
   const navigate = useNavigate();
+
+  // Hero carousel images
+  const heroImages = [
+    "https://lasermedicalclinic.com/wp-content/uploads/2024/04/laser-hair-removal-time-between-sessions.png",
+    "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  ];
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Auto-slide functionality
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 5000); // Change image every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
+
   return (
     <div className="homepage">
       {/* Hero Section */}
       <section className="hero-section">
+        <div className="hero-carousel">
+          {heroImages.map((image, index) => (
+            <div
+              key={index}
+              className={`hero-slide ${
+                index === currentImageIndex ? "active" : ""
+              }`}
+              style={{ backgroundImage: `url(${image})` }}
+            />
+          ))}
+        </div>
+        <div className="hero-overlay"></div>
         <div className="container">
           <div className="hero-content">
             <div className="hero-text text-right">
@@ -32,6 +65,48 @@ const HomePage = () => {
             </div>
           </div>
         </div>
+
+        {/* Carousel Indicators */}
+        <div className="hero-indicators">
+          {heroImages.map((_, index) => (
+            <button
+              key={index}
+              className={`indicator ${
+                index === currentImageIndex ? "active" : ""
+              }`}
+              onClick={() => setCurrentImageIndex(index)}
+              aria-label={`Slide ${index + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Navigation Arrows */}
+        <button
+          className="hero-nav prev"
+          onClick={() =>
+            setCurrentImageIndex(
+              currentImageIndex === heroImages.length - 1
+                ? 0
+                : currentImageIndex + 1
+            )
+          }
+          aria-label="Previous slide"
+        >
+          &#8250;
+        </button>
+        <button
+          className="hero-nav next"
+          onClick={() =>
+            setCurrentImageIndex(
+              currentImageIndex === 0
+                ? heroImages.length - 1
+                : currentImageIndex - 1
+            )
+          }
+          aria-label="Next slide"
+        >
+          &#8249;
+        </button>
       </section>
 
       {/* Featured Services */}
