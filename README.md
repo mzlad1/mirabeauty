@@ -2,7 +2,7 @@
 
 MiraBeauty is a modern beauty salon and e-commerce web application. It offers a seamless experience for customers, staff, and administrators, featuring online booking, product shopping, user profiles, and dashboards.
 
-## Features 
+## Features
 
 ### 1. User Authentication
 - Register and login for customers and staff
@@ -82,9 +82,12 @@ MiraBeauty is a modern beauty salon and e-commerce web application. It offers a 
 - Modify styles in `src/styles/`
 - Add or edit components in `src/components/`
 
-## Deployment
-- Ready for deployment on Vercel (see `vercel.json`)
+## Performance Targets
+- First Contentful Paint: < 1.5s
+- Time to Interactive: < 3.0s
+- Lighthouse Performance Score: > 90
+- Bundle size: < 250KB (gzipped)
 
 ---
 
-**MiraBeauty** — A complete solution for beauty salons and online beauty product sales.
+This technical documentation provides developers with the necessary information to understand and implement the MiraBeauty system. It includes data models, component architecture, API specifications, and performance requirements.
