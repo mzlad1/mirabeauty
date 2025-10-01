@@ -1,196 +1,90 @@
-# Mira Beauty Clinic
+# MiraBeauty
 
-موقع ويب فاخر لمركز الليزر والعناية بالبشرة مصمم خصيصاً للنساء 
+MiraBeauty is a modern beauty salon and e-commerce web application. It offers a seamless experience for customers, staff, and administrators, featuring online booking, product shopping, user profiles, and dashboards.
 
-## 🌟 المميزات
+## Features
 
-- **تصميم فاخر وأنيق** مع ألوان وردية وذهبية وأنيقة
-- **دعم كامل للغة العربية** مع تخطيط من اليمين إلى اليسار (RTL)
-- **واجهة مستخدم متجاوبة** تعمل على جميع الأجهزة
-- **لوحة تحكم إدارية شاملة** لإدارة جميع جوانب المركز
-- **نظام حجز متقدم** مع واجهة سهلة الاستخدام
-- **إدارة المنتجات والخدمات** مع عروض وخصومات
-- **نظام تقييمات العملاء** مع إدارة التقييمات
+### 1. User Authentication
+- Register and login for customers and staff
+- Secure authentication with local storage
+- Account settings and profile management
 
-## 🚀 التقنيات المستخدمة
+### 2. Customer Experience
+- **Home Page:** Promotional banners, featured products, and services
+- **Booking:** Book appointments for beauty services with date/time selection
+- **Product Shopping:** Browse, view details, and add products to cart
+- **Cart:** Overlay and dedicated cart page for managing purchases
+- **Booking History:** View past and upcoming appointments
+- **Testimonials:** Customer reviews and feedback
+- **FAQ:** Frequently asked questions
 
-- **React 18** - مكتبة واجهة المستخدم
-- **Vite** - أداة البناء السريعة
-- **React Router** - إدارة التنقل بين الصفحات
-- **CSS3** - التصميم والتنسيق
-- **HTML5** - هيكل الصفحات
+### 3. Staff & Admin Dashboards
+- **Admin Dashboard:**
+  - View and manage all appointments
+  - Customer management
+  - Statistics and analytics cards
+- **Staff Dashboard:**
+  - View assigned appointments
+  - Access to customer details
 
-## 📱 الصفحات المتاحة
+### 4. Product & Service Management
+- Product and service cards with details
+- Responsive product and service listing pages
+- Product details page with add-to-cart functionality
 
-### صفحات العملاء
+### 5. Common Components
+- Header and navigation bar
+- Footer with contact and social links
+- Loading spinner for async actions
+- Responsive promotional banners
 
-- **الرئيسية** (`/`) - الصفحة الرئيسية مع عرض الخدمات والعروض
-- **الخدمات** (`/services`) - عرض جميع خدمات المركز
-- **الحجز** (`/booking`) - نظام حجز الجلسات
-- **المنتجات** (`/products`) - عرض منتجات العناية بالبشرة
-- **الأسئلة الشائعة** (`/faq`) - إجابات على الأسئلة الشائعة
-- **حسابي** (`/account`) - إدارة حساب العميلة
-  - نظرة عامة (`/account/overview`)
-  - السجل (`/account/history`)
-  - الإعدادات (`/account/settings`)
-  - التقييمات (`/account/feedback`)
+### 6. Responsive Design
+- Fully responsive layout for desktop, tablet, and mobile
+- RTL (Right-to-Left) support for languages like Arabic
+- Custom fonts and modern UI
 
-### لوحة التحكم الإدارية
+### 7. Utilities & Helpers
+- Local storage hooks for persistent state
+- Date helpers for formatting and calculations
+- Constants for configuration
 
-- **لوحة التحكم** (`/admin`) - نظرة عامة على الإحصائيات
-- **إدارة الحجوزات** (`/admin/bookings`) - عرض وإدارة الحجوزات
-- **إدارة الخدمات** (`/admin/services`) - إدارة خدمات المركز
-- **إدارة الغرف** (`/admin/rooms`) - إدارة غرف العلاج
-- **إدارة الموظفين** (`/admin/staff`) - إدارة فريق العمل
-- **إدارة المنتجات** (`/admin/products`) - إدارة منتجات المركز
-- **إدارة العروض** (`/admin/discounts`) - إدارة الخصومات والعروض
-- **إدارة الأسئلة الشائعة** (`/admin/faq`) - إدارة الأسئلة والإجابات
-- **إدارة التقييمات** (`/admin/feedback`) - مراجعة تقييمات العملاء
-- **إعدادات النظام** (`/admin/settings`) - إعدادات المركز والنظام
+## Project Structure
 
-## 🎨 التصميم
+- `src/components/` — Reusable UI components (auth, common, customer, dashboard, profile)
+- `src/pages/` — Main pages (Home, Booking, Products, Cart, Profile, Admin/Staff Dashboards, FAQ)
+- `src/data/` — Sample data for products, services, users, etc.
+- `src/hooks/` — Custom React hooks
+- `src/utils/` — Utility functions (auth, date helpers, constants)
+- `src/styles/` — Global, responsive, RTL, and variable CSS
+- `public/` — Static assets (fonts, images)
 
-### نظام الألوان
+## Getting Started
 
-- **الوردي الأساسي**: `#f8b5c1`
-- **الوردي الفاتح**: `#fce4e8`
-- **الذهبي**: `#d4af37`
-- **الذهبي الفاتح**: `#f4e4bc`
-- **الأسود الأنيق**: `#2c2c2c`
-- **الأسود الفاتح**: `#4a4a4a`
-- **الأبيض**: `#ffffff`
-
-### الخطوط
-
-- **خط القاهرة (Cairo)** - خط عربي أنيق وواضح
-
-## 🛠️ التثبيت والتشغيل
-
-### المتطلبات
-
-- Node.js (الإصدار 16 أو أحدث)
-- npm أو yarn
-
-### خطوات التثبيت
-
-1. **استنساخ المشروع**
-
-   ```bash
-   git clone <repository-url>
-   cd luxury-laser-center
-   ```
-
-2. **تثبيت التبعيات**
-
-   ```bash
+1. **Install dependencies:**
+   ```sh
    npm install
    ```
-
-3. **تشغيل المشروع في وضع التطوير**
-
-   ```bash
+2. **Run the development server:**
+   ```sh
    npm run dev
    ```
+3. **Open in browser:**
+   Visit [http://localhost:5173](http://localhost:5173)
 
-4. **فتح المتصفح**
-   ```
-   http://localhost:3000
-   ```
+## Tech Stack
+- React (Vite)
+- CSS Modules
+- Local Storage
+- Modern JavaScript (ES6+)
 
-### بناء المشروع للإنتاج
+## Customization
+- Update sample data in `src/data/`
+- Modify styles in `src/styles/`
+- Add or edit components in `src/components/`
 
-```bash
-npm run build
-```
-
-### معاينة الإنتاج
-
-```bash
-npm run preview
-```
-
-## 📁 هيكل المشروع
-
-```
-src/
-├── components/          # المكونات القابلة لإعادة الاستخدام
-│   ├── Header.jsx      # رأس الصفحة
-│   ├── Footer.jsx      # تذييل الصفحة
-│   ├── LuxuryCard.jsx  # بطاقة فاخرة
-│   └── Button.jsx      # أزرار مخصصة
-├── pages/              # صفحات التطبيق
-│   ├── Home.jsx        # الصفحة الرئيسية
-│   ├── Services.jsx    # صفحة الخدمات
-│   ├── Booking.jsx     # صفحة الحجز
-│   ├── Products.jsx    # صفحة المنتجات
-│   ├── FAQ.jsx         # الأسئلة الشائعة
-│   ├── Account/        # صفحات حساب العميلة
-│   └── admin/          # لوحة التحكم الإدارية
-├── data/               # البيانات الوهمية
-│   └── arabicData.js   # البيانات العربية
-├── App.jsx             # المكون الرئيسي
-├── main.jsx            # نقطة دخول التطبيق
-└── index.css           # الأنماط العامة
-```
-
-## 🌐 البيانات الوهمية
-
-المشروع يحتوي على بيانات وهمية شاملة باللغة العربية تشمل:
-
-- **الخدمات**: خدمات الليزر، العناية بالبشرة، VIP
-- **المنتجات**: منتجات العناية بالبشرة مع الأسعار والخصومات
-- **العملاء**: بيانات العملاء والحجوزات
-- **الموظفين**: معلومات فريق العمل
-- **التقييمات**: تقييمات العملاء
-- **الأسئلة الشائعة**: أسئلة وإجابات مفصلة
-
-## 📱 الاستجابة
-
-الموقع مصمم ليعمل بشكل مثالي على:
-
-- **أجهزة سطح المكتب** (1200px+)
-- **الأجهزة اللوحية** (768px - 1199px)
-- **الهواتف الذكية** (أقل من 768px)
-
-## 🎯 المميزات الخاصة
-
-### للعملاء
-
-- واجهة سهلة الاستخدام باللغة العربية
-- نظام حجز بسيط ومفهوم
-- عرض تفصيلي للخدمات والمنتجات
-- إدارة شاملة للحساب الشخصي
-- نظام تقييمات وتقييم الخدمات
-
-### للإدارة
-
-- لوحة تحكم شاملة مع إحصائيات مفصلة
-- إدارة كاملة للحجوزات والمواعيد
-- إدارة الخدمات والمنتجات
-- مراجعة وتدقيق تقييمات العملاء
-- إعدادات متقدمة للنظام
-
-## 🔧 التخصيص
-
-يمكن تخصيص الموقع بسهولة من خلال:
-
-1. **تعديل الألوان** في ملف `src/index.css`
-2. **إضافة خدمات جديدة** في `src/data/arabicData.js`
-3. **تعديل التصميم** في ملفات CSS الخاصة بكل صفحة
-4. **إضافة صفحات جديدة** في مجلد `src/pages`
-
-## 📞 الدعم
-
-للدعم الفني أو الاستفسارات، يرجى التواصل عبر:
-
-- **واتساب**: +970 50 123 4567
-- **الهاتف**: +970 11 234 5678
-- **البريد الإلكتروني**: info@roselaser.com
-
-## 📄 الترخيص
-
-هذا المشروع مطور لأغراض العرض التوضيحي. جميع الحقوق محفوظة.
+## Deployment
+- Ready for deployment on Vercel (see `vercel.json`)
 
 ---
 
-**Mira Beauty Clinic** - ✨
+**MiraBeauty** — A complete solution for beauty salons and online beauty product sales.
