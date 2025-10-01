@@ -88,26 +88,3 @@ MiraBeauty is a modern beauty salon and e-commerce web application. It offers a 
 ---
 
 **MiraBeauty** — A complete solution for beauty salons and online beauty product sales.
-3. **Open in browser:**
-   Visit [http://localhost:5173](http://localhost:5173)
-
-## Tech Stack
-- React (Vite)
-- CSS Modules
-- Local Storage
-- Modern JavaScript (ES6+)
-
-## Customization
-- Update sample data in `src/data/`
-- Modify styles in `src/styles/`
-- Add or edit components in `src/components/`
-
-## Performance Targets
-- First Contentful Paint: < 1.5s
-- Time to Interactive: < 3.0s
-- Lighthouse Performance Score: > 90
-- Bundle size: < 250KB (gzipped)
-
----
-
-This technical documentation provides developers with the necessary information to understand and implement the MiraBeauty system. It includes data models, component architecture, API specifications, and performance requirements.
