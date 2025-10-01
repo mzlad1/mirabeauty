@@ -119,7 +119,7 @@ const ProductsPage = ({ setCurrentPage }) => {
                     : categories.find((c) => c.id === selectedCategory)?.name}
                 </h2>
                 <span className="products-count">
-                  {filteredProducts.length} منتج
+                  {filteredProducts.length} منتجات
                 </span>
               </div>
 

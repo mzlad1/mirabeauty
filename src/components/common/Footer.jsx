@@ -45,7 +45,7 @@ const Footer = () => {
                   </svg>
                 </a>
                 <a
-                  href="https://wa.me/966112345678"
+                  href="https://wa.me/message/HGFTI2VFZFCMN1"
                   className="social-link"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -134,7 +134,7 @@ const Footer = () => {
       {/* Floating WhatsApp Button */}
       <div className="floating-actions">
         <a
-          href="https://wa.me/966112345678"
+          href="https://wa.me/message/HGFTI2VFZFCMN1"
           className="floating-btn whatsapp-btn"
           target="_blank"
           rel="noopener noreferrer"

@@ -109,7 +109,7 @@ const ServicesPage = () => {
                     : categories.find((c) => c.id === selectedCategory)?.name}
                 </h2>
                 <span className="services-page-count">
-                  {filteredServices.length} خدمة
+                  {filteredServices.length} خدمات
                 </span>
               </div>
 

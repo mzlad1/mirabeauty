@@ -114,7 +114,6 @@ const HomePage = () => {
         <div className="container">
           <div className="section-header text-center mb-3">
             <h2>خدماتنا المميزة</h2>
-            <p>اكتشفي مجموعة شاملة من خدمات العناية والتجميل المتطورة</p>
           </div>
           <div className="services-grid grid-3">
             {sampleServices.slice(0, 3).map((service) => (
@@ -164,7 +163,6 @@ const HomePage = () => {
         <div className="container">
           <div className="section-header text-center mb-3">
             <h2>الأكثر مبيعاً</h2>
-            <p>اكتشفي منتجاتنا الأكثر شعبية وثقة من عميلاتنا</p>
           </div>
           <div className="products-grid grid-4">
             {sampleProducts
