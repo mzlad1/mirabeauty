@@ -1,91 +1,178 @@
-# MiraBeauty - Technical Documentation
+# MiraBeauty - Features & Technical Requirements# MiraBeauty - Technical Documentation
 
-## System Architecture
+
+
+This document lists all features of the MiraBeauty website for both programmers (technical context) and normal users (user-facing features).## System Architecture
+
 - Single Page Application (SPA) built with React + Vite
-- Client-side routing and state management
+
+---- Client-side routing and state management
+
 - Local storage-based authentication system
-- Modular component architecture with CSS Modules
 
-## Technical Requirements
+## User-Facing Features (For Normal Users)- Modular component architecture with CSS Modules
 
-### 1. Authentication System
+
+
+- **User Registration & Login:**## Technical Requirements
+
+  - Sign up and log in as a customer or staff member.
+
+  - Secure authentication and account management.### 1. Authentication System
+
+- **Home Page:**```typescript
+
+  - View promotional banners, featured products, and services.interface AuthSystem {
+
+- **Service Booking:**  registration: {
+
+  - Book appointments for beauty services with date and time selection.    userTypes: ['customer', 'staff', 'admin'];
+
+  - View booking history and upcoming appointments.    validation: EmailPasswordValidation;
+
+- **Product Shopping:**    storage: LocalStorageAuth;
+
+  - Browse products, view details, and add to cart.  };
+
+  - Manage cart and proceed to checkout.  session: {
+
+- **Testimonials:**    tokenManagement: JWT | LocalStorage;
+
+  - Read customer reviews and feedback.    persistence: boolean;
+
+- **FAQ:**    roleBasedAccess: boolean;
+
+  - Find answers to common questions.  };
+
+- **Profile Management:**}
+
+  - Update account settings and personal information.```
+
+- **Dashboards:**
+
+  - Customers: View bookings and profile.### 2. User Management
+
+  - Staff/Admin: Manage appointments, customers, and view statistics.- Role-based access control (RBAC)
+
+- **Responsive Design:**- User state persistence using LocalStorage
+
+  - Works on desktop, tablet, and mobile devices.- Profile management with avatar support
+
+  - RTL (Right-to-Left) language support.- Account settings with update capabilities
+
+
+
+---### 3. Booking System
+
 ```typescript
-interface AuthSystem {
-  registration: {
-    userTypes: ['customer', 'staff', 'admin'];
-    validation: EmailPasswordValidation;
-    storage: LocalStorageAuth;
-  };
-  session: {
-    tokenManagement: JWT | LocalStorage;
-    persistence: boolean;
-    roleBasedAccess: boolean;
-  };
-}
-```
 
-### 2. User Management
-- Role-based access control (RBAC)
-- User state persistence using LocalStorage
-- Profile management with avatar support
-- Account settings with update capabilities
+## Technical Features & Requirements (For Developers)interface BookingSystem {
 
-### 3. Booking System
-```typescript
-interface BookingSystem {
   appointment: {
-    dateTime: DateTime;
-    service: Service[];
-    staff: StaffMember;
-    status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  };
+
+### 1. Architecture    dateTime: DateTime;
+
+- Built with React (Vite) SPA architecture.    service: Service[];
+
+- Modular component structure (auth, common, customer, dashboard, profile).    staff: StaffMember;
+
+- CSS Modules for scoped styling.    status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+
+- Uses local storage for authentication and cart persistence.  };
+
   validation: {
-    timeSlotAvailability: boolean;
-    staffAvailability: boolean;
-    serviceCompatibility: boolean;
-  };
+
+### 2. Authentication & Authorization    timeSlotAvailability: boolean;
+
+- Local storage-based authentication (no backend required for demo).    staffAvailability: boolean;
+
+- Role-based access: customer, staff, admin.    serviceCompatibility: boolean;
+
+- Account settings and profile update functionality.  };
+
   notifications: {
-    confirmation: Email | UI;
-    reminders: boolean;
-  };
-}
+
+### 3. Booking System    confirmation: Email | UI;
+
+- Bookings stored in local state/sample data.    reminders: boolean;
+
+- Date/time selection with validation.  };
+
+- Booking history and status tracking.}
+
 ```
 
-### 4. E-commerce Features
-```typescript
-interface EcommerceSystem {
-  products: {
+### 4. Product & Cart System
+
+- Product catalog and details from sample data.### 4. E-commerce Features
+
+- Add/remove products to/from cart.```typescript
+
+- Cart overlay and dedicated cart page.interface EcommerceSystem {
+
+- Cart state persisted in local storage.  products: {
+
     catalog: ProductCatalog;
-    categories: Category[];
-    search: SearchFunctionality;
-    filters: FilterOptions;
-  };
+
+### 5. Dashboard Functionality    categories: Category[];
+
+- Admin dashboard: View/manage all appointments, customers, and statistics.    search: SearchFunctionality;
+
+- Staff dashboard: View assigned appointments and customer details.    filters: FilterOptions;
+
+- Statistics cards for analytics (sample data).  };
+
   cart: {
-    persistence: LocalStorage;
-    calculations: PriceCalculator;
-    items: CartItem[];
-  };
+
+### 6. UI Components    persistence: LocalStorage;
+
+- Header, navigation, footer, banners, loading spinner, cards, forms.    calculations: PriceCalculator;
+
+- Responsive layouts using CSS Grid/Flexbox.    items: CartItem[];
+
+- RTL support via dedicated CSS.  };
+
 }
-```
 
-### 5. Dashboard Requirements
+### 7. Utilities & Helpers```
+
+- Custom React hooks for auth and local storage.
+
+- Utility functions for date formatting and constants.### 5. Dashboard Requirements
+
 #### Admin Dashboard
-- Real-time statistics rendering
-- Data aggregation for analytics
-- Customer data management
-- Appointment oversight system
 
-#### Staff Dashboard
-- Appointment management interface
-- Customer information access
+### 8. Data & State Management- Real-time statistics rendering
+
+- Sample data in `src/data/` for products, services, users, etc.- Data aggregation for analytics
+
+- Local state and custom hooks for state management.- Customer data management
+
+- No external state management library required.- Appointment oversight system
+
+
+
+### 9. Styling#### Staff Dashboard
+
+- Global, responsive, RTL, and variable CSS in `src/styles/`.- Appointment management interface
+
+- Custom fonts and modern UI.- Customer information access
+
 - Schedule visualization
 
-### 6. Component System
-```typescript
+### 10. Deployment
+
+- Ready for deployment on Vercel (see `vercel.json`).### 6. Component System
+
+- Vite build configuration for optimized production builds.```typescript
+
 interface ComponentArchitecture {
-  atomic: {
+
+---  atomic: {
+
     atoms: ButtonProps & InputProps & IconProps;
-    molecules: CardProps & FormProps;
+
+This document provides a clear overview of all features and technical requirements for both users and developers working on the MiraBeauty project.    molecules: CardProps & FormProps;
     organisms: HeaderProps & FooterProps;
   };
   layouts: {
