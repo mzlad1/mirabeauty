@@ -2,7 +2,7 @@
 
 MiraBeauty is a modern beauty salon and e-commerce web application. It offers a seamless experience for customers, staff, and administrators, featuring online booking, product shopping, user profiles, and dashboards.
 
-## Features
+## Features 
 
 ### 1. User Authentication
 - Register and login for customers and staff
