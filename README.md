@@ -1,90 +1,239 @@
-# MiraBeauty
+# MiraBeauty - Technical Documentation
 
-MiraBeauty is a modern beauty salon and e-commerce web application. It offers a seamless experience for customers, staff, and administrators, featuring online booking, product shopping, user profiles, and dashboards.
+## System Architecture
+- Single Page Application (SPA) built with React + Vite
+- Client-side routing and state management
+- Local storage-based authentication system
+- Modular component architecture with CSS Modules
 
-## Features
+## Technical Requirements
 
-### 1. User Authentication
-- Register and login for customers and staff
-- Secure authentication with local storage
-- Account settings and profile management
+### 1. Authentication System
+```typescript
+interface AuthSystem {
+  registration: {
+    userTypes: ['customer', 'staff', 'admin'];
+    validation: EmailPasswordValidation;
+    storage: LocalStorageAuth;
+  };
+  session: {
+    tokenManagement: JWT | LocalStorage;
+    persistence: boolean;
+    roleBasedAccess: boolean;
+  };
+}
+```
 
-### 2. Customer Experience
-- **Home Page:** Promotional banners, featured products, and services
-- **Booking:** Book appointments for beauty services with date/time selection
-- **Product Shopping:** Browse, view details, and add products to cart
-- **Cart:** Overlay and dedicated cart page for managing purchases
-- **Booking History:** View past and upcoming appointments
-- **Testimonials:** Customer reviews and feedback
-- **FAQ:** Frequently asked questions
+### 2. User Management
+- Role-based access control (RBAC)
+- User state persistence using LocalStorage
+- Profile management with avatar support
+- Account settings with update capabilities
 
-### 3. Staff & Admin Dashboards
-- **Admin Dashboard:**
-  - View and manage all appointments
-  - Customer management
-  - Statistics and analytics cards
-- **Staff Dashboard:**
-  - View assigned appointments
-  - Access to customer details
+### 3. Booking System
+```typescript
+interface BookingSystem {
+  appointment: {
+    dateTime: DateTime;
+    service: Service[];
+    staff: StaffMember;
+    status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  };
+  validation: {
+    timeSlotAvailability: boolean;
+    staffAvailability: boolean;
+    serviceCompatibility: boolean;
+  };
+  notifications: {
+    confirmation: Email | UI;
+    reminders: boolean;
+  };
+}
+```
 
-### 4. Product & Service Management
-- Product and service cards with details
-- Responsive product and service listing pages
-- Product details page with add-to-cart functionality
+### 4. E-commerce Features
+```typescript
+interface EcommerceSystem {
+  products: {
+    catalog: ProductCatalog;
+    categories: Category[];
+    search: SearchFunctionality;
+    filters: FilterOptions;
+  };
+  cart: {
+    persistence: LocalStorage;
+    calculations: PriceCalculator;
+    items: CartItem[];
+  };
+}
+```
 
-### 5. Common Components
-- Header and navigation bar
-- Footer with contact and social links
-- Loading spinner for async actions
-- Responsive promotional banners
+### 5. Dashboard Requirements
+#### Admin Dashboard
+- Real-time statistics rendering
+- Data aggregation for analytics
+- Customer data management
+- Appointment oversight system
 
-### 6. Responsive Design
-- Fully responsive layout for desktop, tablet, and mobile
-- RTL (Right-to-Left) support for languages like Arabic
-- Custom fonts and modern UI
+#### Staff Dashboard
+- Appointment management interface
+- Customer information access
+- Schedule visualization
 
-### 7. Utilities & Helpers
-- Local storage hooks for persistent state
-- Date helpers for formatting and calculations
-- Constants for configuration
+### 6. Component System
+```typescript
+interface ComponentArchitecture {
+  atomic: {
+    atoms: ButtonProps & InputProps & IconProps;
+    molecules: CardProps & FormProps;
+    organisms: HeaderProps & FooterProps;
+  };
+  layouts: {
+    responsive: boolean;
+    rtlSupport: boolean;
+    gridSystem: CSS.GridSystem;
+  };
+}
+```
 
-## Project Structure
+### 7. State Management
+- Local component state using React hooks
+- Custom hooks for shared logic
+- LocalStorage for persistence
+- Context API for global state
 
-- `src/components/` — Reusable UI components (auth, common, customer, dashboard, profile)
-- `src/pages/` — Main pages (Home, Booking, Products, Cart, Profile, Admin/Staff Dashboards, FAQ)
-- `src/data/` — Sample data for products, services, users, etc.
-- `src/hooks/` — Custom React hooks
-- `src/utils/` — Utility functions (auth, date helpers, constants)
-- `src/styles/` — Global, responsive, RTL, and variable CSS
-- `public/` — Static assets (fonts, images)
+### 8. Data Models
 
-## Getting Started
+```typescript
+interface CoreModels {
+  User {
+    id: string;
+    role: UserRole;
+    profile: UserProfile;
+    preferences: UserPreferences;
+  }
+  
+  Product {
+    id: string;
+    details: ProductDetails;
+    inventory: InventoryStatus;
+    pricing: PricingInfo;
+  }
+  
+  Service {
+    id: string;
+    duration: number;
+    price: number;
+    availability: TimeSlot[];
+  }
+  
+  Appointment {
+    id: string;
+    customer: User;
+    service: Service;
+    dateTime: DateTime;
+    status: AppointmentStatus;
+  }
+}
+```
 
-1. **Install dependencies:**
-   ```sh
-   npm install
-   ```
-2. **Run the development server:**
-   ```sh
-   npm run dev
-   ```
-3. **Open in browser:**
-   Visit [http://localhost:5173](http://localhost:5173)
+## Technical Features
 
-## Tech Stack
-- React (Vite)
-- CSS Modules
-- Local Storage
-- Modern JavaScript (ES6+)
+### 1. Responsive Design Implementation
+- CSS Grid and Flexbox layouts
+- Mobile-first approach
+- Breakpoint system:
+  ```css
+  --breakpoint-mobile: 320px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+  ```
 
-## Customization
-- Update sample data in `src/data/`
-- Modify styles in `src/styles/`
-- Add or edit components in `src/components/`
+### 2. Performance Optimizations
+- Component lazy loading
+- Image optimization
+- Route-based code splitting
+- Memoization of expensive calculations
 
-## Deployment
-- Ready for deployment on Vercel (see `vercel.json`)
+### 3. Form Handling
+- Form validation
+- Error handling
+- Real-time field validation
+- Submit handling with loading states
+
+### 4. API Integration Points
+```typescript
+interface APIEndpoints {
+  auth: '/api/auth/*';
+  products: '/api/products/*';
+  services: '/api/services/*';
+  bookings: '/api/bookings/*';
+  users: '/api/users/*';
+}
+```
+
+### 5. Security Implementations
+- XSS protection
+- CSRF protection
+- Input sanitization
+- Secure local storage handling
+
+## Development Requirements
+
+### Environment Setup
+```json
+{
+  "node": ">=14.0.0",
+  "npm": ">=6.0.0",
+  "dependencies": {
+    "react": "^18.x",
+    "vite": "^4.x",
+    "react-router-dom": "^6.x"
+  }
+}
+```
+
+### Build System
+- Vite configuration
+- CSS Modules setup
+- Environment variables
+- Build optimization settings
+
+### Testing Requirements
+- Unit tests for utilities
+- Component testing
+- Integration testing
+- E2E testing setup
+
+### Code Quality
+- ESLint configuration
+- Prettier setup
+- TypeScript strict mode
+- Git hooks for pre-commit linting
+
+## Deployment Configuration
+```json
+{
+  "build": {
+    "outDir": "dist",
+    "assetsDir": "assets",
+    "sourcemap": true
+  },
+  "vercel": {
+    "routes": [
+      { "handle": "filesystem" },
+      { "src": "/(.*)", "dest": "/index.html" }
+    ]
+  }
+}
+```
+
+## Performance Targets
+- First Contentful Paint: < 1.5s
+- Time to Interactive: < 3.0s
+- Lighthouse Performance Score: > 90
+- Bundle size: < 250KB (gzipped)
 
 ---
 
-**MiraBeauty** — A complete solution for beauty salons and online beauty product sales.
+This technical documentation provides developers with the necessary information to understand and implement the MiraBeauty system. It includes data models, component architecture, API specifications, and performance requirements.
