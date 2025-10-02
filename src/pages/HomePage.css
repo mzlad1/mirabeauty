@@ -438,12 +438,12 @@
   color: var(--white);
 }
 
-.service-icon img {
+/* .service-icon img {
   width: 50px;
   height: 50px;
   box-shadow: 0 6px 18px rgba(7, 22, 38, 0.2);
   transition: all 0.3s ease;
-}
+} */
 
 .service-card:hover .service-icon {
   background: linear-gradient(135deg, var(--gold) 0%, #d4a843 100%);
@@ -463,8 +463,6 @@
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
-
-  transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(184, 146, 31, 0.25);
 }
 
