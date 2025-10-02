@@ -13,7 +13,7 @@ export const sampleServices = [
     image:
       "https://images.unsplash.com/photo-1700760933941-3a06a28fbf47?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D  ",
     //use wax.png from public folder for icon
-    icon: "../../public/assets/wax.png",
+    icon: "https://www.canadiancmc.com/wp-content/uploads/2024/09/Laser-hair-removal.jpg",
     features: [
       "تقنية ليزر متطورة وآمنة",
       "نتائج دائمة ومضمونة",
@@ -34,7 +34,7 @@ export const sampleServices = [
     categoryName: "العناية بالبشرة",
     image:
       "https://images.unsplash.com/photo-1700760933941-3a06a28fbf47?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    icon: "../../public/assets/wax.png",
+    icon: "https://bioinst.com/wp-content/uploads/2024/09/skin-rejuvenation-with-stem-cells-of-adipose-tissue-AR.jpg",
     features: [
       "تحفيز تجديد الخلايا",
       "تحسين ملمس البشرة",
@@ -55,7 +55,7 @@ export const sampleServices = [
     categoryName: "نحت الجسم",
     image:
       "https://images.unsplash.com/photo-1700760933941-3a06a28fbf47?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    icon: "../../public/assets/wax.png",
+    icon: "https://www.medicaliclinic.com/wp-content/uploads/2023/05/%D8%B4%D9%81%D8%B7-%D8%A7%D9%84%D8%AF%D9%87%D9%88%D9%86-2.jpg",
     features: [
       "تفتيت الدهون الموضعية",
       "شد وتشكيل الجسم",
