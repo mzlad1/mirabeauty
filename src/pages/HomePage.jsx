@@ -116,21 +116,25 @@ const HomePage = () => {
             <h2>خدماتنا المميزة</h2>
           </div>
           <div className="services-grid grid-3">
-            {sampleServices.slice(0, 3).map((service) => (
-              <div key={service.id} className="service-card card">
-                <div className="service-icon">
-                  <img src={service.icon} alt={service.name} />
+            {sampleServices.slice(0, 3).map((service, index) => {
+              // Map service icons based on index
+              const icons = ["fas fa-spa", "fas fa-star", "fas fa-heart"];
+              return (
+                <div key={service.id} className="service-card card">
+                  <div className="service-icon">
+                    <i className={icons[index]}></i>
+                  </div>
+                  <h3>{service.name}</h3>
+                  <p>{service.description}</p>
+                  <button
+                    className="btn-secondary service-btn"
+                    onClick={() => navigate("/services")}
+                  >
+                    اعرفي المزيد
+                  </button>
                 </div>
-                <h3>{service.name}</h3>
-                <p>{service.description}</p>
-                <button
-                  className="btn-secondary service-btn"
-                  onClick={() => navigate("/services")}
-                >
-                  اعرفي المزيد
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="text-center" style={{ marginTop: "2rem" }}>
             <button
