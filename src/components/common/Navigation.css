@@ -326,6 +326,12 @@
   }
 }
 
+@media (max-width: 1210px) {
+  .logo-text {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
   .mobile-menu-toggle {
     display: flex;

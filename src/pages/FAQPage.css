@@ -1,5 +1,68 @@
 /* FAQPage.css - FAQ Page Specific Styles */
 
+/* Category Containers */
+.faq-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.faq-category-container {
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(7, 22, 38, 0.08), 0 2px 8px rgba(7, 22, 38, 0.06);
+  border: 1px solid rgba(184, 146, 31, 0.12);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.faq-category-container.active {
+  border-color: var(--gold);
+  box-shadow: 0 12px 32px rgba(184, 146, 31, 0.12);
+}
+
+/* Category Headers */
+.faq-category-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, var(--navy-blue) 0%, #0f2a5a 100%);
+  color: var(--white);
+  border: none;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: right;
+  transition: all 0.3s ease;
+}
+
+.faq-category-header span:first-child {
+  position: relative;
+  padding-right: 2rem;
+}
+
+.faq-category-header span:first-child::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.2rem;
+  height: 1.2rem;
+  background: var(--gold);
+  border-radius: 50%;
+  opacity: 0.3;
+  transition: all 0.3s ease;
+}
+
+.faq-category-container.active .faq-category-header span:first-child::before {
+  opacity: 1;
+}
+
 /* Page Header */
 .faq-page .page-header {
   background: linear-gradient(135deg, var(--navy-blue) 0%, #0f2a5a 100%);
@@ -60,21 +123,28 @@
 .faq-list {
   max-width: 800px;
   margin: 0 auto;
+  padding: 0.3rem 0;
 }
 
 .faq-item {
   background-color: var(--white);
-  border: 2px solid var(--border-color);
-  margin-bottom: 1rem;
+  margin-bottom: 0;
   transition: all 0.3s ease;
+  position: relative;
+  padding: 0.5rem 0;
 }
 
-.faq-item:hover {
-  border-color: var(--gold);
+.faq-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  border-bottom: 2px dashed rgba(184, 146, 31, 0.2);
 }
 
 .faq-item.active {
-  border-color: var(--navy-blue);
+  background-color: rgba(184, 146, 31, 0.05);
 }
 
 /* FAQ Question */
@@ -288,38 +358,60 @@
 }
 
 /* Responsive Design */
-@media (max-width: 968px) {
-  .category-filter {
-    gap: 0.5rem;
+@media (max-width: 480px) {
+  .faq-category-header {
+    padding: 1rem 1.25rem;
+    font-size: 1.125rem;
   }
-
-  .category-btn {
-    padding: 8px 16px;
-    font-size: 0.85rem;
-  }
-
-  .faq-question {
-    padding: 1.25rem 1.5rem;
-  }
-
-  .question-text {
-    font-size: 1rem;
+  .faq-controls {
+    padding: 1rem;
   }
 
   .faq-answer p {
-    padding: 1.5rem;
+    padding: 1rem;
+    font-size: 0.9rem;
   }
 
-  .contact-options {
-    grid-template-columns: 1fr;
+  .contact-content p {
+    font-size: 1rem;
   }
 
   .tips-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: 1fr;
+  }
+
+  .tip-card {
+    padding: 1.25rem;
+  }
+
+  .tip-card h3 {
+    font-size: 1.125rem;
+  }
+
+  .tip-card p {
+    font-size: 0.9rem;
   }
 }
 
+/* Responsive Category Styles */
 @media (max-width: 768px) {
+  .faq-categories {
+    padding: 1rem;
+  }
+
+  .faq-category-header {
+    padding: 1.25rem 1.5rem;
+    font-size: 1.25rem;
+  }
+
+  .faq-category-header span:first-child {
+    padding-right: 1.5rem;
+  }
+
+  .faq-category-header span:first-child::before {
+    width: 1rem;
+    height: 1rem;
+  }
   .faq-page .page-header h1 {
     font-size: 2rem;
   }
@@ -351,7 +443,6 @@
 
   .faq-question {
     padding: 1rem 1.25rem;
-    flex-direction: column;
     gap: 1rem;
     text-align: center;
   }
@@ -373,33 +464,33 @@
   }
 }
 
-@media (max-width: 480px) {
-  .faq-controls {
-    padding: 1rem;
+@media (max-width: 968px) {
+  .category-filter {
+    gap: 0.5rem;
   }
 
-  .faq-answer p {
-    padding: 1rem;
-    font-size: 0.9rem;
+  .category-btn {
+    padding: 8px 16px;
+    font-size: 0.85rem;
   }
 
-  .contact-content p {
+  .faq-question {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .question-text {
     font-size: 1rem;
   }
 
-  .tips-grid {
+  .faq-answer p {
+    padding: 1.5rem;
+  }
+
+  .contact-options {
     grid-template-columns: 1fr;
   }
 
-  .tip-card {
-    padding: 1.25rem;
-  }
-
-  .tip-card h3 {
-    font-size: 1.125rem;
-  }
-
-  .tip-card p {
-    font-size: 0.9rem;
+  .tips-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 }

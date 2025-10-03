@@ -4,6 +4,7 @@ import "./FAQPage.css";
 const FAQPage = () => {
   const [activeQuestion, setActiveQuestion] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeCategory, setActiveCategory] = useState("all");
 
   const faqData = [
     {
@@ -90,6 +91,13 @@ const FAQPage = () => {
       answer:
         "لا ننصح بإجراء علاجات الليزر أثناء فترة الحمل والرضاعة كإجراء احترازي، رغم عدم وجود دراسات تثبت ضررها. يمكنكم استئناف العلاجات بعد انتهاء فترة الرضاعة.",
     },
+    {
+      id: 13,
+      category: "general",
+      question: "أين يقع مركز ميرا بيوتي؟",
+      answer:
+        "يقع مركزنا في قلب رام الله، شارع ركب، مجمع النخيل التجاري، الطابق الثاني. يمكنكم الوصول إلينا بسهولة عبر وسائل النقل العام أو السيارة الخاصة مع توفر مواقف مجانية.",
+    },
   ];
 
   const categories = [
@@ -102,16 +110,26 @@ const FAQPage = () => {
     { id: "safety", name: "الأمان والسلامة" },
   ];
 
-  const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const filteredFAQs = faqData.filter((faq) => {
-    const matchesCategory =
-      selectedCategory === "all" || faq.category === selectedCategory;
-    const matchesSearch =
-      faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      faq.answer.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Group FAQs by category
+  const groupedFAQs = categories.reduce((acc, cat) => {
+    if (cat.id === "all") return acc;
+    acc[cat.id] = faqData.filter((faq) => faq.category === cat.id);
+    return acc;
+  }, {});
+
+  // Filtered by search
+  const filteredGroupedFAQs = Object.fromEntries(
+    Object.entries(groupedFAQs).map(([catId, faqs]) => [
+      catId,
+      faqs.filter(
+        (faq) =>
+          faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    ])
+  );
+
 
   const toggleQuestion = (questionId) => {
     setActiveQuestion(activeQuestion === questionId ? null : questionId);
@@ -119,55 +137,56 @@ const FAQPage = () => {
 
   return (
     <div className="faq-page">
-      {/* Page Header */}
-
       {/* FAQ Content */}
       <section className="faq-content section">
         <div className="container">
-          {/* Search and Filter */}
-
-
-          {/* FAQ List */}
-          <div className="faq-list">
-            {filteredFAQs.length > 0 ? (
-              filteredFAQs.map((faq) => (
-                <div
-                  key={faq.id}
-                  className={`faq-item ${
-                    activeQuestion === faq.id ? "active" : ""
-                  }`}
-                >
-                  <button
-                    className="faq-question"
-                    onClick={() => toggleQuestion(faq.id)}
-                  >
-                    <span className="question-text">{faq.question}</span>
-                    <span className="question-icon">
-                      {activeQuestion === faq.id ? "−" : "+"}
-                    </span>
-                  </button>
-                  <div className="faq-answer">
-                    <p>{faq.answer}</p>
-                  </div>
+          {/* Category List */}
+          <div className="faq-categories">
+            {categories.filter((cat) => cat.id !== "all").map((cat) => (
+              <div
+                key={cat.id}
+                className="faq-category-container active"
+              >
+                <div className="faq-category-header">
+                  <span>{cat.name}</span>
                 </div>
-              ))
-            ) : (
-              <div className="no-results">
-                <h3>لم نجد أي نتائج</h3>
-                <p>
-                  لم نتمكن من العثور على أسئلة تطابق بحثك. جربي كلمات مختلفة أو
-                  تصفحي الفئات المختلفة.
-                </p>
+                {(
+                  <div className="faq-list">
+                    {filteredGroupedFAQs[cat.id] && filteredGroupedFAQs[cat.id].length > 0 ? (
+                      filteredGroupedFAQs[cat.id].map((faq) => (
+                        <div
+                          key={faq.id}
+                          className={`faq-item${activeQuestion === faq.id ? " active" : ""}`}
+                        >
+                          <button
+                            className="faq-question"
+                            onClick={() => toggleQuestion(faq.id)}
+                          >
+                            <span className="question-text">{faq.question}</span>
+                            <span className="question-icon">
+                              {activeQuestion === faq.id ? "−" : "+"}
+                            </span>
+                          </button>
+                          <div className="faq-answer">
+                            <p>{faq.answer}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="no-results">
+                        <h3>لم نجد أي نتائج</h3>
+                        <p>
+                          لم نتمكن من العثور على أسئلة تطابق بحثك. جربي كلمات مختلفة أو تصفحي الفئات المختلفة.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            )}
+            ))}
           </div>
         </div>
       </section>
-
-
-
-      {/* Quick Tips */}
-
     </div>
   );
 };
