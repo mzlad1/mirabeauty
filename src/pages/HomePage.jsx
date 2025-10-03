@@ -216,7 +216,6 @@ const HomePage = () => {
         <div className="container">
           <div className="section-header text-center mb-3">
             <h2>آراء عميلاتنا</h2>
-            <p>اقرئي تجارب عميلاتنا وآرائهن حول خدماتنا المميزة</p>
           </div>
           <div className="testimonials-grid grid-3">
             {sampleTestimonials.map((testimonial) => (
