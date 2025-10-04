@@ -333,6 +333,10 @@
 }
 
 @media (max-width: 768px) {
+  .logo-text {
+    display: inline;
+  }
+
   .mobile-menu-toggle {
     display: flex;
   }
@@ -400,6 +404,7 @@
     transform: translateX(0);
     opacity: 1;
     visibility: visible;
+    width: 90%;
   }
 
   .auth-buttons {
@@ -447,11 +452,6 @@
 
   .logo-text h2 {
     font-size: 1.25rem;
-  }
-
-  .logo-icon {
-    width: 2.5rem;
-    height: 2.5rem;
   }
 
   .user-avatar {
