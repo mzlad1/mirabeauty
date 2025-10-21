@@ -1,5 +1,46 @@
 /* BookingPage.css - Booking Page Specific Styles */
 
+/* Breadcrumb Navigation */
+.booking-breadcrumb-section {
+  background: var(--white);
+  padding: 1rem 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.booking-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.booking-breadcrumb-item {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.3s ease;
+  padding: 0;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.booking-breadcrumb-item:hover {
+  color: var(--navy-blue);
+}
+
+.booking-breadcrumb-item.active {
+  color: var(--navy-blue);
+  font-weight: 600;
+  cursor: default;
+}
+
+.booking-breadcrumb-separator {
+  color: var(--text-secondary);
+  margin: 0 0.25rem;
+}
+
 /* Category Selection */
 .category-selection {
   background-color: var(--white);
@@ -1136,4 +1177,65 @@
   .consultation-why-points li {
     font-size: 1rem;
   }
+}
+
+/* Loading and Error States */
+.loading-section,
+.error-section {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-card,
+.error-card {
+  background: var(--white);
+  padding: 3rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--navy-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-card p,
+.error-card p {
+  color: var(--text-secondary);
+  margin: 1rem 0;
+}
+
+.error-card h2 {
+  color: var(--navy-blue);
+  margin-bottom: 1rem;
+}
+
+/* Disabled button styles */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button:disabled:hover {
+  background-color: var(--navy-blue);
+  transform: none;
 }

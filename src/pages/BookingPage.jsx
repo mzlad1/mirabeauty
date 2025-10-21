@@ -1,10 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./BookingPage.css";
-import { sampleServices } from "../data/sampleServices";
-import { sampleUsers } from "../data/sampleUsers";
+import {
+  getAllServices,
+  getServicesByCategory,
+} from "../services/servicesService";
+import { getUsersByRole } from "../services/usersService";
+import {
+  createAppointment,
+  checkStaffAvailability,
+} from "../services/appointmentsService";
 
-const BookingPage = ({ currentUser }) => {
+const BookingPage = ({ currentUser, userData }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState(""); // إضافة حالة لنوع الجلسة
@@ -15,13 +22,39 @@ const BookingPage = ({ currentUser }) => {
     time: "",
     notes: "",
     customerInfo: {
-      name: currentUser?.name || "",
-      phone: currentUser?.phone || "",
-      email: currentUser?.email || "",
+      name: userData?.name || currentUser?.displayName || "",
+      phone: userData?.phone || "",
+      email: userData?.email || currentUser?.email || "",
     },
   });
 
-  const staffMembers = sampleUsers.filter((user) => user.role === "staff");
+  // Firebase data states
+  const [services, setServices] = useState([]);
+  const [staffMembers, setStaffMembers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Load services and staff on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [servicesData, staffData] = await Promise.all([
+          getAllServices(),
+          getUsersByRole("staff"),
+        ]);
+        setServices(servicesData);
+        setStaffMembers(staffData);
+      } catch (error) {
+        console.error("Error loading data:", error);
+        setError("حدث خطأ في تحميل البيانات");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   const timeSlots = [
     "09:00",
@@ -59,20 +92,63 @@ const BookingPage = ({ currentUser }) => {
     setStep(4);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would normally send the booking data to your backend
-    console.log("Booking submitted:", bookingData);
-    alert("تم حجز موعدك بنجاح! سيتم التواصل معك قريباً لتأكيد الموعد.");
-    navigate("/profile");
+
+    if (!currentUser) {
+      alert("يرجى تسجيل الدخول أولاً");
+      navigate("/login");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      // Check staff availability
+      const isAvailable = await checkStaffAvailability(
+        bookingData.staffId,
+        bookingData.date,
+        bookingData.time
+      );
+
+      if (!isAvailable) {
+        alert("عذراً، هذا الموعد محجوز بالفعل. يرجى اختيار موعد آخر.");
+        setSubmitting(false);
+        return;
+      }
+
+      // Create appointment
+      const appointmentData = {
+        customerId: currentUser.uid,
+        customerName: bookingData.customerInfo.name,
+        customerPhone: bookingData.customerInfo.phone,
+        customerEmail: bookingData.customerInfo.email,
+        serviceId: bookingData.serviceId,
+        serviceName: selectedService?.name,
+        serviceCategory: selectedService?.category,
+        servicePrice: selectedService?.price,
+        serviceDuration: selectedService?.duration || 60, // Default 60 minutes
+        staffId: bookingData.staffId,
+        staffName: selectedStaff?.name,
+        date: bookingData.date,
+        time: bookingData.time,
+        notes: bookingData.notes,
+        status: "pending",
+      };
+
+      await createAppointment(appointmentData);
+      alert("تم حجز موعدك بنجاح! سيتم التواصل معك قريباً لتأكيد الموعد.");
+      navigate("/profile");
+    } catch (error) {
+      console.error("Error creating appointment:", error);
+      alert("حدث خطأ أثناء حجز الموعد. يرجى المحاولة مرة أخرى.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const selectedService = sampleServices.find(
-    (s) => s.id === parseInt(bookingData.serviceId)
-  );
-  const selectedStaff = staffMembers.find(
-    (s) => s.id === parseInt(bookingData.staffId)
-  );
+  const selectedService = services.find((s) => s.id === bookingData.serviceId);
+  const selectedStaff = staffMembers.find((s) => s.id === bookingData.staffId);
 
   const getMinDate = () => {
     const tomorrow = new Date();
@@ -109,8 +185,60 @@ const BookingPage = ({ currentUser }) => {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="booking-page">
+        <section className="loading-section section">
+          <div className="container">
+            <div className="loading-card">
+              <div className="loading-spinner"></div>
+              <p>جاري تحميل البيانات...</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="booking-page">
+        <section className="error-section section">
+          <div className="container">
+            <div className="error-card">
+              <h2>حدث خطأ</h2>
+              <p>{error}</p>
+              <button
+                className="btn-primary"
+                onClick={() => window.location.reload()}
+              >
+                إعادة المحاولة
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="booking-page">
+      {/* Breadcrumb Navigation */}
+      <section className="booking-breadcrumb-section">
+        <div className="container">
+          <nav className="booking-breadcrumb">
+            <button
+              className="booking-breadcrumb-item"
+              onClick={() => navigate("/")}
+            >
+              الرئيسية
+            </button>
+            <span className="booking-breadcrumb-separator">/</span>
+            <span className="booking-breadcrumb-item active">حجز موعد</span>
+          </nav>
+        </div>
+      </section>
+
       {/* Service Category Selection */}
       {!selectedCategory && (
         <section className="category-selection section">
@@ -220,7 +348,7 @@ const BookingPage = ({ currentUser }) => {
                   </h2>
                 </div>
                 <div className="services-selection">
-                  {sampleServices
+                  {services
                     .filter((service) => service.category === selectedCategory)
                     .map((service) => (
                       <div
@@ -441,8 +569,12 @@ const BookingPage = ({ currentUser }) => {
                   </div>
 
                   <div className="booking-actions">
-                    <button type="submit" className="btn-primary confirm-btn">
-                      تأكيد الحجز
+                    <button
+                      type="submit"
+                      className="btn-primary confirm-btn"
+                      disabled={submitting}
+                    >
+                      {submitting ? "جاري الحجز..." : "تأكيد الحجز"}
                     </button>
                     <p className="booking-note">
                       سيتم التواصل معك خلال 24 ساعة لتأكيد الموعد
@@ -640,8 +772,9 @@ const BookingPage = ({ currentUser }) => {
                     <button
                       type="submit"
                       className="btn-primary consultation-btn"
+                      disabled={submitting}
                     >
-                      احجزي استشارتك المجانية
+                      {submitting ? "جاري الحجز..." : "احجزي استشارتك المجانية"}
                     </button>
                     <p className="consultation-note">
                       سيتم التواصل معك خلال 24 ساعة لتأكيد موعد الاستشارة

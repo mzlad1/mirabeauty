@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./ProductDetailsPage.css";
-import { sampleProducts } from "../data/sampleProducts";
+import { getProductById, getAllProducts } from "../services/productsService";
 import CartOverlay from "../components/common/CartOverlay";
 import ProductCard from "../components/customer/ProductCard";
 
@@ -9,6 +9,9 @@ const ProductDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
@@ -19,33 +22,73 @@ const ProductDetailsPage = () => {
   const [cartOpenedFromAdd, setCartOpenedFromAdd] = useState(false);
 
   useEffect(() => {
-    const foundProduct = sampleProducts.find((p) => p.id === parseInt(id));
-    if (foundProduct) {
-      setProduct({
-        ...foundProduct,
-        images: foundProduct.image
-          ? [foundProduct.image, foundProduct.image, foundProduct.image]
-          : [],
-        fullDescription:
-          foundProduct.description ||
-          "هذا المنتج مصنوع من أفضل المواد الطبيعية والآمنة على البشرة. يحتوي على مكونات فعالة تساعد في تحسين ملمس البشرة ونعومتها. مناسب لجميع أنواع البشرة ومختبر علمياً للحصول على أفضل النتائج.",
-        ingredients: foundProduct.ingredients || [
-          "حمض الهيالورونيك",
-          "فيتامين C",
-          "كولاجين طبيعي",
-          "مستخلص الصبار",
-          "زيت الأرغان",
-        ],
-        howToUse:
-          foundProduct.howToUse ||
-          "يُستخدم مرتين يومياً صباحاً ومساءً. ضعي كمية مناسبة على البشرة النظيفة ودلكي بلطف حتى الامتصاص الكامل.",
-        benefits: foundProduct.benefits || [
-          "ترطيب عميق للبشرة",
-          "تحسين ملمس البشرة",
-          "تقليل علامات الشيخوخة",
-          "حماية من العوامل الخارجية",
-        ],
-      });
+    const fetchProductData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch the main product
+        const fetchedProduct = await getProductById(id);
+
+        // Process the product data with enhanced details
+        const processedProduct = {
+          ...fetchedProduct,
+          images: fetchedProduct.image
+            ? [fetchedProduct.image, fetchedProduct.image, fetchedProduct.image]
+            : [],
+          fullDescription:
+            fetchedProduct.description ||
+            "هذا المنتج مصنوع من أفضل المواد الطبيعية والآمنة على البشرة. يحتوي على مكونات فعالة تساعد في تحسين ملمس البشرة ونعومتها. مناسب لجميع أنواع البشرة ومختبر علمياً للحصول على أفضل النتائج.",
+          ingredients: fetchedProduct.ingredients || [
+            "حمض الهيالورونيك",
+            "فيتامين C",
+            "كولاجين طبيعي",
+            "مستخلص الصبار",
+            "زيت الأرغان",
+          ],
+          howToUse:
+            fetchedProduct.howToUse ||
+            "يُستخدم مرتين يومياً صباحاً ومساءً. ضعي كمية مناسبة على البشرة النظيفة ودلكي بلطف حتى الامتصاص الكامل.",
+          benefits: fetchedProduct.benefits || [
+            "ترطيب عميق للبشرة",
+            "تحسين ملمس البشرة",
+            "تقليل علامات الشيخوخة",
+            "حماية من العوامل الخارجية",
+          ],
+        };
+
+        setProduct(processedProduct);
+
+        // Fetch all products for related products
+        const allProducts = await getAllProducts();
+
+        // Filter related products by category, excluding current product
+        let filteredRelated = allProducts.filter((p) => {
+          const matchesCategory =
+            p.category === fetchedProduct.category ||
+            p.categoryName === fetchedProduct.categoryName;
+          const isDifferentProduct = p.id !== fetchedProduct.id;
+          return matchesCategory && isDifferentProduct;
+        });
+
+        // If no products in same category, get random different products
+        if (filteredRelated.length === 0) {
+          filteredRelated = allProducts.filter(
+            (p) => p.id !== fetchedProduct.id
+          );
+        }
+
+        setRelatedProducts(filteredRelated.slice(0, 4));
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        setError("حدث خطأ في تحميل المنتج. يرجى المحاولة مرة أخرى.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchProductData();
     }
   }, [id]);
 
@@ -121,11 +164,45 @@ const ProductDetailsPage = () => {
     }
   };
 
-  if (!product) {
+  if (loading) {
     return (
       <div className="product-details-loading">
         <div className="product-details-loading-spinner"></div>
         <p>جاري تحميل تفاصيل المنتج...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="product-details-loading">
+        <div className="error-message">
+          <i className="fas fa-exclamation-triangle"></i>
+          <p>{error}</p>
+          <button
+            onClick={() => navigate("/products")}
+            className="btn btn-primary"
+          >
+            العودة للمنتجات
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="product-details-loading">
+        <div className="error-message">
+          <i className="fas fa-search"></i>
+          <p>المنتج غير موجود</p>
+          <button
+            onClick={() => navigate("/products")}
+            className="btn btn-primary"
+          >
+            العودة للمنتجات
+          </button>
+        </div>
       </div>
     );
   }
@@ -456,64 +533,46 @@ const ProductDetailsPage = () => {
             <p>اكتشفي منتجات أخرى قد تعجبك</p>
           </div>
           <div className="products-grid grid-4">
-            {(() => {
-              // First try to get products from same category
-              let relatedProducts = sampleProducts.filter((p) => {
-                const matchesCategory =
-                  p.category === product.category ||
-                  p.categoryName === product.categoryName;
-                const isDifferentProduct = p.id !== product.id;
-                return matchesCategory && isDifferentProduct;
-              });
+            {relatedProducts.map((relatedProduct) => (
+              <ProductCard
+                key={relatedProduct.id}
+                product={relatedProduct}
+                onAddToCart={(product) => {
+                  // Handle add to cart for related products
+                  const savedCart = localStorage.getItem("cartItems");
+                  const cartItems = savedCart ? JSON.parse(savedCart) : [];
 
-              // If no products found in same category, get random different products
-              if (relatedProducts.length === 0) {
-                relatedProducts = sampleProducts.filter(
-                  (p) => p.id !== product.id
-                );
-              }
+                  const existingItem = cartItems.find(
+                    (item) => item.id === product.id
+                  );
+                  let updatedCart;
 
-              return relatedProducts.slice(0, 4).map((relatedProduct) => (
-                <ProductCard
-                  key={relatedProduct.id}
-                  product={relatedProduct}
-                  onAddToCart={(product) => {
-                    // Handle add to cart for related products
-                    const savedCart = localStorage.getItem("cartItems");
-                    const cartItems = savedCart ? JSON.parse(savedCart) : [];
-
-                    const existingItem = cartItems.find(
-                      (item) => item.id === product.id
+                  if (existingItem) {
+                    updatedCart = cartItems.map((item) =>
+                      item.id === product.id
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
                     );
-                    let updatedCart;
-
-                    if (existingItem) {
-                      updatedCart = cartItems.map((item) =>
-                        item.id === product.id
-                          ? { ...item, quantity: item.quantity + 1 }
-                          : item
-                      );
-                      showToast(
-                        `تم زيادة كمية ${product.name} في السلة`,
-                        "success"
-                      );
-                    } else {
-                      updatedCart = [...cartItems, { ...product, quantity: 1 }];
-                      showToast(
-                        `تم إضافة ${product.name} للسلة بنجاح`,
-                        "success"
-                      );
-                    }
-
-                    localStorage.setItem(
-                      "cartItems",
-                      JSON.stringify(updatedCart)
+                    showToast(
+                      `تم زيادة كمية ${product.name} في السلة`,
+                      "success"
                     );
-                    window.dispatchEvent(new Event("cartUpdated"));
-                  }}
-                />
-              ));
-            })()}
+                  } else {
+                    updatedCart = [...cartItems, { ...product, quantity: 1 }];
+                    showToast(
+                      `تم إضافة ${product.name} للسلة بنجاح`,
+                      "success"
+                    );
+                  }
+
+                  localStorage.setItem(
+                    "cartItems",
+                    JSON.stringify(updatedCart)
+                  );
+                  window.dispatchEvent(new Event("cartUpdated"));
+                }}
+              />
+            ))}
           </div>
         </div>
       </section>

@@ -1,55 +1,141 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ProfilePage.css";
-import { sampleAppointments } from "../data/sampleAppointments";
+import {
+  getAppointmentsByCustomer,
+  cancelAppointment,
+  updateAppointment,
+  checkStaffAvailability,
+} from "../services/appointmentsService";
+import { updateUser, getUserById } from "../services/usersService";
+import AppointmentEditModal from "../components/profile/AppointmentEditModal";
 
-const ProfilePage = ({ currentUser, setCurrentUser }) => {
+const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [editMode, setEditMode] = useState(false);
   const [userAppointments, setUserAppointments] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [completeUserData, setCompleteUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [editData, setEditData] = useState({
-    name: currentUser.name,
-    phone: currentUser.phone,
-    address: currentUser.address || "",
-    skinType: currentUser.skinType || "",
-    allergies: currentUser.allergies ? currentUser.allergies.join(", ") : "",
+    name: "",
+    phone: "",
+    address: "",
+    skinType: "",
+    allergies: "",
   });
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState(null);
+
+  // Helper function to parse price string to number
+  const parsePrice = (priceString) => {
+    if (!priceString) return 0;
+    if (typeof priceString === "number") return priceString;
+    // Extract numeric value from strings like "200 شيكل" or "200"
+    const match = priceString.toString().match(/\d+/);
+    return match ? parseInt(match[0]) : 0;
+  };
 
   useEffect(() => {
-    // Filter appointments for current user
-    const appointments = sampleAppointments.filter(
-      (appointment) => appointment.customerId === currentUser.id
-    );
-    setUserAppointments(appointments);
-  }, [currentUser.id]);
+    const loadUserData = async () => {
+      if (currentUser?.uid) {
+        setLoading(true);
+        try {
+          // Load complete user data from Firestore
+          const userData = await getUserById(currentUser.uid);
+          const mergedUserData = {
+            ...currentUser,
+            ...userData,
+          };
+          setCompleteUserData(mergedUserData);
+
+          // Initialize edit form with complete data
+          setEditData({
+            name: userData?.name || currentUser?.displayName || "",
+            phone: userData?.phone || "",
+            address: userData?.address || "",
+            skinType: userData?.skinType || "",
+            allergies: userData?.allergies
+              ? Array.isArray(userData.allergies)
+                ? userData.allergies.join(", ")
+                : userData.allergies
+              : "",
+          });
+
+          // Load appointments
+          const appointments = await getAppointmentsByCustomer(currentUser.uid);
+          setUserAppointments(appointments);
+        } catch (error) {
+          console.error("Error loading user data:", error);
+          setUserAppointments([]);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, [currentUser?.uid]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditData({ ...editData, [name]: value });
   };
 
-  const handleSaveProfile = () => {
-    const updatedUser = {
-      ...currentUser,
-      name: editData.name,
-      phone: editData.phone,
-      address: editData.address,
-      skinType: editData.skinType,
-      allergies: editData.allergies
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean),
-    };
-    setCurrentUser(updatedUser);
-    setEditMode(false);
+  const handleSaveProfile = async () => {
+    setSubmitting(true);
+    try {
+      const updatedUserData = {
+        name: editData.name,
+        phone: editData.phone,
+        address: editData.address,
+        skinType: editData.skinType,
+        allergies: editData.allergies
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean),
+      };
+
+      await updateUser(currentUser.uid, updatedUserData);
+
+      const updatedUser = {
+        ...currentUser,
+        ...updatedUserData,
+      };
+
+      const updatedCompleteData = {
+        ...completeUserData,
+        ...updatedUserData,
+      };
+
+      if (typeof setCurrentUser === "function") {
+        setCurrentUser(updatedUser);
+      }
+      setCompleteUserData(updatedCompleteData);
+      setEditMode(false);
+      alert("تم تحديث بياناتك بنجاح");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("حدث خطأ أثناء تحديث البيانات");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleCancelEdit = () => {
     setEditData({
-      name: currentUser.name,
-      phone: currentUser.phone,
-      address: currentUser.address || "",
-      skinType: currentUser.skinType || "",
-      allergies: currentUser.allergies ? currentUser.allergies.join(", ") : "",
+      name: completeUserData?.name || currentUser?.displayName || "",
+      phone: completeUserData?.phone || "",
+      address: completeUserData?.address || "",
+      skinType: completeUserData?.skinType || "",
+      allergies: completeUserData?.allergies
+        ? Array.isArray(completeUserData.allergies)
+          ? completeUserData.allergies.join(", ")
+          : completeUserData.allergies
+        : "",
     });
     setEditMode(false);
   };
@@ -69,6 +155,66 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
     }
   };
 
+  // Handle appointment cancellation
+  const handleCancelAppointment = async (appointmentId) => {
+    if (!window.confirm("هل أنت متأكدة من إلغاء هذا الموعد؟")) {
+      return;
+    }
+
+    try {
+      await cancelAppointment(appointmentId, "إلغاء من قبل العميل");
+      // Reload appointments
+      const appointments = await getAppointmentsByCustomer(currentUser.uid);
+      setUserAppointments(appointments);
+      alert("تم إلغاء الموعد بنجاح");
+    } catch (error) {
+      console.error("Error cancelling appointment:", error);
+      alert("حدث خطأ أثناء إلغاء الموعد");
+    }
+  };
+
+  // Handle appointment edit - open edit modal
+  const handleEditAppointment = (appointment) => {
+    setEditingAppointment(appointment);
+    setIsEditModalOpen(true);
+  };
+
+  // Handle appointment edit submission
+  const handleAppointmentEditSubmit = async (updatedData) => {
+    try {
+      // Check if the new date/time is available for the staff member
+      const isAvailable = await checkStaffAvailability(
+        editingAppointment.staffId,
+        updatedData.date,
+        updatedData.time
+      );
+
+      if (!isAvailable) {
+        alert("عذراً، الموعد المختار محجوز بالفعل. يرجى اختيار موعد آخر.");
+        return;
+      }
+
+      // Update the appointment
+      await updateAppointment(editingAppointment.id, {
+        date: updatedData.date,
+        time: updatedData.time,
+        notes: updatedData.notes,
+        status: "في الانتظار", // Reset to pending after edit
+      });
+
+      // Reload appointments
+      const appointments = await getAppointmentsByCustomer(currentUser.uid);
+      setUserAppointments(appointments);
+
+      setIsEditModalOpen(false);
+      setEditingAppointment(null);
+      alert("تم تعديل الموعد بنجاح. سيتم مراجعته والتواصل معك للتأكيد.");
+    } catch (error) {
+      console.error("Error updating appointment:", error);
+      throw error;
+    }
+  };
+
   const upcomingAppointments = userAppointments.filter(
     (apt) => apt.status === "مؤكد" || apt.status === "في الانتظار"
   );
@@ -77,8 +223,26 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
     (apt) => apt.status === "مكتمل"
   );
 
-  const totalSpent = pastAppointments.reduce((sum, apt) => sum + apt.price, 0);
+  const totalSpent = pastAppointments.reduce((sum, apt) => {
+    const price = parsePrice(apt.servicePrice || apt.price);
+    return sum + price;
+  }, 0);
   const loyaltyPoints = Math.floor(totalSpent / 10);
+
+  if (loading || !completeUserData) {
+    return (
+      <div className="profile-page">
+        <section className="loading-section section">
+          <div className="container">
+            <div className="loading-card">
+              <div className="loading-spinner"></div>
+              <p>جاري تحميل البيانات...</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="profile-page">
@@ -90,10 +254,18 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
             <aside className="profile-sidebar">
               <div className="profile-card">
                 <div className="profile-avatar">
-                  <img src={currentUser.avatar} alt={currentUser.name} />
+                  <img
+                    src={
+                      completeUserData.avatar || "/assets/default-avatar.jpg"
+                    }
+                    alt={completeUserData.name}
+                    onError={(e) => {
+                      e.target.src = "/assets/default-avatar.jpg";
+                    }}
+                  />
                 </div>
-                <h3>{currentUser.name}</h3>
-                <p>{currentUser.email}</p>
+                <h3>{completeUserData.name}</h3>
+                <p>{completeUserData.email}</p>
                 <div className="profile-stats">
                   <div className="stat-item">
                     <span className="stat-number">
@@ -205,13 +377,10 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                               {upcomingAppointments[0].date}
                             </span>
                             <span className="time">
-                              🕐 {upcomingAppointments[0].time}
+                              <i className="fas fa-clock"></i>{" "}
+                              {upcomingAppointments[0].time}
                             </span>
                           </div>
-                        </div>
-                        <div className="appointment-actions">
-                          <button className="btn-secondary">تعديل</button>
-                          <button className="btn-primary">تفاصيل</button>
                         </div>
                       </div>
                     </div>
@@ -288,13 +457,16 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                             <div className="detail-row">
                               <span className="label">المدة:</span>
                               <span className="value">
-                                {appointment.duration} دقيقة
+                                {appointment.serviceDuration ||
+                                  appointment.duration}{" "}
+                                دقيقة
                               </span>
                             </div>
                             <div className="detail-row">
                               <span className="label">السعر:</span>
                               <span className="value">
-                                {appointment.price} شيكل
+                                {appointment.servicePrice || appointment.price}{" "}
+                                شيكل
                               </span>
                             </div>
                             {appointment.notes && (
@@ -307,10 +479,19 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                             )}
                           </div>
                           <div className="appointment-actions">
-                            <button className="action-btn cancel">إلغاء</button>
-                            <button className="action-btn edit">تعديل</button>
-                            <button className="action-btn details">
-                              تفاصيل
+                            <button
+                              className="action-btn cancel"
+                              onClick={() =>
+                                handleCancelAppointment(appointment.id)
+                              }
+                            >
+                              إلغاء
+                            </button>
+                            <button
+                              className="action-btn edit"
+                              onClick={() => handleEditAppointment(appointment)}
+                            >
+                              تعديل
                             </button>
                           </div>
                         </div>
@@ -320,7 +501,12 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                     <div className="empty-state">
                       <h3>لا توجد مواعيد قادمة</h3>
                       <p>احجزي موعدك القادم الآن</p>
-                      <button className="btn-primary">احجزي موعد</button>
+                      <button
+                        className="btn-primary"
+                        onClick={() => navigate("/book")}
+                      >
+                        احجزي موعد
+                      </button>
                     </div>
                   )}
                 </div>
@@ -341,7 +527,11 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                           </div>
                           <div className="history-details">
                             <p>الأخصائية: {appointment.staffName}</p>
-                            <p>السعر: {appointment.price} شيكل</p>
+                            <p>
+                              السعر:{" "}
+                              {appointment.servicePrice || appointment.price}{" "}
+                              شيكل
+                            </p>
                             {appointment.rating && (
                               <div className="rating">
                                 <span>التقييم: </span>
@@ -381,7 +571,7 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                   <h2>إعدادات الحساب</h2>
 
                   <div className="settings-section">
-                    <div className="section-header">
+                    <div className="profile-section-header">
                       <h3>المعلومات الشخصية</h3>
                       {!editMode ? (
                         <button
@@ -401,8 +591,9 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                           <button
                             className="btn-primary"
                             onClick={handleSaveProfile}
+                            disabled={submitting}
                           >
-                            حفظ
+                            {submitting ? "جاري الحفظ..." : "حفظ"}
                           </button>
                         </div>
                       )}
@@ -420,13 +611,15 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                             className="form-input"
                           />
                         ) : (
-                          <p className="form-value">{currentUser.name}</p>
+                          <p className="form-value">
+                            {completeUserData?.name || "غير محدد"}
+                          </p>
                         )}
                       </div>
 
                       <div className="form-group">
                         <label className="form-label">البريد الإلكتروني</label>
-                        <p className="form-value">{currentUser.email}</p>
+                        <p className="form-value">{completeUserData.email}</p>
                         <small>لا يمكن تغيير البريد الإلكتروني</small>
                       </div>
 
@@ -441,7 +634,9 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                             className="form-input"
                           />
                         ) : (
-                          <p className="form-value">{currentUser.phone}</p>
+                          <p className="form-value">
+                            {completeUserData?.phone || "غير محدد"}
+                          </p>
                         )}
                       </div>
 
@@ -457,7 +652,7 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                           />
                         ) : (
                           <p className="form-value">
-                            {currentUser.address || "غير محدد"}
+                            {completeUserData?.address || "غير محدد"}
                           </p>
                         )}
                       </div>
@@ -480,7 +675,7 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                           </select>
                         ) : (
                           <p className="form-value">
-                            {currentUser.skinType || "غير محدد"}
+                            {completeUserData?.skinType || "غير محدد"}
                           </p>
                         )}
                       </div>
@@ -497,8 +692,10 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
                           />
                         ) : (
                           <p className="form-value">
-                            {currentUser.allergies
-                              ? currentUser.allergies.join(", ")
+                            {completeUserData?.allergies
+                              ? Array.isArray(completeUserData.allergies)
+                                ? completeUserData.allergies.join(", ")
+                                : completeUserData.allergies
                               : "لا توجد"}
                           </p>
                         )}
@@ -511,6 +708,17 @@ const ProfilePage = ({ currentUser, setCurrentUser }) => {
           </div>
         </div>
       </section>
+
+      {/* Appointment Edit Modal */}
+      <AppointmentEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingAppointment(null);
+        }}
+        onSubmit={handleAppointmentEditSubmit}
+        appointment={editingAppointment}
+      />
     </div>
   );
 };

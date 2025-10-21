@@ -1,9 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./RegisterPage.css";
+import {
+  registerCustomer,
+  getFirebaseErrorMessage,
+} from "../services/authService";
+import { useAuth } from "../hooks/useAuth.jsx";
 
-const RegisterPage = ({ setCurrentUser }) => {
+const RegisterPage = () => {
   const navigate = useNavigate();
+  const { refreshUserData } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -57,8 +63,13 @@ const RegisterPage = ({ setCurrentUser }) => {
 
     if (!formData.phone) {
       newErrors.phone = "رقم الهاتف مطلوب";
-    } else if (!/^[+970|0]\d{9,10}$/.test(formData.phone.replace(/\s/g, ""))) {
-      newErrors.phone = "رقم الهاتف غير صحيح";
+    } else {
+      const cleanPhone = formData.phone.replace(/\s/g, "");
+      // Support Palestinian (+970), Israeli (+972), and local numbers (059...)
+      const phoneRegex = /^(\+970\d{9}|\+972\d{9}|05[0-9]\d{7})$/;
+      if (!phoneRegex.test(cleanPhone)) {
+        newErrors.phone = "رقم الهاتف غير صحيح";
+      }
     }
 
     if (!formData.password) {
@@ -103,32 +114,35 @@ const RegisterPage = ({ setCurrentUser }) => {
     }
 
     setLoading(true);
+    setErrors({}); // Clear any previous errors
 
-    // Simulate API call
-    setTimeout(() => {
-      // Create new user object
-      const newUser = {
-        id: Date.now(), // Simple ID generation for demo
+    try {
+      // Register user with Firebase
+      await registerCustomer({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
+        password: formData.password,
         birthDate: formData.birthDate,
         skinType: formData.skinType,
-        allergies: formData.allergies || ["لا توجد"],
-        role: "customer",
-        joinDate: new Date().toISOString(),
-        active: true,
-        appointmentsCount: 0,
-        totalSpent: 0,
-        loyaltyPoints: 0,
-        avatar:
-          "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=761&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      };
+        allergies: formData.allergies || [],
+      });
 
-      setCurrentUser(newUser);
-      navigate("/profile");
+      // Force refresh user data in auth context
+      await refreshUserData();
+
+      // Small delay to ensure auth state is updated
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      // Navigate to home page after successful registration
+      navigate("/");
+    } catch (error) {
+      console.error("Registration error:", error);
+      const errorMessage = getFirebaseErrorMessage(error);
+      setErrors({ general: errorMessage });
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const getMaxDate = () => {
@@ -202,7 +216,7 @@ const RegisterPage = ({ setCurrentUser }) => {
                         value={formData.phone}
                         onChange={handleInputChange}
                         className={`form-input ${errors.phone ? "error" : ""}`}
-                        placeholder="+970 5X XXX XXXX"
+                        placeholder="059XXXXXXX"
                         disabled={loading}
                       />
                       {errors.phone && (
@@ -349,6 +363,23 @@ const RegisterPage = ({ setCurrentUser }) => {
                     )}
                   </div>
                 </div>
+
+                {errors.general && (
+                  <div
+                    className="form-error-message"
+                    style={{
+                      color: "#dc3545",
+                      textAlign: "center",
+                      marginBottom: "1rem",
+                      padding: "0.75rem",
+                      backgroundColor: "#f8d7da",
+                      border: "1px solid #f5c6cb",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    {errors.general}
+                  </div>
+                )}
 
                 <button
                   type="submit"

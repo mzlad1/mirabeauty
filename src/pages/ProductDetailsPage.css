@@ -24,6 +24,31 @@
   animation: spin 1s linear infinite;
 }
 
+/* Error Message */
+.error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.error-message i {
+  font-size: 3rem;
+  color: var(--gold);
+}
+
+.error-message p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.error-message .btn {
+  margin-top: 1rem;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -576,6 +601,7 @@
   color: var(--text-secondary);
   line-height: 1.7;
   padding-right: 1.5rem;
+  list-style: none;
 }
 
 .product-details-tab-content li {

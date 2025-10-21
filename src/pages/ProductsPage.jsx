@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ProductsPage.css";
-import { sampleProducts } from "../data/sampleProducts";
+import {
+  getAllProducts,
+  getProductsByCategory,
+} from "../services/productsService";
 import CartOverlay from "../components/common/CartOverlay";
 
 const ProductsPage = ({ setCurrentPage }) => {
@@ -12,6 +15,9 @@ const ProductsPage = ({ setCurrentPage }) => {
   const [cartItemsCount, setCartItemsCount] = useState(0);
   const [cartItems, setCartItems] = useState([]);
   const [cartOpenedFromAdd, setCartOpenedFromAdd] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const categories = [
     { id: "all", name: "جميع المنتجات" },
@@ -27,6 +33,7 @@ const ProductsPage = ({ setCurrentPage }) => {
 
   useEffect(() => {
     updateCartData();
+    loadProducts();
 
     const handleCartUpdate = () => {
       updateCartData();
@@ -35,6 +42,10 @@ const ProductsPage = ({ setCurrentPage }) => {
     window.addEventListener("cartUpdated", handleCartUpdate);
     return () => window.removeEventListener("cartUpdated", handleCartUpdate);
   }, []);
+
+  useEffect(() => {
+    loadProducts();
+  }, [selectedCategory]);
 
   const updateCartData = () => {
     const savedCart = localStorage.getItem("cartItems");
@@ -49,12 +60,29 @@ const ProductsPage = ({ setCurrentPage }) => {
     }
   };
 
-  const filteredProducts =
-    selectedCategory === "all"
-      ? sampleProducts
-      : sampleProducts.filter(
-          (product) => product.category === selectedCategory
-        );
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      let productsData;
+      if (selectedCategory === "all") {
+        productsData = await getAllProducts();
+      } else {
+        productsData = await getProductsByCategory(selectedCategory);
+      }
+
+      setProducts(productsData);
+    } catch (error) {
+      console.error("Error loading products:", error);
+      setError("فشل في تحميل المنتجات. يرجى المحاولة مرة أخرى.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Products are already filtered by loadProducts function
+  const filteredProducts = products;
 
   const addToCart = (product) => {
     const savedCart = localStorage.getItem("cartItems");
@@ -162,87 +190,149 @@ const ProductsPage = ({ setCurrentPage }) => {
                     : categories.find((c) => c.id === selectedCategory)?.name}
                 </h2>
                 <span className="products-count">
-                  {filteredProducts.length} منتجات
+                  {loading
+                    ? "جاري التحميل..."
+                    : `${filteredProducts.length} منتجات`}
                 </span>
               </div>
 
-              <div className="products-grid">
-                {filteredProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="product-card"
-                    onClick={() => navigate(`/products/${product.id}`)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <div className="product-image">
-                      <img src={product.image} alt={product.name} />
-                      {product.originalPrice && (
-                        <div className="discount-badge">
-                          خصم{" "}
-                          {Math.round(
-                            (1 -
-                              parseInt(product.price) /
-                                parseInt(product.originalPrice)) *
-                              100
-                          )}
-                          %
-                        </div>
-                      )}
-                      {!product.inStock && (
-                        <div className="out-of-stock-badge">نفذ من المخزن</div>
-                      )}
-                      {product.inStock && (
-                        <button
-                          className="product-add-to-cart-icon"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            addToCart(product);
-                          }}
-                          title="إضافة إلى السلة"
-                        >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <path d="M7 18c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-0.16 0.28-0.25 0.61-0.25 0.96 0 1.1 0.9 2 2 2h12v-2H7.42c-0.14 0-0.25-0.11-0.25-0.25l0.03-0.12L8.1 13h7.45c0.75 0 1.41-0.42 1.75-1.03L21.7 4H5.21l-0.94-2H1zm16 16c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2z" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
+              {/* Loading State */}
+              {loading && (
+                <div
+                  className="products-loading"
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "300px",
+                    fontSize: "1.2rem",
+                    color: "#0b2235",
+                  }}
+                >
+                  <i
+                    className="fas fa-spinner fa-spin"
+                    style={{ marginLeft: "10px" }}
+                  ></i>
+                  جاري تحميل المنتجات...
+                </div>
+              )}
 
-                    <div className="product-info">
-                      <h3>{product.name}</h3>
-                      {/* <p className="product-description">
+              {/* Error State */}
+              {error && (
+                <div
+                  className="products-error"
+                  style={{
+                    background: "#f8d7da",
+                    color: "#721c24",
+                    padding: "1rem",
+                    borderRadius: "8px",
+                    textAlign: "center",
+                    margin: "2rem 0",
+                  }}
+                >
+                  <i
+                    className="fas fa-exclamation-triangle"
+                    style={{ marginLeft: "10px" }}
+                  ></i>
+                  {error}
+                  <button
+                    onClick={loadProducts}
+                    style={{
+                      marginRight: "10px",
+                      background: "#721c24",
+                      color: "white",
+                      border: "none",
+                      padding: "5px 10px",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    إعادة المحاولة
+                  </button>
+                </div>
+              )}
+
+              <div className="products-grid">
+                {!loading &&
+                  !error &&
+                  filteredProducts.map((product) => (
+                    <div
+                      key={product.id}
+                      className="product-card"
+                      onClick={() => navigate(`/products/${product.id}`)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <div className="product-image">
+                        <img src={product.image} alt={product.name} />
+                        {product.originalPrice && (
+                          <div className="discount-badge">
+                            خصم{" "}
+                            {Math.round(
+                              (1 -
+                                parseInt(product.price) /
+                                  parseInt(product.originalPrice)) *
+                                100
+                            )}
+                            %
+                          </div>
+                        )}
+                        {!product.inStock && (
+                          <div className="out-of-stock-badge">
+                            نفذ من المخزن
+                          </div>
+                        )}
+                        {product.inStock && (
+                          <button
+                            className="product-add-to-cart-icon"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              addToCart(product);
+                            }}
+                            title="إضافة إلى السلة"
+                          >
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path d="M7 18c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-0.16 0.28-0.25 0.61-0.25 0.96 0 1.1 0.9 2 2 2h12v-2H7.42c-0.14 0-0.25-0.11-0.25-0.25l0.03-0.12L8.1 13h7.45c0.75 0 1.41-0.42 1.75-1.03L21.7 4H5.21l-0.94-2H1zm16 16c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2z" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="product-info">
+                        <h3>{product.name}</h3>
+                        {/* <p className="product-description">
                         {product.description}
                       </p> */}
 
-                      <div className="product-rating">
-                        <div className="stars">
-                          {"⭐".repeat(Math.floor(product.rating))}
-                        </div>
-                        <span className="rating-text">
-                          {product.rating} ({product.reviewsCount} تقييم)
-                        </span>
-                      </div>
-
-                      <div className="product-price">
-                        <span className="current-price">{product.price}</span>
-                        {product.originalPrice && (
-                          <span className="original-price">
-                            {product.originalPrice}
+                        <div className="product-rating">
+                          <div className="stars">
+                            {"⭐".repeat(Math.floor(product.rating))}
+                          </div>
+                          <span className="rating-text">
+                            {product.rating} ({product.reviewsCount} تقييم)
                           </span>
-                        )}
+                        </div>
+
+                        <div className="product-price">
+                          <span className="current-price">{product.price}</span>
+                          {product.originalPrice && (
+                            <span className="original-price">
+                              {product.originalPrice}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
 
               {/* No Products Message */}
-              {filteredProducts.length === 0 && (
+              {!loading && !error && filteredProducts.length === 0 && (
                 <div className="no-products">
                   <h3>لا توجد منتجات في هذه الفئة حالياً</h3>
                   <p>يرجى اختيار فئة أخرى أو العودة لاحقاً</p>

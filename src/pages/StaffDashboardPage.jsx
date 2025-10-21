@@ -1,18 +1,63 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./StaffDashboardPage.css";
-import { sampleAppointments } from "../data/sampleAppointments";
-import { sampleUsers } from "../data/sampleUsers";
+import {
+  getAppointmentsByStaff,
+  updateAppointmentStatus,
+  confirmAppointment,
+  completeAppointment,
+} from "../services/appointmentsService";
+import { getCustomers } from "../services/usersService";
 
-const StaffDashboardPage = ({ currentUser }) => {
+const StaffDashboardPage = ({ currentUser, userData }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
+  const [myAppointments, setMyAppointments] = useState([]);
+  const [myCustomers, setMyCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Filter appointments for current staff member
-  const myAppointments = sampleAppointments.filter(
-    (appointment) => appointment.staffId === currentUser.id
-  );
+  // Helper function to parse price string to number
+  const parsePrice = (priceString) => {
+    if (!priceString) return 0;
+    if (typeof priceString === "number") return priceString;
+    // Extract numeric value from strings like "200 شيكل" or "200"
+    const match = priceString.toString().match(/\d+/);
+    return match ? parseInt(match[0]) : 0;
+  };
+
+  // Load staff appointments and customers
+  useEffect(() => {
+    const loadStaffData = async () => {
+      if (!currentUser?.uid) return;
+
+      try {
+        setLoading(true);
+        const [appointmentsData, customersData] = await Promise.all([
+          getAppointmentsByStaff(currentUser.uid),
+          getCustomers(),
+        ]);
+
+        setMyAppointments(appointmentsData);
+
+        // Filter customers who have appointments with this staff member
+        const staffCustomers = customersData.filter((customer) =>
+          appointmentsData.some((apt) => apt.customerId === customer.id)
+        );
+        setMyCustomers(staffCustomers);
+      } catch (err) {
+        console.error("Error loading staff data:", err);
+        setError("فشل في تحميل البيانات");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStaffData();
+  }, [currentUser?.uid]);
 
   const todayAppointments = myAppointments.filter((apt) => {
     const today = new Date().toISOString().split("T")[0];
@@ -33,22 +78,14 @@ const StaffDashboardPage = ({ currentUser }) => {
     (apt) => apt.date === selectedDate
   );
 
-  const myRevenue = completedAppointments.reduce(
-    (sum, apt) => sum + apt.price,
-    0
-  );
+  const myRevenue = completedAppointments.reduce((sum, apt) => {
+    const price = parsePrice(apt.servicePrice || apt.price);
+    return sum + price;
+  }, 0);
   const completionRate =
     myAppointments.length > 0
       ? Math.round((completedAppointments.length / myAppointments.length) * 100)
       : 0;
-
-  // Get customers for this staff member
-  const myCustomers = sampleUsers.filter((user) => {
-    return (
-      user.role === "customer" &&
-      myAppointments.some((apt) => apt.customerId === user.id)
-    );
-  });
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -65,16 +102,122 @@ const StaffDashboardPage = ({ currentUser }) => {
     }
   };
 
-  const getTimeSlots = () => {
-    const slots = [];
-    for (let hour = 9; hour <= 17; hour++) {
-      slots.push(`${hour.toString().padStart(2, "0")}:00`);
-      if (hour < 17) {
-        slots.push(`${hour.toString().padStart(2, "0")}:30`);
-      }
+  // Reload appointments
+  const reloadAppointments = async () => {
+    try {
+      const appointmentsData = await getAppointmentsByStaff(currentUser.uid);
+      setMyAppointments(appointmentsData);
+    } catch (error) {
+      console.error("Error reloading appointments:", error);
     }
-    return slots;
   };
+
+  // Handle confirm appointment
+  const handleConfirmAppointment = async (appointmentId) => {
+    if (!window.confirm("هل تريد تأكيد هذا الموعد؟")) {
+      return;
+    }
+
+    try {
+      await confirmAppointment(appointmentId);
+      await reloadAppointments();
+      alert("تم تأكيد الموعد بنجاح");
+    } catch (error) {
+      console.error("Error confirming appointment:", error);
+      alert("حدث خطأ أثناء تأكيد الموعد");
+    }
+  };
+
+  // Handle complete appointment
+  const handleCompleteAppointment = async (appointmentId) => {
+    if (!window.confirm("هل تريد إتمام هذا الموعد؟")) {
+      return;
+    }
+
+    try {
+      await completeAppointment(appointmentId);
+      await reloadAppointments();
+      alert("تم إتمام الموعد بنجاح");
+    } catch (error) {
+      console.error("Error completing appointment:", error);
+      alert("حدث خطأ أثناء إتمام الموعد");
+    }
+  };
+
+  // Handle edit appointment
+  const handleEditAppointment = (appointment) => {
+    alert(
+      "لتعديل الموعد، يرجى التواصل مع الإدارة. سيتم إضافة هذه الميزة قريباً."
+    );
+  };
+
+  // Handle view appointment details
+  const handleViewAppointmentDetails = (appointment) => {
+    alert(
+      `تفاصيل الموعد:\n\nالعميل: ${appointment.customerName}\nالخدمة: ${
+        appointment.serviceName
+      }\nالتاريخ: ${appointment.date}\nالوقت: ${appointment.time}\nالمدة: ${
+        appointment.serviceDuration || appointment.duration
+      } دقيقة\nالسعر: ${
+        appointment.servicePrice || appointment.price
+      } شيكل\nالملاحظات: ${appointment.notes || "لا توجد"}`
+    );
+  };
+
+  // Handle book appointment for customer
+  const handleBookAppointment = () => {
+    navigate("/book");
+  };
+
+  // Handle view customer history
+  const handleViewCustomerHistory = (customer) => {
+    const customerAppts = myAppointments.filter(
+      (apt) => apt.customerId === customer.id
+    );
+    const history = customerAppts
+      .map((apt) => `${apt.date} - ${apt.serviceName} - ${apt.status}`)
+      .join("\n");
+
+    alert(
+      `تاريخ جلسات ${customer.name}:\n\n${history || "لا توجد جلسات سابقة"}`
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="staff-dashboard">
+        <section className="dashboard-content">
+          <div className="container">
+            <div className="loading-state">
+              <div className="loading-spinner"></div>
+              <p>جاري تحميل البيانات...</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="staff-dashboard">
+        <section className="dashboard-content">
+          <div className="container">
+            <div className="error-state">
+              <i className="fas fa-exclamation-triangle"></i>
+              <p>{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="btn-primary"
+              >
+                إعادة المحاولة
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="staff-dashboard">
@@ -206,7 +349,9 @@ const StaffDashboardPage = ({ currentUser }) => {
                                 <h4>{appointment.customerName}</h4>
                                 <p>{appointment.serviceName}</p>
                                 <span className="duration">
-                                  {appointment.duration} دقيقة
+                                  {appointment.serviceDuration ||
+                                    appointment.duration}{" "}
+                                  دقيقة
                                 </span>
                               </div>
                               <span
@@ -302,7 +447,9 @@ const StaffDashboardPage = ({ currentUser }) => {
                                   <h4>{appointment.customerName}</h4>
                                   <p>{appointment.serviceName}</p>
                                   <span className="slot-duration">
-                                    {appointment.duration} دقيقة
+                                    {appointment.serviceDuration ||
+                                      appointment.duration}{" "}
+                                    دقيقة
                                   </span>
                                   <span
                                     className={`slot-status ${getStatusColor(
@@ -379,11 +526,15 @@ const StaffDashboardPage = ({ currentUser }) => {
                                 </span>
                                 <span>
                                   <i className="fas fa-hourglass-half"></i>{" "}
-                                  {appointment.duration} دقيقة
+                                  {appointment.serviceDuration ||
+                                    appointment.duration}{" "}
+                                  دقيقة
                                 </span>
                                 <span>
                                   <i className="fas fa-money-bill"></i>{" "}
-                                  {appointment.price} شيكل
+                                  {appointment.servicePrice ||
+                                    appointment.price}{" "}
+                                  شيكل
                                 </span>
                               </div>
                             </div>
@@ -396,17 +547,39 @@ const StaffDashboardPage = ({ currentUser }) => {
                           </div>
                           <div className="appointment-actions">
                             {appointment.status === "في الانتظار" && (
-                              <button className="action-btn confirm">
+                              <button
+                                className="action-btn confirm"
+                                onClick={() =>
+                                  handleConfirmAppointment(appointment.id)
+                                }
+                              >
                                 تأكيد
                               </button>
                             )}
                             {appointment.status === "مؤكد" && (
-                              <button className="action-btn complete">
+                              <button
+                                className="action-btn complete"
+                                onClick={() =>
+                                  handleCompleteAppointment(appointment.id)
+                                }
+                              >
                                 إتمام
                               </button>
                             )}
-                            <button className="action-btn edit">تعديل</button>
-                            <button className="action-btn view">تفاصيل</button>
+                            <button
+                              className="action-btn edit"
+                              onClick={() => handleEditAppointment(appointment)}
+                            >
+                              تعديل
+                            </button>
+                            <button
+                              className="action-btn view"
+                              onClick={() =>
+                                handleViewAppointmentDetails(appointment)
+                              }
+                            >
+                              تفاصيل
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -426,12 +599,25 @@ const StaffDashboardPage = ({ currentUser }) => {
                       );
                       const customerRevenue = customerAppointments
                         .filter((apt) => apt.status === "مكتمل")
-                        .reduce((sum, apt) => sum + apt.price, 0);
+                        .reduce((sum, apt) => {
+                          const price = parsePrice(
+                            apt.servicePrice || apt.price
+                          );
+                          return sum + price;
+                        }, 0);
 
                       return (
                         <div key={customer.id} className="customer-card">
                           <div className="customer-header">
-                            <img src={customer.avatar} alt={customer.name} />
+                            <img
+                              src={
+                                customer.avatar || "/assets/default-avatar.jpg"
+                              }
+                              alt={customer.name}
+                              onError={(e) => {
+                                e.target.src = "/assets/default-avatar.jpg";
+                              }}
+                            />
                             <div className="customer-info">
                               <h4>{customer.name}</h4>
                               <p>{customer.phone}</p>
@@ -469,8 +655,20 @@ const StaffDashboardPage = ({ currentUser }) => {
                             </div>
                           </div>
                           <div className="customer-actions">
-                            <button className="action-btn">حجز موعد</button>
-                            <button className="action-btn">عرض التاريخ</button>
+                            <button
+                              className="action-btn"
+                              onClick={handleBookAppointment}
+                            >
+                              حجز موعد
+                            </button>
+                            <button
+                              className="action-btn"
+                              onClick={() =>
+                                handleViewCustomerHistory(customer)
+                              }
+                            >
+                              عرض التاريخ
+                            </button>
                           </div>
                         </div>
                       );

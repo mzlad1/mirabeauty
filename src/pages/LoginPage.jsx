@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
-import { sampleUsers } from "../data/sampleUsers";
+import { loginUser, getFirebaseErrorMessage } from "../services/authService";
+import { useAuth } from "../hooks/useAuth.jsx";
 
-const LoginPage = ({ setCurrentUser }) => {
+const LoginPage = () => {
   const navigate = useNavigate();
+  const { refreshUserData } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -49,40 +51,40 @@ const LoginPage = ({ setCurrentUser }) => {
     }
 
     setLoading(true);
+    setErrors({}); // Clear any previous errors
 
-    // Simulate API call
-    setTimeout(() => {
-      const user = sampleUsers.find(
-        (u) => u.email === formData.email && u.password === formData.password
+    try {
+      // Login with Firebase
+      const { user, userData } = await loginUser(
+        formData.email,
+        formData.password
       );
 
-      if (user) {
-        setCurrentUser(user);
-        // Redirect based on user role
-        if (user.role === "admin" || user.role === "staff") {
-          navigate("/dashboard");
-        } else {
-          navigate("/profile");
-        }
-      } else {
-        setErrors({ general: "البريد الإلكتروني أو كلمة المرور غير صحيحة" });
-      }
+      // Force refresh user data in auth context
+      await refreshUserData();
 
-      setLoading(false);
-    }, 1000);
-  };
+      // Small delay to ensure auth state is updated
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
-  const handleDemoLogin = (role) => {
-    const demoUser = sampleUsers.find((u) => u.role === role);
-    if (demoUser) {
-      setCurrentUser(demoUser);
-      if (role === "admin" || role === "staff") {
+      // Redirect based on user role
+      if (userData.role === "admin" || userData.role === "staff") {
         navigate("/dashboard");
       } else {
-        navigate("/profile");
+        navigate("/"); // Redirect customers to home page
       }
+    } catch (error) {
+      console.error("Login error:", error);
+      const errorMessage = getFirebaseErrorMessage(error);
+      setErrors({ general: errorMessage });
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Note: Demo login functionality will be removed as we're using Firebase now
+  // const handleDemoLogin = (role) => {
+  //   // This functionality will be replaced with actual Firebase accounts
+  // };
 
   return (
     <div className="login-page">
@@ -176,35 +178,6 @@ const LoginPage = ({ setCurrentUser }) => {
                   </button>
                 </p>
               </div>
-            </div>
-          </div>
-
-          {/* Demo Login Section */}
-          <div className="login-demo-section">
-            <h3>تسجيل دخول تجريبي</h3>
-            <p>جربي النظام بأدوار مختلفة</p>
-            <div className="login-demo-buttons">
-              <button
-                onClick={() => handleDemoLogin("customer")}
-                className="login-demo-btn login-customer-demo"
-              >
-                عميل
-                <span>customer1@example.com</span>
-              </button>
-              <button
-                onClick={() => handleDemoLogin("staff")}
-                className="login-demo-btn login-staff-demo"
-              >
-                موظف
-                <span>staff1@mirabeauty.com</span>
-              </button>
-              <button
-                onClick={() => handleDemoLogin("admin")}
-                className="login-demo-btn login-admin-demo"
-              >
-                مدير
-                <span>admin@mirabeauty.com</span>
-              </button>
             </div>
           </div>
         </div>

@@ -330,7 +330,7 @@
   box-shadow: 0 8px 24px rgba(11, 34, 53, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 1, 0.3, 1);
   overflow: hidden;
-  padding: 2.5rem 2rem;
+  /* padding: 2.5rem 2rem; */
 }
 
 .product-card:hover {
@@ -612,8 +612,10 @@
 }
 
 .no-products p {
-  color: var(--charcoal);
-  opacity: 0.8;
+  color: var(--white);
+  opacity: 1;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
 }
 
 /* Product Benefits */

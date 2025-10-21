@@ -1,5 +1,51 @@
 /* ServicesPage.css - Services Page Specific Styles */
 
+/* Breadcrumb Section */
+.services-breadcrumb-section {
+  background: var(--white);
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.breadcrumb-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.services-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.services-breadcrumb-link {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.3s ease;
+  padding: 0;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.services-breadcrumb-link:hover {
+  color: var(--gold);
+}
+
+.services-breadcrumb-separator {
+  color: var(--text-secondary);
+  margin: 0 0.25rem;
+}
+
+.services-breadcrumb-current {
+  color: var(--navy-blue);
+  font-weight: 600;
+}
+
 /* Why Choose Services Section */
 .services-page-why-choose {
   background: linear-gradient(135deg, var(--navy-blue) 0%, #0f2a5a 100%);
@@ -247,7 +293,7 @@
   box-shadow: 0 8px 24px rgba(11, 34, 53, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 1, 0.3, 1);
   overflow: hidden;
-  padding: 2.5rem 2rem;
+  /* padding: 2.5rem 2rem; */
 }
 
 .services-page-card:hover {
@@ -528,6 +574,66 @@
 .services-page-bookmark-btn:active::after,
 .services-page-bookmark-btn:focus-visible::after {
   animation: btn-shine 0.6s ease forwards;
+}
+
+/* Loading State */
+.services-page-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top: 3px solid var(--gold);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.services-page-loading p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Error State */
+.services-page-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.services-page-error i {
+  font-size: 3rem;
+  color: var(--gold);
+}
+
+.services-page-error p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.services-page-error .btn {
+  margin-top: 1rem;
 }
 
 /* No Services Message */

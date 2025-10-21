@@ -1,12 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ServicesPage.css";
-import { sampleServices } from "../data/sampleServices";
+import {
+  getAllServices,
+  getServicesByCategory,
+} from "../services/servicesService";
 
 const ServicesPage = () => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [bookmarkedServices, setBookmarkedServices] = useState([]);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const categories = [
     { id: "all", name: "جميع الخدمات" },
@@ -16,12 +22,33 @@ const ServicesPage = () => {
     { id: "facial", name: "العناية بالوجه" },
   ];
 
-  const filteredServices =
-    selectedCategory === "all"
-      ? sampleServices
-      : sampleServices.filter(
-          (service) => service.category === selectedCategory
-        );
+  // Fetch services from Firebase
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        let fetchedServices;
+        if (selectedCategory === "all") {
+          fetchedServices = await getAllServices();
+        } else {
+          fetchedServices = await getServicesByCategory(selectedCategory);
+        }
+
+        setServices(fetchedServices);
+      } catch (error) {
+        console.error("Error fetching services:", error);
+        setError("حدث خطأ في تحميل الخدمات. يرجى المحاولة مرة أخرى.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, [selectedCategory]);
+
+  const filteredServices = services;
 
   const addToBookmarks = (service) => {
     const existingItem = bookmarkedServices.find(
@@ -40,6 +67,24 @@ const ServicesPage = () => {
 
   return (
     <div className="services-page-container">
+      {/* Breadcrumb Section */}
+      <section className="services-breadcrumb-section">
+        <div className="container">
+          <div className="breadcrumb-container">
+            <nav className="services-breadcrumb">
+              <button
+                onClick={() => navigate("/")}
+                className="services-breadcrumb-link"
+              >
+                الرئيسية
+              </button>
+              <span className="services-breadcrumb-separator">/</span>
+              <span className="services-breadcrumb-current">الخدمات</span>
+            </nav>
+          </div>
+        </div>
+      </section>
+
       {/* Services Content */}
       <section className="services-page-content section">
         <div className="container">
@@ -113,53 +158,70 @@ const ServicesPage = () => {
                 </span>
               </div>
 
-              <div className="services-page-grid">
-                {filteredServices.map((service) => (
-                  <div key={service.id} className="services-page-card">
-                    <div className="services-page-image">
-                      <img src={service.image} alt={service.name} />
-                      {service.originalPrice && (
-                        <div className="services-page-discount-badge">
-                          خصم{" "}
-                          {Math.round(
-                            (1 -
-                              parseInt(service.price) /
-                                parseInt(service.originalPrice)) *
-                              100
-                          )}
-                          %
-                        </div>
-                      )}
-                      <button
-                        className="services-page-bookmark-icon"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          addToBookmarks(service);
-                        }}
-                        title="احفظ الخدمة"
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
+              {loading ? (
+                <div className="services-page-loading">
+                  <div className="loading-spinner"></div>
+                  <p>جاري تحميل الخدمات...</p>
+                </div>
+              ) : error ? (
+                <div className="services-page-error">
+                  <i className="fas fa-exclamation-triangle"></i>
+                  <p>{error}</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="btn btn-primary"
+                  >
+                    إعادة المحاولة
+                  </button>
+                </div>
+              ) : (
+                <div className="services-page-grid">
+                  {filteredServices.map((service) => (
+                    <div key={service.id} className="services-page-card">
+                      <div className="services-page-image">
+                        <img src={service.image} alt={service.name} />
+                        {service.originalPrice && (
+                          <div className="services-page-discount-badge">
+                            خصم{" "}
+                            {Math.round(
+                              (1 -
+                                parseInt(service.price) /
+                                  parseInt(service.originalPrice)) *
+                                100
+                            )}
+                            %
+                          </div>
+                        )}
+                        <button
+                          className="services-page-bookmark-icon"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            addToBookmarks(service);
+                          }}
+                          title="احفظ الخدمة"
                         >
-                          <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    <div className="services-page-info">
-                      <div className="services-page-category">
-                        {service.categoryName}
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z" />
+                          </svg>
+                        </button>
                       </div>
-                      <h3>{service.name}</h3>
-                      <p className="services-page-description">
-                        {service.description}
-                      </p>
 
-                      {/* <div className="services-page-rating">
+                      <div className="services-page-info">
+                        <div className="services-page-category">
+                          {service.categoryName}
+                        </div>
+                        <h3>{service.name}</h3>
+                        <p className="services-page-description">
+                          {service.description}
+                        </p>
+
+                        {/* <div className="services-page-rating">
                         <div className="services-page-stars">
                           {"⭐".repeat(Math.floor(service.rating || 5))}
                         </div>
@@ -180,21 +242,22 @@ const ServicesPage = () => {
                         )}
                       </div> */}
 
-                      <div className="services-page-actions">
-                        <button
-                          className="services-page-book-btn"
-                          onClick={() => navigate("/book")}
-                        >
-                          احجز الآن
-                        </button>
+                        <div className="services-page-actions">
+                          <button
+                            className="services-page-book-btn"
+                            onClick={() => navigate("/book")}
+                          >
+                            احجز الآن
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               {/* No Services Message */}
-              {filteredServices.length === 0 && (
+              {!loading && !error && filteredServices.length === 0 && (
                 <div className="services-page-no-services">
                   <h3>لا توجد خدمات في هذه الفئة حالياً</h3>
                   <p>يرجى اختيار فئة أخرى أو العودة لاحقاً</p>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -25,39 +25,46 @@ import CartPage from "./pages/CartPage";
 import Navigation from "./components/common/Navigation";
 import Footer from "./components/common/Footer";
 
-// Import Sample Data
-import { sampleUsers } from "./data/sampleUsers";
+// Import Auth Hook and Provider
+import { useAuth, AuthProvider } from "./hooks/useAuth.jsx";
 
-function App() {
-  const [currentUser, setCurrentUser] = useState(null);
+// Main App Content Component
+const AppContent = () => {
+  const { currentUser, userData, loading } = useAuth();
 
-  // Load user from localStorage on app start
-  useEffect(() => {
-    const savedUser = localStorage.getItem("currentUser");
-    if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser));
-    }
-  }, []);
-
-  // Save user to localStorage when it changes
-  useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem("currentUser", JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem("currentUser");
-    }
-  }, [currentUser]);
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="App" dir="rtl">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+            fontSize: "18px",
+          }}
+        >
+          جاري التحميل...
+        </div>
+      </div>
+    );
+  }
 
   // Protected route component for dashboard
   const ProtectedDashboard = () => {
-    if (!currentUser) {
+    if (!currentUser || !userData) {
       return <Navigate to="/login" replace />;
     }
 
-    if (currentUser.role === "admin") {
-      return <AdminDashboardPage currentUser={currentUser} />;
-    } else if (currentUser.role === "staff") {
-      return <StaffDashboardPage currentUser={currentUser} />;
+    if (userData.role === "admin") {
+      return (
+        <AdminDashboardPage currentUser={currentUser} userData={userData} />
+      );
+    } else if (userData.role === "staff") {
+      return (
+        <StaffDashboardPage currentUser={currentUser} userData={userData} />
+      );
     } else {
       return <Navigate to="/" replace />;
     }
@@ -65,18 +72,16 @@ function App() {
 
   // Protected route component for profile
   const ProtectedProfile = () => {
-    if (!currentUser) {
+    if (!currentUser || !userData) {
       return <Navigate to="/login" replace />;
     }
-    return (
-      <ProfilePage currentUser={currentUser} setCurrentUser={setCurrentUser} />
-    );
+    return <ProfilePage currentUser={currentUser} userData={userData} />;
   };
 
   return (
     <Router>
       <div className="App" dir="rtl">
-        <Navigation currentUser={currentUser} setCurrentUser={setCurrentUser} />
+        <Navigation currentUser={currentUser} userData={userData} />
         <main className="main-content">
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -86,24 +91,29 @@ function App() {
             <Route path="/cart" element={<CartPage />} />
             <Route
               path="/book"
-              element={<BookingPage currentUser={currentUser} />}
+              element={
+                <BookingPage currentUser={currentUser} userData={userData} />
+              }
             />
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/profile" element={<ProtectedProfile />} />
-            <Route
-              path="/login"
-              element={<LoginPage setCurrentUser={setCurrentUser} />}
-            />
-            <Route
-              path="/register"
-              element={<RegisterPage setCurrentUser={setCurrentUser} />}
-            />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route path="/dashboard" element={<ProtectedDashboard />} />
           </Routes>
         </main>
         <Footer />
       </div>
     </Router>
+  );
+};
+
+// Main App Component with Auth Provider
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

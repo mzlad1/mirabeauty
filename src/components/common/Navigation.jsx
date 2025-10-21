@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import "./Navigation.css";
+import { logoutUser } from "../../services/authService";
 
-const Navigation = ({ currentUser, setCurrentUser }) => {
+const Navigation = ({ currentUser, userData }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
-    setCurrentUser(null);
-    navigate("/");
-    setIsMobileMenuOpen(false);
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      navigate("/");
+      setIsMobileMenuOpen(false);
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Still navigate even if logout fails
+      navigate("/");
+      setIsMobileMenuOpen(false);
+    }
   };
 
   const handleNavigation = (path) => {
@@ -89,21 +97,26 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
             <div className="user-menu">
               <div className="user-info">
                 <img
-                  src={currentUser.avatar}
-                  alt={currentUser.name}
+                  src={userData?.avatar || "/assets/default-avatar.jpg"}
+                  alt={userData?.name || currentUser?.displayName || "المستخدم"}
                   className="user-avatar"
+                  onError={(e) => {
+                    e.target.src = "/assets/default-avatar.jpg";
+                  }}
                 />
                 <div className="user-details">
-                  <span className="user-name">{currentUser.name}</span>
+                  <span className="user-name">
+                    {userData?.name || currentUser?.displayName || "المستخدم"}
+                  </span>
                   <span className="user-role">
-                    {currentUser.role === "customer" && "عميل"}
-                    {currentUser.role === "staff" && "موظف"}
-                    {currentUser.role === "admin" && "مدير"}
+                    {userData?.role === "customer" && "عميل"}
+                    {userData?.role === "staff" && "موظف"}
+                    {userData?.role === "admin" && "مدير"}
                   </span>
                 </div>
               </div>
               <div className="user-dropdown">
-                {currentUser.role === "customer" && (
+                {userData?.role === "customer" && (
                   <button
                     className="dropdown-item"
                     onClick={() => handleNavigation("/profile")}
@@ -114,8 +127,7 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
                     الملف الشخصي
                   </button>
                 )}
-                {(currentUser.role === "staff" ||
-                  currentUser.role === "admin") && (
+                {(userData?.role === "staff" || userData?.role === "admin") && (
                   <button
                     className="dropdown-item"
                     onClick={() => handleNavigation("/dashboard")}
