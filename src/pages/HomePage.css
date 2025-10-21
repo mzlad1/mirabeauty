@@ -57,6 +57,10 @@
   opacity: 70%;
 }
 
+.promotional-banner-section .promo-container {
+  padding: 0 0;
+}
+
 .hero-content {
   position: relative;
   z-index: 5;

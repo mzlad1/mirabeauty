@@ -145,7 +145,7 @@ const HomePage = () => {
 
       {/* Promotional Banner */}
       <section className="promotional-banner-section">
-        <div className="container">
+        <div className="promo-container">
           <PromotionalBanner
             backgroundImage="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             headline="عروض حصرية على منتجات العناية الفاخرة"
