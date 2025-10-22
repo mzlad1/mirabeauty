@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
 import { sampleServices } from "../data/sampleServices";
 import { sampleTestimonials } from "../data/sampleTestimonials";
-import { sampleProducts } from "../data/sampleProducts";
+import { getAllProducts } from "../services/productsService";
 import PromotionalBanner from "../components/common/PromotionalBanner";
 import ProductCard from "../components/customer/ProductCard";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -18,6 +19,28 @@ const HomePage = () => {
   ];
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Load products from Firebase
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const productsData = await getAllProducts();
+      setProducts(productsData);
+    } catch (err) {
+      console.error("Error loading products:", err);
+      setError("فشل في تحميل المنتجات. يرجى المحاولة مرة أخرى.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
   // Auto-slide functionality
   useEffect(() => {
@@ -165,19 +188,33 @@ const HomePage = () => {
             <h2>الأكثر مبيعاً</h2>
           </div>
           <div className="products-grid grid-4">
-            {sampleProducts
-              .sort((a, b) => b.reviewsCount - a.reviewsCount)
-              .slice(0, 4)
-              .map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onAddToCart={(product) => {
-                    // Handle add to cart functionality
-                    console.log("Added to cart:", product.name);
-                  }}
-                />
-              ))}
+            {loading ? (
+              <div style={{ gridColumn: "1/-1" }}>
+                <LoadingSpinner />
+              </div>
+            ) : error ? (
+              <div style={{ gridColumn: "1/-1", textAlign: "center" }}>
+                <p style={{ color: "#721c24", marginBottom: "1rem" }}>{error}</p>
+                <button className="btn-primary" onClick={loadProducts}>
+                  إعادة المحاولة
+                </button>
+              </div>
+            ) : (
+              products
+                .slice()
+                .sort((a, b) => (b.reviewsCount || 0) - (a.reviewsCount || 0))
+                .slice(0, 4)
+                .map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAddToCart={(product) => {
+                      // Handle add to cart functionality
+                      console.log("Added to cart:", product.name);
+                    }}
+                  />
+                ))
+            )}
           </div>
           <div className="text-center" style={{ marginTop: "2rem" }}>
             <button
