@@ -7,7 +7,8 @@ import {
   confirmAppointment,
   completeAppointment,
 } from "../services/appointmentsService";
-import { getCustomers } from "../services/usersService";
+import { getCustomers, updateUser, getUserById } from "../services/usersService";
+import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
 
 const StaffDashboardPage = ({ currentUser, userData }) => {
   const navigate = useNavigate();
@@ -20,6 +21,18 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Profile editing states
+  const [editMode, setEditMode] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [completeUserData, setCompleteUserData] = useState(null);
+  const [editData, setEditData] = useState({
+    name: "",
+    phone: "",
+    address: "",
+  });
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarFile, setAvatarFile] = useState(null);
+
   // Helper function to parse price string to number
   const parsePrice = (priceString) => {
     if (!priceString) return 0;
@@ -27,6 +40,30 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
     // Extract numeric value from strings like "200 شيكل" or "200"
     const match = priceString.toString().match(/\d+/);
     return match ? parseInt(match[0]) : 0;
+  };
+
+  // Helper function to get available time slots
+  const getTimeSlots = () => {
+    return [
+      "09:00",
+      "09:30",
+      "10:00",
+      "10:30",
+      "11:00",
+      "11:30",
+      "12:00",
+      "12:30",
+      "13:00",
+      "13:30",
+      "14:00",
+      "14:30",
+      "15:00",
+      "15:30",
+      "16:00",
+      "16:30",
+      "17:00",
+      "17:30",
+    ];
   };
 
   // Load staff appointments and customers
@@ -57,6 +94,27 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
     };
 
     loadStaffData();
+  }, [currentUser?.uid]);
+
+  // Load user profile data
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (!currentUser?.uid) return;
+
+      try {
+        const userData = await getUserById(currentUser.uid);
+        setCompleteUserData(userData);
+        setEditData({
+          name: userData?.name || "",
+          phone: userData?.phone || "",
+          address: userData?.address || "",
+        });
+      } catch (error) {
+        console.error("Error loading user profile:", error);
+      }
+    };
+
+    loadUserProfile();
   }, [currentUser?.uid]);
 
   const todayAppointments = myAppointments.filter((apt) => {
@@ -183,6 +241,97 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
     );
   };
 
+  // Profile editing functions
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setSubmitting(true);
+      
+      const updatedData = {
+        ...completeUserData,
+        ...editData
+      };
+
+      await updateUser(currentUser.uid, updatedData);
+      setCompleteUserData(updatedData);
+      setEditMode(false);
+      alert("تم حفظ التغييرات بنجاح");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("حدث خطأ أثناء حفظ التغييرات");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditData({
+      name: completeUserData?.name || "",
+      phone: completeUserData?.phone || "",
+      address: completeUserData?.address || "",
+    });
+    setEditMode(false);
+  };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('يرجى اختيار ملف صورة صحيح');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+      return;
+    }
+
+    try {
+      setAvatarUploading(true);
+      
+      // Delete old avatar if exists and is not the default avatar
+      if (completeUserData?.avatar && 
+          typeof completeUserData.avatar === 'string' &&
+          !completeUserData.avatar.includes('/default-avatar') &&
+          !completeUserData.avatar.includes('default-avatar.png')) {
+        try {
+          await deleteImage(completeUserData.avatar);
+        } catch (error) {
+          console.warn("Could not delete old avatar:", error);
+        }
+      }
+
+      // Upload new avatar
+      const avatarData = await uploadSingleImage(file, 'avatars', currentUser.uid);
+      
+      // Update user data
+      const updatedData = {
+        ...completeUserData,
+        avatar: avatarData.url
+      };
+
+      await updateUser(currentUser.uid, updatedData);
+      setCompleteUserData(updatedData);
+      
+      alert("تم تحديث الصورة الشخصية بنجاح");
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      alert("حدث خطأ أثناء تحديث الصورة الشخصية");
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="staff-dashboard">
@@ -272,6 +421,15 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                 >
                   <i className="nav-icon fas fa-chart-line"></i>
                   أدائي
+                </button>
+                <button
+                  className={`nav-item ${
+                    activeTab === "settings" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("settings")}
+                >
+                  <i className="nav-icon fas fa-cog"></i>
+                  الإعدادات
                 </button>
               </nav>
             </aside>
@@ -498,7 +656,7 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                     {myAppointments
                       .sort((a, b) => new Date(b.date) - new Date(a.date))
                       .map((appointment) => (
-                        <div key={appointment.id} className="appointment-card">
+                        <div key={appointment.id} className="staff-appointment-card">
                           <div className="appointment-header">
                             <div className="appointment-customer">
                               <h4>{appointment.customerName}</h4>
@@ -743,6 +901,137 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                             </span>
                           </div>
                         ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Settings Tab */}
+              {activeTab === "settings" && (
+                <div className="tab-content">
+                  <h2>الإعدادات</h2>
+
+                  <div className="settings-sections">
+                    {/* Profile Section */}
+                    <div className="settings-section">
+                      <h3>الملف الشخصي</h3>
+                      <div className="profile-section">
+                        <div className="profile-avatar">
+                          <div className="avatar-container">
+                            <img
+                              src={completeUserData?.avatar || "/default-avatar.png"}
+                              alt="Profile"
+                              className="avatar-image"
+                            />
+                            <div className="avatar-overlay">
+                              <input
+                                type="file"
+                                id="avatar-upload"
+                                accept="image/*"
+                                onChange={handleAvatarUpload}
+                                style={{ display: "none" }}
+                                disabled={avatarUploading}
+                              />
+                              <label htmlFor="avatar-upload" className="avatar-upload-btn">
+                                {avatarUploading ? (
+                                  <i className="fas fa-spinner fa-spin"></i>
+                                ) : (
+                                  <i className="fas fa-camera"></i>
+                                )}
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="profile-form">
+                          {!editMode ? (
+                            <div className="profile-info">
+                              <div className="info-item">
+                                <label>الاسم</label>
+                                <span>{completeUserData?.name || "غير محدد"}</span>
+                              </div>
+                              <div className="info-item">
+                                <label>البريد الإلكتروني</label>
+                                <span>{completeUserData?.email || "غير محدد"}</span>
+                              </div>
+                              <div className="info-item">
+                                <label>رقم الهاتف</label>
+                                <span>{completeUserData?.phone || "غير محدد"}</span>
+                              </div>
+                              <div className="info-item">
+                                <label>العنوان</label>
+                                <span>{completeUserData?.address || "غير محدد"}</span>
+                              </div>
+                              <button
+                                className="btn-secondary"
+                                onClick={() => setEditMode(true)}
+                              >
+                                تعديل المعلومات
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="profile-edit-form">
+                              <div className="form-group">
+                                <label>الاسم</label>
+                                <input
+                                  type="text"
+                                  name="name"
+                                  value={editData.name}
+                                  onChange={handleInputChange}
+                                  className="form-input"
+                                />
+                              </div>
+                              <div className="form-group">
+                                <label>البريد الإلكتروني</label>
+                                <input
+                                  type="email"
+                                  value={completeUserData?.email || ""}
+                                  className="form-input"
+                                  disabled
+                                  style={{ backgroundColor: "#f5f5f5", cursor: "not-allowed" }}
+                                />
+                                <small className="form-note">البريد الإلكتروني غير قابل للتعديل</small>
+                              </div>
+                              <div className="form-group">
+                                <label>رقم الهاتف</label>
+                                <input
+                                  type="tel"
+                                  name="phone"
+                                  value={editData.phone}
+                                  onChange={handleInputChange}
+                                  className="form-input"
+                                />
+                              </div>
+                              <div className="form-group">
+                                <label>العنوان</label>
+                                <input
+                                  type="text"
+                                  name="address"
+                                  value={editData.address}
+                                  onChange={handleInputChange}
+                                  className="form-input"
+                                />
+                              </div>
+                              <div className="form-actions">
+                                <button
+                                  className="btn-primary"
+                                  onClick={handleSaveProfile}
+                                  disabled={submitting}
+                                >
+                                  {submitting ? "جاري الحفظ..." : "حفظ التغييرات"}
+                                </button>
+                                <button
+                                  className="btn-secondary"
+                                  onClick={handleCancelEdit}
+                                  disabled={submitting}
+                                >
+                                  إلغاء
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

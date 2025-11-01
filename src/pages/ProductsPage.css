@@ -424,6 +424,10 @@
 
 /* Product Info */
 .product-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   padding: 1.5rem;
 }
 

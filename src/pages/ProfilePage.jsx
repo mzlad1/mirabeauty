@@ -9,6 +9,7 @@ import {
 } from "../services/appointmentsService";
 import { updateUser, getUserById } from "../services/usersService";
 import AppointmentEditModal from "../components/profile/AppointmentEditModal";
+import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
 
 const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
   const navigate = useNavigate();
@@ -27,6 +28,8 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
   });
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarFile, setAvatarFile] = useState(null);
 
   // Helper function to parse price string to number
   const parsePrice = (priceString) => {
@@ -138,6 +141,60 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
         : "",
     });
     setEditMode(false);
+  };
+
+  const handleAvatarUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('يرجى اختيار ملف صورة صالح');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('حجم الصورة كبير جداً. يرجى اختيار صورة أصغر من 5 ميجابايت');
+      return;
+    }
+
+    setAvatarUploading(true);
+    try {
+      // Delete old avatar if exists (skip deletion for now to avoid complexity)
+      // The old avatar will be overwritten by the new upload
+
+      // Upload new avatar
+      const avatarImageObject = await uploadSingleImage(file, 'avatars', currentUser.uid);
+      const avatarUrl = avatarImageObject.url;
+      
+      // Update user data with new avatar
+      await updateUser(currentUser.uid, { avatar: avatarUrl });
+
+      // Update local state
+      const updatedCompleteData = {
+        ...completeUserData,
+        avatar: avatarUrl,
+      };
+      setCompleteUserData(updatedCompleteData);
+
+      // Update current user if setCurrentUser is available
+      if (typeof setCurrentUser === "function") {
+        setCurrentUser({
+          ...currentUser,
+          avatar: avatarUrl,
+        });
+      }
+
+      alert('تم تحديث صورة الملف الشخصي بنجاح');
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      alert('حدث خطأ أثناء رفع الصورة. يرجى المحاولة مرة أخرى');
+    } finally {
+      setAvatarUploading(false);
+      // Reset file input
+      event.target.value = '';
+    }
   };
 
   const getAppointmentStatusColor = (status) => {
@@ -263,6 +320,27 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                       e.target.src = "/assets/default-avatar.jpg";
                     }}
                   />
+                  <div className="avatar-upload-overlay">
+                    <input
+                      type="file"
+                      id="avatar-upload"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      style={{ display: 'none' }}
+                      disabled={avatarUploading}
+                    />
+                    <label 
+                      htmlFor="avatar-upload" 
+                      className={`avatar-upload-btn ${avatarUploading ? 'uploading' : ''}`}
+                      title="تغيير صورة الملف الشخصي"
+                    >
+                      {avatarUploading ? (
+                        <span className="upload-spinner"><i className="fas fa-spinner fa-spin"></i></span>
+                      ) : (
+                        <span className="upload-icon"><i className="fas fa-camera"></i></span>
+                      )}
+                    </label>
+                  </div>
                 </div>
                 <h3>{completeUserData.name}</h3>
                 <p>{completeUserData.email}</p>

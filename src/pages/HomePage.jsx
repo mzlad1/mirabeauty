@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
-import { sampleServices } from "../data/sampleServices";
 import { sampleTestimonials } from "../data/sampleTestimonials";
 import { getAllProducts } from "../services/productsService";
+import { getAllServices } from "../services/servicesService";
 import PromotionalBanner from "../components/common/PromotionalBanner";
 import ProductCard from "../components/customer/ProductCard";
 import LoadingSpinner from "../components/common/LoadingSpinner";
@@ -20,26 +20,31 @@ const HomePage = () => {
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [products, setProducts] = useState([]);
+  const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load products from Firebase
-  const loadProducts = async () => {
+  // Load products and services from Firebase
+  const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const productsData = await getAllProducts();
+      const [productsData, servicesData] = await Promise.all([
+        getAllProducts(),
+        getAllServices()
+      ]);
       setProducts(productsData);
+      setServices(servicesData);
     } catch (err) {
-      console.error("Error loading products:", err);
-      setError("فشل في تحميل المنتجات. يرجى المحاولة مرة أخرى.");
+      console.error("Error loading data:", err);
+      setError("فشل في تحميل البيانات. يرجى المحاولة مرة أخرى.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadProducts();
+    loadData();
   }, []);
 
   // Auto-slide functionality
@@ -139,21 +144,41 @@ const HomePage = () => {
             <h2>خدماتنا المميزة</h2>
           </div>
           <div className="services-grid grid-3">
-            {sampleServices.slice(0, 3).map((service) => (
-              <div key={service.id} className="service-card card">
-                <div className="service-icon">
-                  <img src={service.icon} alt={service.name} />
-                </div>
-                <h3>{service.name}</h3>
-                <p>{service.description}</p>
-                <button
-                  className="btn-secondary service-btn"
-                  onClick={() => navigate("/services")}
-                >
-                  اعرفي المزيد
+            {loading ? (
+              <div style={{ gridColumn: "1/-1" }}>
+                <LoadingSpinner />
+              </div>
+            ) : error ? (
+              <div style={{ gridColumn: "1/-1", textAlign: "center" }}>
+                <p style={{ color: "#721c24", marginBottom: "1rem" }}>{error}</p>
+                <button className="btn-primary" onClick={loadData}>
+                  إعادة المحاولة
                 </button>
               </div>
-            ))}
+            ) : (
+              services.slice(0, 3).map((service) => {
+                // Get primary image or first image - handle object-based images
+                const primaryImage = service.images && service.images.length > 0 
+                  ? (service.images[service.primaryImageIndex || 0]?.url || service.images[service.primaryImageIndex || 0])
+                  : service.icon || '/assets/default-service.jpg';
+                
+                return (
+                  <div key={service.id} className="service-card card">
+                    <div className="service-icon">
+                      <img src={primaryImage} alt={service.name} />
+                    </div>
+                    <h3>{service.name}</h3>
+                    <p>{service.description}</p>
+                    <button
+                      className="btn-secondary service-btn"
+                      onClick={() => navigate("/services")}
+                    >
+                      اعرفي المزيد
+                    </button>
+                  </div>
+                );
+              })
+            )}
           </div>
           <div className="text-center" style={{ marginTop: "2rem" }}>
             <button
@@ -195,7 +220,7 @@ const HomePage = () => {
             ) : error ? (
               <div style={{ gridColumn: "1/-1", textAlign: "center" }}>
                 <p style={{ color: "#721c24", marginBottom: "1rem" }}>{error}</p>
-                <button className="btn-primary" onClick={loadProducts}>
+                <button className="btn-primary" onClick={loadData}>
                   إعادة المحاولة
                 </button>
               </div>

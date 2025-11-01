@@ -36,6 +36,9 @@ const ServicesPage = () => {
           fetchedServices = await getServicesByCategory(selectedCategory);
         }
 
+        console.log("ServicesPage - Loaded services data:", fetchedServices);
+        console.log("ServicesPage - First service structure:", fetchedServices[0]);
+
         setServices(fetchedServices);
       } catch (error) {
         console.error("Error fetching services:", error);
@@ -112,28 +115,35 @@ const ServicesPage = () => {
                 <div className="services-page-bookmarks-section">
                   <h3>الخدمات المحفوظة ({bookmarkedServices.length})</h3>
                   <div className="services-page-bookmark-items">
-                    {bookmarkedServices.map((item) => (
-                      <div
-                        key={item.id}
-                        className="services-page-bookmark-item"
-                      >
-                        <div className="services-page-bookmark-item-info">
-                          <img src={item.image} alt={item.name} />
-                          <div>
-                            <h4>{item.name}</h4>
-                            <span className="services-page-bookmark-item-duration">
-                              {item.duration}
-                            </span>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => removeFromBookmarks(item.id)}
-                          className="services-page-remove-bookmark-btn"
+                    {bookmarkedServices.map((item) => {
+                      // Get primary image or first image - handle object-based images
+                      const primaryImage = item.images && item.images.length > 0 
+                        ? (item.images[item.primaryImageIndex || 0]?.url || item.images[item.primaryImageIndex || 0])
+                        : item.image || '/assets/default-service.jpg';
+                      
+                      return (
+                        <div
+                          key={item.id}
+                          className="services-page-bookmark-item"
                         >
-                          ×
-                        </button>
-                      </div>
-                    ))}
+                          <div className="services-page-bookmark-item-info">
+                            <img src={primaryImage} alt={item.name} />
+                            <div>
+                              <h4>{item.name}</h4>
+                              <span className="services-page-bookmark-item-duration">
+                                {item.duration}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => removeFromBookmarks(item.id)}
+                            className="services-page-remove-bookmark-btn"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                   <button
                     className="services-page-book-all-btn btn-primary"
@@ -176,10 +186,27 @@ const ServicesPage = () => {
                 </div>
               ) : (
                 <div className="services-page-grid">
-                  {filteredServices.map((service) => (
-                    <div key={service.id} className="services-page-card">
-                      <div className="services-page-image">
-                        <img src={service.image} alt={service.name} />
+                  {filteredServices.map((service) => {
+                    // Debug logging for each service
+                    console.log("ServicesPage - Service data:", {
+                      id: service.id,
+                      name: service.name,
+                      image: service.image,
+                      images: service.images,
+                      primaryImageIndex: service.primaryImageIndex
+                    });
+
+                    // Get primary image or first image - handle object-based images
+                    const primaryImage = service.images && service.images.length > 0 
+                      ? (service.images[service.primaryImageIndex || 0]?.url || service.images[service.primaryImageIndex || 0])
+                      : service.image || '/assets/default-service.jpg';
+                    
+                    console.log("ServicesPage - Primary image selected:", primaryImage);
+                    
+                    return (
+                      <div key={service.id} className="services-page-card">
+                        <div className="services-page-image">
+                          <img src={primaryImage} alt={service.name} />
                         {service.originalPrice && (
                           <div className="services-page-discount-badge">
                             خصم{" "}
@@ -252,7 +279,8 @@ const ServicesPage = () => {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 

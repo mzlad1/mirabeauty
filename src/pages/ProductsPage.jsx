@@ -72,6 +72,9 @@ const ProductsPage = ({ setCurrentPage }) => {
         productsData = await getProductsByCategory(selectedCategory);
       }
 
+      console.log("ProductsPage - Loaded products data:", productsData);
+      console.log("ProductsPage - First product structure:", productsData[0]);
+
       setProducts(productsData);
     } catch (error) {
       console.error("Error loading products:", error);
@@ -263,7 +266,16 @@ const ProductsPage = ({ setCurrentPage }) => {
                       style={{ cursor: "pointer" }}
                     >
                       <div className="product-image">
-                        <img src={product.image} alt={product.name} />
+                        <img 
+                          src={
+                            product.images && product.images.length > 0
+                              ? product.primaryImageIndex !== undefined && product.images[product.primaryImageIndex]
+                                ? (product.images[product.primaryImageIndex]?.url || product.images[product.primaryImageIndex])
+                                : (product.images[0]?.url || product.images[0])
+                              : product.image || "/images/placeholder.jpg"
+                          } 
+                          alt={product.name} 
+                        />
                         {product.originalPrice && (
                           <div className="discount-badge">
                             خصم{" "}
@@ -297,7 +309,7 @@ const ProductsPage = ({ setCurrentPage }) => {
                               viewBox="0 0 24 24"
                               fill="currentColor"
                             >
-                              <path d="M7 18c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-0.16 0.28-0.25 0.61-0.25 0.96 0 1.1 0.9 2 2 2h12v-2H7.42c-0.14 0-0.25-0.11-0.25-0.25l0.03-0.12L8.1 13h7.45c0.75 0 1.41-0.42 1.75-1.03L21.7 4H5.21l-0.94-2H1zm16 16c-1.1 0-2 0.9-2 2s0.9 2 2 2 2-0.9 2-2-0.9-2-2-2z" />
+                              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6m-8 0V9a2 2 0 012-2h4a2 2 0 012 2v4" />
                             </svg>
                           </button>
                         )}

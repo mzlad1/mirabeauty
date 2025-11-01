@@ -29,16 +29,20 @@ const ProductDetailsPage = () => {
 
         // Fetch the main product
         const fetchedProduct = await getProductById(id);
+        
+        console.log("ProductDetailsPage - Raw product data:", fetchedProduct);
 
         // Process the product data with enhanced details
         const processedProduct = {
           ...fetchedProduct,
-          images: fetchedProduct.image
-            ? [fetchedProduct.image, fetchedProduct.image, fetchedProduct.image]
+          images: fetchedProduct.images && fetchedProduct.images.length > 0
+            ? fetchedProduct.images.map(img => img?.url || img)
+            : fetchedProduct.image
+            ? [fetchedProduct.image]
             : [],
           fullDescription:
             fetchedProduct.description ||
-            "هذا المنتج مصنوع من أفضل المواد الطبيعية والآمنة على البشرة. يحتوي على مكونات فعالة تساعد في تحسين ملمس البشرة ونعومتها. مناسب لجميع أنواع البشرة ومختبر علمياً للحصول على أفضل النتائج.",
+            "هذا المنتج مصنوع من أفضل المواد الطبيعية والآمنة على البشرة. يحتوي على مكونات فعالة تساعد في تحسين ملمس البشرة ونعومتها. مناسب لجميع أنواع البشرة ومختبر علمياً للصول على أفضل النتائج.",
           ingredients: fetchedProduct.ingredients || [
             "حمض الهيالورونيك",
             "فيتامين C",
@@ -56,6 +60,9 @@ const ProductDetailsPage = () => {
             "حماية من العوامل الخارجية",
           ],
         };
+
+        console.log("ProductDetailsPage - Processed product data:", processedProduct);
+        console.log("ProductDetailsPage - Product images array:", processedProduct.images);
 
         setProduct(processedProduct);
 

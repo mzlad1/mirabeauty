@@ -24,10 +24,15 @@ export const getAllProducts = async () => {
     const productsRef = collection(db, PRODUCTS_COLLECTION);
     const q = query(productsRef, orderBy("name"));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
+    const products = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+    
+    console.log("productsService - getAllProducts result:", products);
+    console.log("productsService - First product raw data:", products[0]);
+    
+    return products;
   } catch (error) {
     console.error("Error getting all products:", error);
     throw error;
@@ -44,10 +49,14 @@ export const getProductsByCategory = async (category) => {
       orderBy("name")
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
+    const products = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+    
+    console.log("productsService - getProductsByCategory result:", products);
+    
+    return products;
   } catch (error) {
     console.error("Error getting products by category:", error);
     throw error;
@@ -61,10 +70,16 @@ export const getProductById = async (productId) => {
     const productDoc = await getDoc(productRef);
 
     if (productDoc.exists()) {
-      return {
+      const productData = {
         id: productDoc.id,
         ...productDoc.data(),
       };
+      
+      console.log("productsService - getProductById result:", productData);
+      console.log("productsService - Product images:", productData.images);
+      console.log("productsService - Product image:", productData.image);
+      
+      return productData;
     } else {
       throw new Error("المنتج غير موجود");
     }

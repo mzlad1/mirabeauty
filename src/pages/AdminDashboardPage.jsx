@@ -10,6 +10,8 @@ import {
   adminUpdateStaff,
   adminDeleteCustomer,
   adminDeleteStaff,
+  updateUser,
+  getUserById,
 } from "../services/usersService";
 import {
   adminRegisterCustomer,
@@ -18,17 +20,20 @@ import {
 import { getAllAppointments } from "../services/appointmentsService";
 import {
   getAllServices,
+  addService,
   updateService,
   deleteService,
 } from "../services/servicesService";
 import {
   getAllProducts,
+  addProduct,
   updateProduct,
   deleteProduct,
 } from "../services/productsService";
 import UserModal from "../components/dashboard/UserModal";
 import ServiceEditModal from "../components/dashboard/ServiceEditModal";
 import ProductEditModal from "../components/dashboard/ProductEditModal";
+import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
 
 const AdminDashboardPage = ({ currentUser }) => {
   const navigate = useNavigate();
@@ -52,6 +57,18 @@ const AdminDashboardPage = ({ currentUser }) => {
   const [editingService, setEditingService] = useState(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+
+  // Profile editing states
+  const [editMode, setEditMode] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [completeUserData, setCompleteUserData] = useState(null);
+  const [editData, setEditData] = useState({
+    name: "",
+    phone: "",
+    address: "",
+  });
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarFile, setAvatarFile] = useState(null);
 
   // Helper function to parse price string to number
   const parsePrice = (priceString) => {
@@ -185,6 +202,33 @@ const AdminDashboardPage = ({ currentUser }) => {
     loadInitialData();
   }, []);
 
+  // Load current user profile data
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (currentUser?.uid) {
+        try {
+          const userData = await getUserById(currentUser.uid);
+          const mergedUserData = {
+            ...currentUser,
+            ...userData,
+          };
+          setCompleteUserData(mergedUserData);
+
+          // Initialize edit form with complete data
+          setEditData({
+            name: userData?.name || currentUser?.displayName || "",
+            phone: userData?.phone || "",
+            address: userData?.address || "",
+          });
+        } catch (error) {
+          console.error("Error loading user data:", error);
+        }
+      }
+    };
+
+    loadUserData();
+  }, [currentUser?.uid]);
+
   // Load data on tab change
   useEffect(() => {
     if (activeTab === "customers") {
@@ -241,6 +285,11 @@ const AdminDashboardPage = ({ currentUser }) => {
     .sort((a, b) => b.revenue - a.revenue);
 
   // Service management functions
+  const handleAddService = () => {
+    setEditingService(null);
+    setIsServiceModalOpen(true);
+  };
+
   const handleEditService = (service) => {
     setEditingService(service);
     setIsServiceModalOpen(true);
@@ -251,10 +300,13 @@ const AdminDashboardPage = ({ currentUser }) => {
       if (editingService) {
         await updateService(editingService.id, serviceData);
         alert("تم تحديث الخدمة بنجاح");
+      } else {
+        await addService(serviceData);
+        alert("تم إضافة الخدمة بنجاح");
       }
       await loadServices();
     } catch (error) {
-      console.error("Error updating service:", error);
+      console.error("Error submitting service:", error);
       throw error;
     }
   };
@@ -279,6 +331,11 @@ const AdminDashboardPage = ({ currentUser }) => {
   };
 
   // Product management functions
+  const handleAddProduct = () => {
+    setEditingProduct(null);
+    setIsProductModalOpen(true);
+  };
+
   const handleEditProduct = (product) => {
     setEditingProduct(product);
     setIsProductModalOpen(true);
@@ -289,10 +346,13 @@ const AdminDashboardPage = ({ currentUser }) => {
       if (editingProduct) {
         await updateProduct(editingProduct.id, productData);
         alert("تم تحديث المنتج بنجاح");
+      } else {
+        await addProduct(productData);
+        alert("تم إضافة المنتج بنجاح");
       }
       await loadProducts();
     } catch (error) {
-      console.error("Error updating product:", error);
+      console.error("Error submitting product:", error);
       throw error;
     }
   };
@@ -417,6 +477,103 @@ const AdminDashboardPage = ({ currentUser }) => {
         return "cancelled";
       default:
         return "pending";
+    }
+  };
+
+  // Profile editing functions
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditData({ ...editData, [name]: value });
+  };
+
+  const handleSaveProfile = async () => {
+    setSubmitting(true);
+    try {
+      const updatedUserData = {
+        name: editData.name,
+        phone: editData.phone,
+        address: editData.address,
+      };
+
+      await updateUser(currentUser.uid, updatedUserData);
+
+      // Update local state
+      const updatedCompleteData = {
+        ...completeUserData,
+        ...updatedUserData,
+      };
+      setCompleteUserData(updatedCompleteData);
+
+      setEditMode(false);
+      alert("تم حفظ التغييرات بنجاح");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("حدث خطأ أثناء حفظ التغييرات");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    // Reset form data to original values
+    setEditData({
+      name: completeUserData?.name || currentUser?.displayName || "",
+      phone: completeUserData?.phone || "",
+      address: completeUserData?.address || "",
+    });
+  };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("يرجى اختيار ملف صورة صحيح");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("حجم الصورة كبير جداً. يرجى اختيار صورة أصغر من 5 ميجابايت");
+      return;
+    }
+
+    try {
+      setAvatarUploading(true);
+
+      // Delete old avatar if exists and is not the default avatar
+      if (completeUserData?.avatar && 
+          typeof completeUserData.avatar === 'string' &&
+          !completeUserData.avatar.includes('/default-avatar') &&
+          !completeUserData.avatar.includes('default-avatar.png')) {
+        try {
+          await deleteImage(completeUserData.avatar);
+        } catch (deleteError) {
+          console.warn("Could not delete old avatar:", deleteError);
+        }
+      }
+
+      // Upload new avatar
+      const avatarData = await uploadSingleImage(file, "avatars", currentUser.uid);
+
+      // Update user data with new avatar
+      await updateUser(currentUser.uid, { avatar: avatarData.url });
+
+      // Update local state
+      const updatedCompleteData = {
+        ...completeUserData,
+        avatar: avatarData.url,
+      };
+      setCompleteUserData(updatedCompleteData);
+
+      alert("تم تحديث صورة الملف الشخصي بنجاح");
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      alert("حدث خطأ أثناء رفع الصورة");
+    } finally {
+      setAvatarUploading(false);
     }
   };
 
@@ -978,7 +1135,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                 <div className="tab-content">
                   <div className="tab-header">
                     <h2>إدارة الخدمات</h2>
-                    <button className="btn-primary">إضافة خدمة جديدة</button>
+                    <button className="btn-primary" onClick={handleAddService}>إضافة خدمة جديدة</button>
                   </div>
 
                   <div className="services-table">
@@ -1037,7 +1194,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                 <div className="tab-content">
                   <div className="tab-header">
                     <h2>إدارة المنتجات</h2>
-                    <button className="btn-primary">إضافة منتج جديد</button>
+                    <button className="btn-primary" onClick={handleAddProduct}>إضافة منتج جديد</button>
                   </div>
 
                   {loading ? (
@@ -1057,7 +1214,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                     <div className="empty-state">
                       <i className="fas fa-box"></i>
                       <p>لا توجد منتجات حتى الآن</p>
-                      <button className="btn-primary">إضافة أول منتج</button>
+                      <button className="btn-primary" onClick={handleAddProduct}>إضافة أول منتج</button>
                     </div>
                   ) : (
                     <div className="services-table">
@@ -1182,6 +1339,128 @@ const AdminDashboardPage = ({ currentUser }) => {
                   <h2>إعدادات النظام</h2>
 
                   <div className="settings-sections">
+                    {/* Profile Section */}
+                    <div className="settings-section">
+                      <h3>الملف الشخصي</h3>
+                      <div className="profile-section">
+                        <div className="profile-avatar">
+                          <div className="avatar-container">
+                            <img
+                              src={completeUserData?.avatar || "/default-avatar.png"}
+                              alt="Profile"
+                              className="avatar-image"
+                            />
+                            <div className="avatar-overlay">
+                              <input
+                                type="file"
+                                id="avatar-upload"
+                                accept="image/*"
+                                onChange={handleAvatarUpload}
+                                style={{ display: "none" }}
+                                disabled={avatarUploading}
+                              />
+                              <label htmlFor="avatar-upload" className="avatar-upload-btn">
+                                {avatarUploading ? (
+                                  <i className="fas fa-spinner fa-spin"></i>
+                                ) : (
+                                  <i className="fas fa-camera"></i>
+                                )}
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="profile-form">
+                          {!editMode ? (
+                            <div className="profile-info">
+                              <div className="info-item">
+                                <label>الاسم</label>
+                                <span>{completeUserData?.name || "غير محدد"}</span>
+                              </div>
+                              <div className="info-item">
+                                <label>البريد الإلكتروني</label>
+                                <span>{completeUserData?.email || "غير محدد"}</span>
+                              </div>
+                              <div className="info-item">
+                                <label>رقم الهاتف</label>
+                                <span>{completeUserData?.phone || "غير محدد"}</span>
+                              </div>
+                              <div className="info-item">
+                                <label>العنوان</label>
+                                <span>{completeUserData?.address || "غير محدد"}</span>
+                              </div>
+                              <button
+                                className="btn-secondary"
+                                onClick={() => setEditMode(true)}
+                              >
+                                تعديل المعلومات
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="profile-edit-form">
+                              <div className="form-group">
+                                <label>الاسم</label>
+                                <input
+                                  type="text"
+                                  name="name"
+                                  value={editData.name}
+                                  onChange={handleInputChange}
+                                  className="form-input"
+                                />
+                              </div>
+                              <div className="form-group">
+                                <label>البريد الإلكتروني</label>
+                                <input
+                                  type="email"
+                                  value={completeUserData?.email || ""}
+                                  className="form-input"
+                                  disabled
+                                  style={{ backgroundColor: "#f5f5f5", cursor: "not-allowed" }}
+                                />
+                                <small className="form-note">البريد الإلكتروني غير قابل للتعديل</small>
+                              </div>
+                              <div className="form-group">
+                                <label>رقم الهاتف</label>
+                                <input
+                                  type="tel"
+                                  name="phone"
+                                  value={editData.phone}
+                                  onChange={handleInputChange}
+                                  className="form-input"
+                                />
+                              </div>
+                              <div className="form-group">
+                                <label>العنوان</label>
+                                <input
+                                  type="text"
+                                  name="address"
+                                  value={editData.address}
+                                  onChange={handleInputChange}
+                                  className="form-input"
+                                />
+                              </div>
+                              <div className="form-actions">
+                                <button
+                                  className="btn-primary"
+                                  onClick={handleSaveProfile}
+                                  disabled={submitting}
+                                >
+                                  {submitting ? "جاري الحفظ..." : "حفظ التغييرات"}
+                                </button>
+                                <button
+                                  className="btn-secondary"
+                                  onClick={handleCancelEdit}
+                                  disabled={submitting}
+                                >
+                                  إلغاء
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="settings-section">
                       <h3>إعدادات عامة</h3>
                       <div className="settings-form">

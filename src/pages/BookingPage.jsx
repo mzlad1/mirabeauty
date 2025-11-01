@@ -357,7 +357,14 @@ const BookingPage = ({ currentUser, userData }) => {
                         onClick={() => handleServiceSelect(service.id)}
                       >
                         <div className="service-image">
-                          <img src={service.image} alt={service.name} />
+                          <img 
+                            src={
+                              service.images && service.images.length > 0
+                                ? (service.images[service.primaryImageIndex || 0]?.url || service.images[service.primaryImageIndex || 0])
+                                : service.image || '/assets/default-service.jpg'
+                            } 
+                            alt={service.name} 
+                          />
                         </div>
                         <div className="service-details">
                           <h3>{service.name}</h3>

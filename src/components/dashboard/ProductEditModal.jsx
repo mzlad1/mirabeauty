@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "./ProductEditModal.css";
+import { 
+  uploadMultipleImages, 
+  deleteImage, 
+  setPrimaryImage, 
+  getPrimaryImage,
+  validateImageFile 
+} from "../../utils/imageUpload";
 
 const ProductEditModal = ({ isOpen, onClose, onSubmit, product }) => {
   const [formData, setFormData] = useState({
@@ -10,13 +17,19 @@ const ProductEditModal = ({ isOpen, onClose, onSubmit, product }) => {
     category: product?.category || "",
     categoryName: product?.categoryName || "",
     brand: product?.brand || "",
-    image: product?.image || "",
+    images: product?.images || [],
+    primaryImageIndex: product?.primaryImageIndex || 0,
     inStock: product?.inStock !== undefined ? product.inStock : true,
     rating: product?.rating || 4.5,
     reviewsCount: product?.reviewsCount || 0,
+    benefits: product?.benefits || [],
+    ingredients: product?.ingredients || [],
+    howToUse: product?.howToUse || "",
   });
 
   const [loading, setLoading] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   useEffect(() => {
     if (product) {
@@ -28,11 +41,35 @@ const ProductEditModal = ({ isOpen, onClose, onSubmit, product }) => {
         category: product.category || "",
         categoryName: product.categoryName || "",
         brand: product.brand || "",
-        image: product.image || "",
+        images: product.images || [],
+        primaryImageIndex: product.primaryImageIndex || 0,
         inStock: product.inStock !== undefined ? product.inStock : true,
         rating: product.rating || 4.5,
         reviewsCount: product.reviewsCount || 0,
+        benefits: product.benefits || [],
+        ingredients: product.ingredients || [],
+        howToUse: product.howToUse || "",
       });
+    } else {
+      // Reset form for new product
+      setFormData({
+        name: "",
+        description: "",
+        price: "",
+        originalPrice: "",
+        category: "",
+        categoryName: "",
+        brand: "",
+        images: [],
+        primaryImageIndex: 0,
+        inStock: true,
+        rating: 4.5,
+        reviewsCount: 0,
+        benefits: [],
+        ingredients: [],
+        howToUse: "",
+      });
+      setSelectedFiles([]);
     }
   }, [product]);
 
@@ -41,21 +78,115 @@ const ProductEditModal = ({ isOpen, onClose, onSubmit, product }) => {
     setLoading(true);
 
     try {
-      await onSubmit(formData);
+      let finalFormData = { ...formData };
+
+      // Upload new images if any
+      if (selectedFiles.length > 0) {
+        setUploadingImages(true);
+        const uploadedImages = await uploadMultipleImages(
+          selectedFiles,
+          `products/${product?.id || 'new'}`
+        );
+        finalFormData.images = [...finalFormData.images, ...uploadedImages];
+        setUploadingImages(false);
+      }
+
+      // Ensure we have at least one image for new products
+      if (!product && finalFormData.images.length === 0) {
+        alert("يجب إضافة صورة واحدة على الأقل");
+        return;
+      }
+
+      await onSubmit(finalFormData);
       onClose();
+      setSelectedFiles([]);
     } catch (error) {
       console.error("Error submitting product edit:", error);
       alert("حدث خطأ أثناء الحفظ");
     } finally {
       setLoading(false);
+      setUploadingImages(false);
     }
+  };
+
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    const validFiles = [];
+
+    for (const file of files) {
+      if (validateImageFile(file)) {
+        validFiles.push(file);
+      } else {
+        alert(`الملف ${file.name} غير صالح. يجب أن يكون صورة أقل من 5MB`);
+      }
+    }
+
+    setSelectedFiles(prev => [...prev, ...validFiles]);
+  };
+
+  const removeSelectedFile = (index) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = async (index) => {
+    const imageToRemove = formData.images[index];
+    try {
+      await deleteImage(imageToRemove.url);
+      const newImages = formData.images.filter((_, i) => i !== index);
+      let newPrimaryIndex = formData.primaryImageIndex;
+      
+      // Adjust primary index if needed
+      if (index === formData.primaryImageIndex) {
+        newPrimaryIndex = 0;
+      } else if (index < formData.primaryImageIndex) {
+        newPrimaryIndex = formData.primaryImageIndex - 1;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        images: newImages,
+        primaryImageIndex: newPrimaryIndex
+      }));
+    } catch (error) {
+      console.error("Error removing image:", error);
+      alert("حدث خطأ أثناء حذف الصورة");
+    }
+  };
+
+  const setPrimaryImageIndex = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      primaryImageIndex: index
+    }));
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  // Handle array fields (benefits and ingredients)
+  const addArrayItem = (fieldName) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: [...prev[fieldName], ""]
+    }));
+  };
+
+  const removeArrayItem = (fieldName, index) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: prev[fieldName].filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateArrayItem = (fieldName, index, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: prev[fieldName].map((item, i) => i === index ? value : item)
     }));
   };
 
@@ -202,17 +333,209 @@ const ProductEditModal = ({ isOpen, onClose, onSubmit, product }) => {
 
           <div className="product-edit-form-row">
             <div className="product-edit-form-group">
-              <label htmlFor="image">رابط الصورة *</label>
-              <input
-                type="url"
-                id="image"
-                name="image"
-                value={formData.image}
+              <label>الفوائد</label>
+              {formData.benefits.map((benefit, index) => (
+                <div key={index} className="array-input-row" style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                  <input
+                    type="text"
+                    value={benefit}
+                    onChange={(e) => updateArrayItem('benefits', index, e.target.value)}
+                    className="product-edit-form-input"
+                    placeholder="مثال: إشراق فوري للبشرة"
+                    style={{ flex: 1 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeArrayItem('benefits', index)}
+                    className="remove-array-item-btn"
+                    style={{ 
+                      background: '#dc3545', 
+                      color: 'white', 
+                      border: 'none', 
+                      borderRadius: '4px', 
+                      padding: '8px 12px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <i className="fas fa-trash"></i>
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => addArrayItem('benefits')}
+                className="add-array-item-btn"
+                style={{ 
+                  background: '#28a745', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '4px', 
+                  padding: '8px 16px',
+                  cursor: 'pointer',
+                  marginTop: '10px'
+                }}
+              >
+                <i className="fas fa-plus"></i> إضافة فائدة
+              </button>
+            </div>
+          </div>
+
+          <div className="product-edit-form-row">
+            <div className="product-edit-form-group">
+              <label>المكونات</label>
+              {formData.ingredients.map((ingredient, index) => (
+                <div key={index} className="array-input-row" style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                  <input
+                    type="text"
+                    value={ingredient}
+                    onChange={(e) => updateArrayItem('ingredients', index, e.target.value)}
+                    className="product-edit-form-input"
+                    placeholder="مثال: فيتامين C 20%"
+                    style={{ flex: 1 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeArrayItem('ingredients', index)}
+                    className="remove-array-item-btn"
+                    style={{ 
+                      background: '#dc3545', 
+                      color: 'white', 
+                      border: 'none', 
+                      borderRadius: '4px', 
+                      padding: '8px 12px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <i className="fas fa-trash"></i>
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => addArrayItem('ingredients')}
+                className="add-array-item-btn"
+                style={{ 
+                  background: '#28a745', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '4px', 
+                  padding: '8px 16px',
+                  cursor: 'pointer',
+                  marginTop: '10px'
+                }}
+              >
+                <i className="fas fa-plus"></i> إضافة مكون
+              </button>
+            </div>
+          </div>
+
+          <div className="product-edit-form-row">
+            <div className="product-edit-form-group">
+              <label htmlFor="howToUse">طريقة الاستخدام</label>
+              <textarea
+                id="howToUse"
+                name="howToUse"
+                value={formData.howToUse}
                 onChange={handleChange}
-                required
                 className="product-edit-form-input"
-                placeholder="https://example.com/image.jpg"
+                placeholder="مثال: يُطبق صباحاً قبل المرطب وواقي الشمس"
+                rows="3"
               />
+            </div>
+          </div>
+
+          <div className="product-edit-form-row">
+            <div className="product-edit-form-group">
+              <label>الصور *</label>
+              
+              {/* File Upload */}
+              <div className="image-upload-section">
+                <input
+                  type="file"
+                  id="imageUpload"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="image-upload-input"
+                  style={{ display: 'none' }}
+                />
+                <label htmlFor="imageUpload" className="image-upload-button">
+                  <span>اختر صور</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7,10 12,15 17,10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </label>
+              </div>
+
+              {/* Selected Files Preview */}
+              {selectedFiles.length > 0 && (
+                <div className="selected-files-preview">
+                  <h4>الصور المحددة للرفع:</h4>
+                  <div className="files-grid">
+                    {selectedFiles.map((file, index) => (
+                      <div key={index} className="file-preview-item">
+                        <img 
+                          src={URL.createObjectURL(file)} 
+                          alt={file.name}
+                          className="file-preview-image"
+                        />
+                        <div className="file-preview-info">
+                          <span className="file-name">{file.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeSelectedFile(index)}
+                            className="remove-file-btn"
+                          >
+                            حذف
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Existing Images */}
+              {formData.images.length > 0 && (
+                <div className="existing-images">
+                  <h4>الصور الحالية:</h4>
+                  <div className="images-grid">
+                    {formData.images.map((image, index) => (
+                      <div key={index} className="image-item">
+                        <img 
+                          src={image.url} 
+                          alt={`صورة ${index + 1}`}
+                          className="existing-image"
+                        />
+                        <div className="image-controls">
+                          <button
+                            type="button"
+                            onClick={() => setPrimaryImageIndex(index)}
+                            className={`primary-btn ${index === formData.primaryImageIndex ? 'active' : ''}`}
+                          >
+                            {index === formData.primaryImageIndex ? 'صورة رئيسية' : 'جعل رئيسية'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeExistingImage(index)}
+                            className="remove-image-btn"
+                          >
+                            حذف
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {uploadingImages && (
+                <div className="upload-progress">
+                  <span>جاري رفع الصور...</span>
+                </div>
+              )}
             </div>
           </div>
 

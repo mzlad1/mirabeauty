@@ -24,10 +24,15 @@ export const getAllServices = async () => {
     const servicesRef = collection(db, SERVICES_COLLECTION);
     const q = query(servicesRef, orderBy("name"));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
+    const services = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+    
+    console.log("servicesService - getAllServices data:", services);
+    console.log("servicesService - First service structure:", services[0]);
+    
+    return services;
   } catch (error) {
     console.error("Error getting all services:", error);
     throw error;
@@ -44,10 +49,15 @@ export const getServicesByCategory = async (category) => {
       orderBy("name")
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
+    const services = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+    
+    console.log("servicesService - getServicesByCategory data:", services);
+    console.log("servicesService - First service structure:", services[0]);
+    
+    return services;
   } catch (error) {
     console.error("Error getting services by category:", error);
     throw error;
