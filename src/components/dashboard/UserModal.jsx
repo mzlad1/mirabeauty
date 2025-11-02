@@ -113,8 +113,8 @@ const UserModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="admin-user-modal-overlay">
-      <div className="admin-user-modal">
+    <div className="admin-user-modal-overlay" onClick={onClose}>
+      <div className="admin-user-modal" onClick={(e) => e.stopPropagation()}>
         <div className="admin-user-modal-header">
           <h3>
             {user ? "تعديل" : "إضافة"}{" "}

@@ -9,7 +9,17 @@ import { getUsersByRole } from "../services/usersService";
 import {
   createAppointment,
   checkStaffAvailability,
+  getAppointmentsByCustomer,
+  getAppointmentsByDate,
 } from "../services/appointmentsService";
+
+// Available time slots
+const timeSlots = [
+  "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
+  "15:00", "15:30", "16:00", "16:30", "17:00", "17:30",
+  "18:00", "18:30", "19:00", "19:30", "20:00"
+];
 
 const BookingPage = ({ currentUser, userData }) => {
   const navigate = useNavigate();
@@ -17,7 +27,6 @@ const BookingPage = ({ currentUser, userData }) => {
   const [selectedCategory, setSelectedCategory] = useState(""); // إضافة حالة لنوع الجلسة
   const [bookingData, setBookingData] = useState({
     serviceId: "",
-    staffId: "",
     date: "",
     time: "",
     notes: "",
@@ -34,6 +43,8 @@ const BookingPage = ({ currentUser, userData }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const [userAppointments, setUserAppointments] = useState([]);
 
   // Load services and staff on component mount
   useEffect(() => {
@@ -46,6 +57,12 @@ const BookingPage = ({ currentUser, userData }) => {
         ]);
         setServices(servicesData);
         setStaffMembers(staffData);
+        
+        // Load user appointments if user is logged in
+        if (currentUser) {
+          const userAppts = await getAppointmentsByCustomer(currentUser.uid);
+          setUserAppointments(userAppts);
+        }
       } catch (error) {
         console.error("Error loading data:", error);
         setError("حدث خطأ في تحميل البيانات");
@@ -54,7 +71,7 @@ const BookingPage = ({ currentUser, userData }) => {
       }
     };
     loadData();
-  }, []);
+  }, [currentUser]);
 
   const timeSlots = [
     "09:00",
@@ -82,14 +99,61 @@ const BookingPage = ({ currentUser, userData }) => {
     setStep(2);
   };
 
-  const handleStaffSelect = (staffId) => {
-    setBookingData({ ...bookingData, staffId });
+  const handleDateTimeSelect = (date, time) => {
+    setBookingData({ ...bookingData, date, time });
     setStep(3);
   };
 
-  const handleDateTimeSelect = (date, time) => {
-    setBookingData({ ...bookingData, date, time });
-    setStep(4);
+  // Load available time slots for selected date
+  const loadAvailableTimeSlots = async (selectedDate) => {
+    if (!selectedDate) {
+      setAvailableTimeSlots([]);
+      return;
+    }
+
+    try {
+      // Get all appointments for the selected date
+      const dateAppointments = await getAppointmentsByDate(selectedDate);
+      
+      // Get booked time slots
+      const bookedTimes = dateAppointments
+        .filter(apt => apt.status === "في الانتظار" || apt.status === "مؤكد")
+        .map(apt => apt.time);
+
+      // Filter available time slots
+      const available = timeSlots.filter(time => !bookedTimes.includes(time));
+      setAvailableTimeSlots(available);
+    } catch (error) {
+      console.error("Error loading available time slots:", error);
+      setAvailableTimeSlots(timeSlots); // Fallback to all slots
+    }
+  };
+
+  // Check for duplicate bookings
+  const checkDuplicateBooking = (serviceId, date, time) => {
+    const selectedService = services.find(s => s.id === serviceId);
+    
+    // Check if user has same service on same day
+    const sameServiceSameDay = userAppointments.some(apt => 
+      apt.serviceId === serviceId && 
+      apt.date === date && 
+      (apt.status === "في الانتظار" || apt.status === "مؤكد")
+    );
+
+    // Check if user has any appointment at same date and time
+    const sameDateTime = userAppointments.some(apt => 
+      apt.date === date && 
+      apt.time === time && 
+      (apt.status === "في الانتظار" || apt.status === "مؤكد")
+    );
+
+    return { sameServiceSameDay, sameDateTime };
+  };
+
+  // Get minimum date for booking (today)
+  const getMinDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
   };
 
   const handleSubmit = async (e) => {
@@ -101,23 +165,27 @@ const BookingPage = ({ currentUser, userData }) => {
       return;
     }
 
+    // Check for duplicate bookings
+    const { sameServiceSameDay, sameDateTime } = checkDuplicateBooking(
+      bookingData.serviceId,
+      bookingData.date,
+      bookingData.time
+    );
+
+    if (sameServiceSameDay) {
+      alert("لديك حجز مسبق لنفس الخدمة في هذا اليوم. لا يمكن حجز نفس الخدمة أكثر من مرة في اليوم الواحد.");
+      return;
+    }
+
+    if (sameDateTime) {
+      alert("لديك حجز مسبق في نفس التاريخ والوقت. يرجى اختيار وقت آخر.");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
-      // Check staff availability
-      const isAvailable = await checkStaffAvailability(
-        bookingData.staffId,
-        bookingData.date,
-        bookingData.time
-      );
-
-      if (!isAvailable) {
-        alert("عذراً، هذا الموعد محجوز بالفعل. يرجى اختيار موعد آخر.");
-        setSubmitting(false);
-        return;
-      }
-
-      // Create appointment
+      // Create appointment without staff assignment (admin will assign later)
       const appointmentData = {
         customerId: currentUser.uid,
         customerName: bookingData.customerInfo.name,
@@ -128,8 +196,8 @@ const BookingPage = ({ currentUser, userData }) => {
         serviceCategory: selectedService?.category,
         servicePrice: selectedService?.price,
         serviceDuration: selectedService?.duration || 60, // Default 60 minutes
-        staffId: bookingData.staffId,
-        staffName: selectedStaff?.name,
+        staffId: null, // Will be assigned by admin
+        staffName: null, // Will be assigned by admin
         date: bookingData.date,
         time: bookingData.time,
         notes: bookingData.notes,
@@ -137,7 +205,7 @@ const BookingPage = ({ currentUser, userData }) => {
       };
 
       await createAppointment(appointmentData);
-      alert("تم حجز موعدك بنجاح! سيتم التواصل معك قريباً لتأكيد الموعد.");
+      alert("تم حجز موعدك بنجاح! سيتم تعيين الأخصائية المناسبة والتواصل معك قريباً لتأكيد الموعد.");
       navigate("/profile");
     } catch (error) {
       console.error("Error creating appointment:", error);
@@ -148,13 +216,6 @@ const BookingPage = ({ currentUser, userData }) => {
   };
 
   const selectedService = services.find((s) => s.id === bookingData.serviceId);
-  const selectedStaff = staffMembers.find((s) => s.id === bookingData.staffId);
-
-  const getMinDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split("T")[0];
-  };
 
   if (!currentUser) {
     return (
@@ -314,18 +375,10 @@ const BookingPage = ({ currentUser, userData }) => {
                 }`}
               >
                 <div className="step-number">2</div>
-                <div className="step-title">اختيار الأخصائية</div>
-              </div>
-              <div
-                className={`progress-step ${step >= 3 ? "active" : ""} ${
-                  step > 3 ? "completed" : ""
-                }`}
-              >
-                <div className="step-number">3</div>
                 <div className="step-title">اختيار التاريخ والوقت</div>
               </div>
-              <div className={`progress-step ${step >= 4 ? "active" : ""}`}>
-                <div className="step-number">4</div>
+              <div className={`progress-step ${step >= 3 ? "active" : ""}`}>
+                <div className="step-number">3</div>
                 <div className="step-title">تأكيد الحجز</div>
               </div>
             </div>
@@ -382,50 +435,11 @@ const BookingPage = ({ currentUser, userData }) => {
               </div>
             )}
 
-            {/* Step 2: Staff Selection */}
+            {/* Step 2: Date & Time Selection */}
             {step === 2 && (
               <div className="booking-step">
                 <div className="step-header">
                   <button className="back-btn" onClick={() => setStep(1)}>
-                    ← العودة
-                  </button>
-                  <h2>اختاري الأخصائية</h2>
-                </div>
-                <div className="selected-service-info">
-                  <h3>الخدمة المختارة: {selectedService?.name}</h3>
-                  <p>{selectedService?.description}</p>
-                </div>
-                <div className="staff-selection">
-                  {staffMembers.map((staff) => (
-                    <div
-                      key={staff.id}
-                      className="staff-option"
-                      onClick={() => handleStaffSelect(staff.id)}
-                    >
-                      <div className="staff-avatar">
-                        <img src={staff.avatar} alt={staff.name} />
-                      </div>
-                      <div className="staff-details">
-                        <h3>{staff.name}</h3>
-                        <p>{staff.specialization}</p>
-                        <div className="staff-experience">
-                          خبرة{" "}
-                          {new Date().getFullYear() -
-                            new Date(staff.joinDate).getFullYear()}{" "}
-                          سنوات
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Date & Time Selection */}
-            {step === 3 && (
-              <div className="booking-step">
-                <div className="step-header">
-                  <button className="back-btn" onClick={() => setStep(2)}>
                     ← العودة
                   </button>
                   <h2>اختاري التاريخ والوقت</h2>
@@ -435,7 +449,10 @@ const BookingPage = ({ currentUser, userData }) => {
                     <strong>الخدمة:</strong> {selectedService?.name}
                   </div>
                   <div className="info-item">
-                    <strong>الأخصائية:</strong> {selectedStaff?.name}
+                    <strong>المدة:</strong> {selectedService?.duration || 60} دقيقة
+                  </div>
+                  <div className="info-item">
+                    <strong>السعر:</strong> {selectedService?.price}
                   </div>
                 </div>
                 <div className="datetime-selection">
@@ -445,41 +462,116 @@ const BookingPage = ({ currentUser, userData }) => {
                       type="date"
                       value={bookingData.date}
                       min={getMinDate()}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, date: e.target.value })
-                      }
+                      onChange={async (e) => {
+                        const selectedDate = e.target.value;
+                        setBookingData({ ...bookingData, date: selectedDate, time: "" });
+                        await loadAvailableTimeSlots(selectedDate);
+                      }}
                       className="form-input"
                     />
                   </div>
                   {bookingData.date && (
                     <div className="time-selection">
-                      <h3>اختاري الوقت</h3>
-                      <div className="time-slots">
-                        {timeSlots.map((time) => (
-                          <button
-                            key={time}
-                            className={`time-slot ${
-                              bookingData.time === time ? "selected" : ""
-                            }`}
-                            onClick={() =>
-                              handleDateTimeSelect(bookingData.date, time)
+                      <h3>اختاري الوقت المتاح</h3>
+                      {availableTimeSlots.length === 0 ? (
+                        <p className="no-slots-message">
+                          لا توجد أوقات متاحة في هذا التاريخ. يرجى اختيار تاريخ آخر.
+                        </p>
+                      ) : (
+                        <>
+                          {/* Check if there are any disabled slots and show warning message */}
+                          {(() => {
+                            const disabledSlots = availableTimeSlots.filter((time) => {
+                              const { sameServiceSameDay, sameDateTime } = checkDuplicateBooking(
+                                bookingData.serviceId,
+                                bookingData.date,
+                                time
+                              );
+                              return sameServiceSameDay || sameDateTime;
+                            });
+                            
+                            const hasSameServiceSameDay = disabledSlots.some((time) => {
+                              const { sameServiceSameDay } = checkDuplicateBooking(
+                                bookingData.serviceId,
+                                bookingData.date,
+                                time
+                              );
+                              return sameServiceSameDay;
+                            });
+                            
+                            const hasSameDateTime = disabledSlots.some((time) => {
+                              const { sameDateTime } = checkDuplicateBooking(
+                                bookingData.serviceId,
+                                bookingData.date,
+                                time
+                              );
+                              return sameDateTime;
+                            });
+                            
+                            if (disabledSlots.length > 0) {
+                              return (
+                                <div className="booking-warning-message">
+                                  <i className="fas fa-exclamation-triangle warning-icon"></i>
+                                  {hasSameServiceSameDay && (
+                                    <p>لديك حجز مسبق لنفس الخدمة في هذا اليوم. الأوقات المعطلة غير متاحة للحجز.</p>
+                                  )}
+                                  {hasSameDateTime && !hasSameServiceSameDay && (
+                                    <p>لديك حجز مسبق في بعض الأوقات. الأوقات المعطلة غير متاحة للحجز.</p>
+                                  )}
+                                </div>
+                              );
                             }
-                          >
-                            {time}
-                          </button>
-                        ))}
-                      </div>
+                            return null;
+                          })()}
+                          
+                          <div className="time-slots">
+                            {availableTimeSlots.map((time) => {
+                              // Check if this time would create a duplicate booking
+                              const { sameServiceSameDay, sameDateTime } = checkDuplicateBooking(
+                                bookingData.serviceId,
+                                bookingData.date,
+                                time
+                              );
+                              const isDisabled = sameServiceSameDay || sameDateTime;
+                              
+                              return (
+                                <button
+                                  key={time}
+                                  className={`time-slot ${
+                                    bookingData.time === time ? "selected" : ""
+                                  } ${isDisabled ? "disabled" : ""}`}
+                                  onClick={() => {
+                                    if (!isDisabled) {
+                                      handleDateTimeSelect(bookingData.date, time);
+                                    }
+                                  }}
+                                  disabled={isDisabled}
+                                  title={
+                                    isDisabled
+                                      ? sameServiceSameDay
+                                        ? "لديك حجز مسبق لنفس الخدمة في هذا اليوم"
+                                        : "لديك حجز مسبق في نفس الوقت"
+                                      : ""
+                                  }
+                                >
+                                  {time}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
               </div>
             )}
 
-            {/* Step 4: Confirmation */}
-            {step === 4 && (
+            {/* Step 3: Confirmation */}
+            {step === 3 && (
               <div className="booking-step">
                 <div className="step-header">
-                  <button className="back-btn" onClick={() => setStep(3)}>
+                  <button className="back-btn" onClick={() => setStep(2)}>
                     ← العودة
                   </button>
                   <h2>تأكيد الحجز</h2>
@@ -492,10 +584,6 @@ const BookingPage = ({ currentUser, userData }) => {
                       <span className="value">{selectedService?.name}</span>
                     </div>
                     <div className="summary-item">
-                      <span className="label">الأخصائية:</span>
-                      <span className="value">{selectedStaff?.name}</span>
-                    </div>
-                    <div className="summary-item">
                       <span className="label">التاريخ:</span>
                       <span className="value">{bookingData.date}</span>
                     </div>
@@ -505,11 +593,14 @@ const BookingPage = ({ currentUser, userData }) => {
                     </div>
                     <div className="summary-item">
                       <span className="label">المدة:</span>
-                      <span className="value">{selectedService?.duration}</span>
+                      <span className="value">{selectedService?.duration || 60} دقيقة</span>
                     </div>
                     <div className="summary-item price-item">
                       <span className="label">السعر:</span>
                       <span className="value">{selectedService?.price}</span>
+                    </div>
+                    <div className="summary-note">
+                      <p><strong>ملاحظة:</strong> سيتم تعيين الأخصائية المناسبة من قبل الإدارة وسيتم إشعارك بالتفاصيل.</p>
                     </div>
                   </div>
                 </div>

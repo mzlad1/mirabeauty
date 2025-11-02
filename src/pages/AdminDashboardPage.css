@@ -610,6 +610,7 @@
 
 .customer-header {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
   margin-bottom: 1rem;
   align-items: center;
@@ -895,8 +896,6 @@
   gap: 0.75rem;
 }
 
-
-
 /* Profile Section Specific Styles */
 .profile-section {
   display: flex;
@@ -1139,7 +1138,7 @@
     padding: 1.5rem;
     margin-bottom: 1.5rem;
   }
-  
+
   .settings-form .form-group {
     margin-bottom: 1rem;
   }
@@ -1148,17 +1147,17 @@
   .settings-form .form-select {
     font-size: 16px;
   }
-  
+
   .profile-info,
   .profile-edit-form {
     grid-template-columns: 1fr;
   }
-  
+
   .profile-actions,
   .settings-actions {
     flex-direction: column;
   }
-  
+
   .profile-avatar img {
     width: 100px;
     height: 100px;
@@ -1415,5 +1414,290 @@
   .appointments-table .customer-info,
   .services-table .customer-info {
     text-align: left;
+  }
+}
+
+/* Categories Section Styles */
+.categories-section {
+  padding: 2rem 0;
+}
+
+/* Sub-tabs for Categories */
+.sub-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0;
+}
+
+.sub-tab {
+  background: none;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px 8px 0 0;
+}
+
+.sub-tab:hover {
+  color: var(--navy-blue);
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.sub-tab.active {
+  color: var(--navy-blue);
+  border-bottom-color: var(--gold);
+  font-weight: 600;
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.sub-tab i {
+  font-size: 1rem;
+}
+
+.categories-section .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.categories-section .section-header h3 {
+  color: var(--navy-blue);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.categories-section .add-category-btn {
+  background: linear-gradient(135deg, var(--gold) 0%, #d4af37 100%);
+  color: var(--white);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.categories-section .add-category-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.categories-section .add-category-btn i {
+  font-size: 1rem;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.category-card {
+  background: var(--white);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.category-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.category-header h4 {
+  color: var(--navy-blue);
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+}
+
+.category-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.category-actions .edit-btn,
+.category-actions .delete-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.category-actions .edit-btn {
+  color: var(--gold);
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.category-actions .edit-btn:hover {
+  background: rgba(212, 175, 55, 0.2);
+  transform: scale(1.1);
+}
+
+.category-actions .delete-btn {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.category-actions .delete-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: scale(1.1);
+}
+
+.category-description {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 1rem 0;
+}
+
+.category-meta {
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.category-date {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* Categories Sub-tabs */
+.categories-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.categories-tab {
+  background: none;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  position: relative;
+}
+
+.categories-tab:hover {
+  color: var(--navy-blue);
+}
+
+.categories-tab.active {
+  color: var(--navy-blue);
+  border-bottom-color: var(--gold);
+  font-weight: 600;
+}
+
+/* Empty State for Categories */
+.categories-section .empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--text-secondary);
+}
+
+.categories-section .empty-state i {
+  font-size: 3rem;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.categories-section .empty-state h4 {
+  color: var(--navy-blue);
+  font-size: 1.2rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.categories-section .empty-state p {
+  margin: 0 0 1.5rem 0;
+  font-size: 0.9rem;
+}
+
+/* Mobile Responsiveness for Categories */
+@media (max-width: 768px) {
+  .categories-section .section-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .categories-section .section-header h3 {
+    text-align: center;
+  }
+
+  .categories-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .category-card {
+    padding: 1rem;
+  }
+
+  .category-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .category-actions {
+    justify-content: center;
+  }
+
+  .categories-tabs {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .categories-tab {
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 0;
+  }
+
+  .categories-tab.active {
+    background: rgba(212, 175, 55, 0.1);
+    border-bottom-color: var(--gold);
   }
 }

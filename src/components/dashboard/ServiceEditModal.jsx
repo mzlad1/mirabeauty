@@ -7,8 +7,9 @@ import {
   getPrimaryImage,
   validateImageFile 
 } from "../../utils/imageUpload";
+import { getAllServiceCategories } from "../../services/categoriesService";
 
-const ServiceEditModal = ({ isOpen, onClose, onSubmit, service }) => {
+const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategories = [] }) => {
   const [formData, setFormData] = useState({
     name: service?.name || "",
     description: service?.description || "",
@@ -26,6 +27,7 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service }) => {
   const [loading, setLoading] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [categories, setCategories] = useState(serviceCategories);
 
   useEffect(() => {
     if (service) {
@@ -60,6 +62,38 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service }) => {
       setSelectedFiles([]);
     }
   }, [service]);
+
+  // Update categories when serviceCategories prop changes
+  useEffect(() => {
+    setCategories(serviceCategories);
+  }, [serviceCategories]);
+
+  // Load categories if not provided as props
+  useEffect(() => {
+    const loadCategories = async () => {
+      if (isOpen && categories.length === 0) {
+        try {
+          const fetchedCategories = await getAllServiceCategories();
+          setCategories(fetchedCategories);
+        } catch (error) {
+          console.error("Error loading service categories:", error);
+        }
+      }
+    };
+
+    loadCategories();
+  }, [isOpen, categories.length]);
+
+  const handleCategoryChange = (e) => {
+    const selectedCategoryId = e.target.value;
+    const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
+    
+    setFormData(prev => ({
+      ...prev,
+      category: selectedCategoryId,
+      categoryName: selectedCategory ? selectedCategory.name : ""
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -159,8 +193,8 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="service-edit-modal-overlay">
-      <div className="service-edit-modal">
+    <div className="service-edit-modal-overlay" onClick={onClose}>
+      <div className="service-edit-modal" onClick={(e) => e.stopPropagation()}>
         <div className="service-edit-modal-header">
           <h3>{service ? "تعديل خدمة" : "إضافة خدمة"}</h3>
           <button className="service-edit-modal-close" onClick={onClose}>
@@ -231,39 +265,24 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service }) => {
 
           <div className="service-edit-form-row-2">
             <div className="service-edit-form-group">
-              <label htmlFor="category">رمز الفئة *</label>
+              <label htmlFor="category">الفئة *</label>
               <select
                 id="category"
                 name="category"
                 value={formData.category}
-                onChange={handleChange}
+                onChange={handleCategoryChange}
                 required
                 className="service-edit-form-input"
               >
                 <option value="">اختر الفئة</option>
-                <option value="laser">ليزر</option>
-                <option value="skincare">عناية بالبشرة</option>
-                <option value="body">نحت الجسم</option>
-                <option value="facial">عناية بالوجه</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
               </select>
             </div>
 
-            <div className="service-edit-form-group">
-              <label htmlFor="categoryName">اسم الفئة *</label>
-              <input
-                type="text"
-                id="categoryName"
-                name="categoryName"
-                value={formData.categoryName}
-                onChange={handleChange}
-                required
-                className="service-edit-form-input"
-                placeholder="مثال: الليزر"
-              />
-            </div>
-          </div>
-
-          <div className="service-edit-form-row">
             <div className="service-edit-form-group">
               <label htmlFor="sessions">عدد الجلسات *</label>
               <input

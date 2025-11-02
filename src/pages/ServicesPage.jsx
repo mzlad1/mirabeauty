@@ -5,6 +5,7 @@ import {
   getAllServices,
   getServicesByCategory,
 } from "../services/servicesService";
+import { getAllServiceCategories } from "../services/categoriesService";
 
 const ServicesPage = () => {
   const navigate = useNavigate();
@@ -13,14 +14,9 @@ const ServicesPage = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const categories = [
-    { id: "all", name: "جميع الخدمات" },
-    { id: "laser", name: "الليزر" },
-    { id: "skincare", name: "العناية بالبشرة" },
-    { id: "body", name: "نحت الجسم" },
-    { id: "facial", name: "العناية بالوجه" },
-  ];
+  const [categories, setCategories] = useState([
+    { id: "all", name: "جميع الخدمات" }
+  ]);
 
   // Fetch services from Firebase
   useEffect(() => {
@@ -50,6 +46,25 @@ const ServicesPage = () => {
 
     fetchServices();
   }, [selectedCategory]);
+
+  // Load categories on component mount
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      const categoriesData = await getAllServiceCategories();
+      const allCategories = [
+        { id: "all", name: "جميع الخدمات" },
+        ...categoriesData
+      ];
+      setCategories(allCategories);
+    } catch (error) {
+      console.error("Error loading categories:", error);
+      // Keep default categories if loading fails
+    }
+  };
 
   const filteredServices = services;
 

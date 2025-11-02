@@ -17,7 +17,11 @@ import {
   adminRegisterCustomer,
   adminRegisterStaff,
 } from "../services/authService";
-import { getAllAppointments } from "../services/appointmentsService";
+import {
+  getAllAppointments,
+  updateAppointment,
+  deleteAppointment,
+} from "../services/appointmentsService";
 import {
   getAllServices,
   addService,
@@ -30,9 +34,21 @@ import {
   updateProduct,
   deleteProduct,
 } from "../services/productsService";
+import {
+  getAllProductCategories,
+  getAllServiceCategories,
+  addProductCategory,
+  addServiceCategory,
+  updateProductCategory,
+  updateServiceCategory,
+  deleteProductCategory,
+  deleteServiceCategory,
+} from "../services/categoriesService";
 import UserModal from "../components/dashboard/UserModal";
 import ServiceEditModal from "../components/dashboard/ServiceEditModal";
 import ProductEditModal from "../components/dashboard/ProductEditModal";
+import AdminAppointmentEditModal from "../components/dashboard/AdminAppointmentEditModal";
+import CategoryModal from "../components/dashboard/CategoryModal";
 import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
 
 const AdminDashboardPage = ({ currentUser }) => {
@@ -49,6 +65,10 @@ const AdminDashboardPage = ({ currentUser }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Appointment editing states
+  const [editingAppointment, setEditingAppointment] = useState(null);
+  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+
   // Modal states
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -57,6 +77,14 @@ const AdminDashboardPage = ({ currentUser }) => {
   const [editingService, setEditingService] = useState(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+
+  // Categories states
+  const [productCategories, setProductCategories] = useState([]);
+  const [serviceCategories, setServiceCategories] = useState([]);
+  const [activeCategoryTab, setActiveCategoryTab] = useState("products");
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [categoryModalType, setCategoryModalType] = useState("product");
 
   // Profile editing states
   const [editMode, setEditMode] = useState(false);
@@ -180,6 +208,73 @@ const AdminDashboardPage = ({ currentUser }) => {
     }
   };
 
+  const loadProductCategories = async () => {
+    try {
+      setLoading(true);
+      const categoriesData = await getAllProductCategories();
+      setProductCategories(categoriesData);
+    } catch (err) {
+      console.error("Error loading product categories:", err);
+      setError("فشل في تحميل تصنيفات المنتجات");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadServiceCategories = async () => {
+    try {
+      setLoading(true);
+      const categoriesData = await getAllServiceCategories();
+      setServiceCategories(categoriesData);
+    } catch (err) {
+      console.error("Error loading service categories:", err);
+      setError("فشل في تحميل تصنيفات الخدمات");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Appointment management functions
+  const handleEditAppointment = (appointment) => {
+    setEditingAppointment(appointment);
+    setIsAppointmentModalOpen(true);
+  };
+
+  const handleDeleteAppointment = async (appointmentId, customerName) => {
+    if (
+      !window.confirm(
+        `هل أنت متأكد من حذف موعد العميل "${customerName}"؟\n\nتحذير: سيتم حذف الموعد بشكل نهائي.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await deleteAppointment(appointmentId);
+      await loadAppointments();
+      alert("تم حذف الموعد بنجاح");
+    } catch (error) {
+      console.error("Error deleting appointment:", error);
+      alert("حدث خطأ أثناء حذف الموعد");
+    }
+  };
+
+  const handleAppointmentSubmit = async (appointmentData) => {
+    try {
+      if (editingAppointment) {
+        await updateAppointment(editingAppointment.id, appointmentData);
+        alert("تم تحديث الموعد بنجاح");
+      }
+      await loadAppointments();
+      setIsAppointmentModalOpen(false);
+      setEditingAppointment(null);
+    } catch (error) {
+      console.error("Error updating appointment:", error);
+      alert("حدث خطأ أثناء تحديث الموعد");
+      throw error;
+    }
+  };
+
   // Load initial data on component mount
   useEffect(() => {
     const loadInitialData = async () => {
@@ -237,10 +332,14 @@ const AdminDashboardPage = ({ currentUser }) => {
       loadStaff();
     } else if (activeTab === "appointments") {
       loadAppointments();
+      loadStaff(); // Load staff data for appointment editing
     } else if (activeTab === "services") {
       loadServices();
     } else if (activeTab === "products") {
       loadProducts();
+    } else if (activeTab === "categories") {
+      loadProductCategories();
+      loadServiceCategories();
     }
   }, [activeTab]);
 
@@ -373,6 +472,80 @@ const AdminDashboardPage = ({ currentUser }) => {
     } catch (error) {
       console.error("Error deleting product:", error);
       alert("حدث خطأ أثناء حذف المنتج");
+    }
+  };
+
+  // Categories management functions
+  const handleAddCategory = (type) => {
+    setCategoryModalType(type);
+    setEditingCategory(null);
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleEditCategory = (category, type) => {
+    setCategoryModalType(type);
+    setEditingCategory(category);
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleCategorySubmit = async (categoryData) => {
+    try {
+      if (editingCategory) {
+        // Update existing category
+        if (categoryModalType === "product") {
+          await updateProductCategory(editingCategory.id, categoryData);
+          alert("تم تحديث تصنيف المنتج بنجاح");
+          await loadProductCategories();
+        } else {
+          await updateServiceCategory(editingCategory.id, categoryData);
+          alert("تم تحديث تصنيف الخدمة بنجاح");
+          await loadServiceCategories();
+        }
+      } else {
+        // Add new category
+        if (categoryModalType === "product") {
+          await addProductCategory(categoryData);
+          alert("تم إضافة تصنيف المنتج بنجاح");
+          await loadProductCategories();
+        } else {
+          await addServiceCategory(categoryData);
+          alert("تم إضافة تصنيف الخدمة بنجاح");
+          await loadServiceCategories();
+        }
+      }
+      setIsCategoryModalOpen(false);
+    } catch (error) {
+      console.error("Error submitting category:", error);
+      throw error;
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId, categoryName, type) => {
+    if (
+      !window.confirm(
+        `هل أنت متأكد من حذف التصنيف "${categoryName}"؟\n\nتحذير: سيتم حذف التصنيف بشكل نهائي.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      if (type === "product") {
+        await deleteProductCategory(categoryId);
+        await loadProductCategories();
+        alert("تم حذف تصنيف المنتج بنجاح");
+      } else {
+        await deleteServiceCategory(categoryId);
+        await loadServiceCategories();
+        alert("تم حذف تصنيف الخدمة بنجاح");
+      }
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      if (error.message.includes("in use")) {
+        alert("لا يمكن حذف هذا التصنيف لأنه مستخدم في منتجات أو خدمات موجودة");
+      } else {
+        alert("حدث خطأ أثناء حذف التصنيف");
+      }
     }
   };
 
@@ -544,10 +717,12 @@ const AdminDashboardPage = ({ currentUser }) => {
       setAvatarUploading(true);
 
       // Delete old avatar if exists and is not the default avatar
-      if (completeUserData?.avatar && 
-          typeof completeUserData.avatar === 'string' &&
-          !completeUserData.avatar.includes('/default-avatar') &&
-          !completeUserData.avatar.includes('default-avatar.png')) {
+      if (
+        completeUserData?.avatar &&
+        typeof completeUserData.avatar === "string" &&
+        !completeUserData.avatar.includes("/default-avatar") &&
+        !completeUserData.avatar.includes("default-avatar.png")
+      ) {
         try {
           await deleteImage(completeUserData.avatar);
         } catch (deleteError) {
@@ -556,7 +731,11 @@ const AdminDashboardPage = ({ currentUser }) => {
       }
 
       // Upload new avatar
-      const avatarData = await uploadSingleImage(file, "avatars", currentUser.uid);
+      const avatarData = await uploadSingleImage(
+        file,
+        "avatars",
+        currentUser.uid
+      );
 
       // Update user data with new avatar
       await updateUser(currentUser.uid, { avatar: avatarData.url });
@@ -655,6 +834,15 @@ const AdminDashboardPage = ({ currentUser }) => {
                 >
                   <i className="nav-icon fas fa-box"></i>
                   المنتجات
+                </button>
+                <button
+                  className={`nav-item ${
+                    activeTab === "categories" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("categories")}
+                >
+                  <i className="nav-icon fas fa-tags"></i>
+                  التصنيفات
                 </button>
                 <button
                   className={`nav-item ${
@@ -774,7 +962,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                   </div>
 
                   {/* Quick Actions */}
-                  <div className="quick-actions">
+                  {/* <div className="quick-actions">
                     <h3>إجراءات سريعة</h3>
                     <div className="actions-grid">
                       <button className="action-card">
@@ -794,7 +982,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                         <span className="action-text">إنشاء تقرير</span>
                       </button>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Recent Activity */}
                   <div className="recent-activity">
@@ -886,10 +1074,25 @@ const AdminDashboardPage = ({ currentUser }) => {
                             </td>
                             <td>
                               <div className="table-actions">
-                                <button className="action-btn edit">
+                                <button
+                                  className="action-btn edit"
+                                  onClick={() =>
+                                    handleEditAppointment(appointment)
+                                  }
+                                  title="تعديل الموعد وتعيين أخصائية"
+                                >
                                   تعديل
                                 </button>
-                                <button className="action-btn delete">
+                                <button
+                                  className="action-btn delete"
+                                  onClick={() =>
+                                    handleDeleteAppointment(
+                                      appointment.id,
+                                      appointment.customerName
+                                    )
+                                  }
+                                  title="حذف الموعد"
+                                >
                                   حذف
                                 </button>
                                 <button className="action-btn view">عرض</button>
@@ -1135,7 +1338,9 @@ const AdminDashboardPage = ({ currentUser }) => {
                 <div className="tab-content">
                   <div className="tab-header">
                     <h2>إدارة الخدمات</h2>
-                    <button className="btn-primary" onClick={handleAddService}>إضافة خدمة جديدة</button>
+                    <button className="btn-primary" onClick={handleAddService}>
+                      إضافة خدمة جديدة
+                    </button>
                   </div>
 
                   <div className="services-table">
@@ -1194,7 +1399,9 @@ const AdminDashboardPage = ({ currentUser }) => {
                 <div className="tab-content">
                   <div className="tab-header">
                     <h2>إدارة المنتجات</h2>
-                    <button className="btn-primary" onClick={handleAddProduct}>إضافة منتج جديد</button>
+                    <button className="btn-primary" onClick={handleAddProduct}>
+                      إضافة منتج جديد
+                    </button>
                   </div>
 
                   {loading ? (
@@ -1214,7 +1421,12 @@ const AdminDashboardPage = ({ currentUser }) => {
                     <div className="empty-state">
                       <i className="fas fa-box"></i>
                       <p>لا توجد منتجات حتى الآن</p>
-                      <button className="btn-primary" onClick={handleAddProduct}>إضافة أول منتج</button>
+                      <button
+                        className="btn-primary"
+                        onClick={handleAddProduct}
+                      >
+                        إضافة أول منتج
+                      </button>
                     </div>
                   ) : (
                     <div className="services-table">
@@ -1283,6 +1495,191 @@ const AdminDashboardPage = ({ currentUser }) => {
                 </div>
               )}
 
+              {/* Categories Tab */}
+              {activeTab === "categories" && (
+                <div className="tab-content">
+                  <h2>إدارة التصنيفات</h2>
+
+                  {/* Categories Sub-tabs */}
+                  <div className="sub-tabs">
+                    <button
+                      className={`sub-tab ${
+                        activeCategoryTab === "products" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveCategoryTab("products")}
+                    >
+                      <i className="fas fa-box"></i>
+                      تصنيفات المنتجات
+                    </button>
+                    <button
+                      className={`sub-tab ${
+                        activeCategoryTab === "services" ? "active" : ""
+                      }`}
+                      onClick={() => setActiveCategoryTab("services")}
+                    >
+                      <i className="fas fa-concierge-bell"></i>
+                      تصنيفات الخدمات
+                    </button>
+                  </div>
+
+                  {/* Product Categories */}
+                  {activeCategoryTab === "products" && (
+                    <div className="categories-section">
+                      <div className="section-header">
+                        <h3>تصنيفات المنتجات</h3>
+                        <button
+                          className="btn-primary"
+                          onClick={() => handleAddCategory("product")}
+                        >
+                          <i className="fas fa-plus"></i>
+                          إضافة تصنيف جديد
+                        </button>
+                      </div>
+
+                      {loading ? (
+                        <div className="loading">جاري التحميل...</div>
+                      ) : productCategories.length === 0 ? (
+                        <div className="empty-state">
+                          <i className="fas fa-tags"></i>
+                          <p>لا توجد تصنيفات منتجات حتى الآن</p>
+                          <button
+                            className="btn-primary"
+                            onClick={() => handleAddCategory("product")}
+                          >
+                            إضافة أول تصنيف
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="categories-grid">
+                          {productCategories.map((category) => (
+                            <div key={category.id} className="category-card">
+                              <div className="category-header">
+                                <h4>{category.name}</h4>
+                                <div className="category-actions">
+                                  <button
+                                    className="action-btn edit"
+                                    onClick={() =>
+                                      handleEditCategory(category, "product")
+                                    }
+                                    title="تعديل"
+                                  >
+                                    <i className="fas fa-edit"></i>
+                                  </button>
+                                  <button
+                                    className="action-btn delete"
+                                    onClick={() =>
+                                      handleDeleteCategory(
+                                        category.id,
+                                        category.name,
+                                        "product"
+                                      )
+                                    }
+                                    title="حذف"
+                                  >
+                                    <i className="fas fa-trash"></i>
+                                  </button>
+                                </div>
+                              </div>
+                              {category.description && (
+                                <p className="category-description">
+                                  {category.description}
+                                </p>
+                              )}
+                              <div className="category-meta">
+                                <span className="category-date">
+                                  تم الإنشاء:{" "}
+                                  {new Date(
+                                    category.createdAt?.toDate()
+                                  ).toLocaleDateString("ar-EG")}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Service Categories */}
+                  {activeCategoryTab === "services" && (
+                    <div className="categories-section">
+                      <div className="section-header">
+                        <h3>تصنيفات الخدمات</h3>
+                        <button
+                          className="btn-primary"
+                          onClick={() => handleAddCategory("service")}
+                        >
+                          <i className="fas fa-plus"></i>
+                          إضافة تصنيف جديد
+                        </button>
+                      </div>
+
+                      {loading ? (
+                        <div className="loading">جاري التحميل...</div>
+                      ) : serviceCategories.length === 0 ? (
+                        <div className="empty-state">
+                          <i className="fas fa-tags"></i>
+                          <p>لا توجد تصنيفات خدمات حتى الآن</p>
+                          <button
+                            className="btn-primary"
+                            onClick={() => handleAddCategory("service")}
+                          >
+                            إضافة أول تصنيف
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="categories-grid">
+                          {serviceCategories.map((category) => (
+                            <div key={category.id} className="category-card">
+                              <div className="category-header">
+                                <h4>{category.name}</h4>
+                                <div className="category-actions">
+                                  <button
+                                    className="action-btn edit"
+                                    onClick={() =>
+                                      handleEditCategory(category, "service")
+                                    }
+                                    title="تعديل"
+                                  >
+                                    <i className="fas fa-edit"></i>
+                                  </button>
+                                  <button
+                                    className="action-btn delete"
+                                    onClick={() =>
+                                      handleDeleteCategory(
+                                        category.id,
+                                        category.name,
+                                        "service"
+                                      )
+                                    }
+                                    title="حذف"
+                                  >
+                                    <i className="fas fa-trash"></i>
+                                  </button>
+                                </div>
+                              </div>
+                              {category.description && (
+                                <p className="category-description">
+                                  {category.description}
+                                </p>
+                              )}
+                              <div className="category-meta">
+                                <span className="category-date">
+                                  تم الإنشاء:{" "}
+                                  {new Date(
+                                    category.createdAt?.toDate()
+                                  ).toLocaleDateString("ar-EG")}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Reports Tab */}
               {activeTab === "reports" && (
                 <div className="tab-content">
@@ -1346,7 +1743,10 @@ const AdminDashboardPage = ({ currentUser }) => {
                         <div className="profile-avatar">
                           <div className="avatar-container">
                             <img
-                              src={completeUserData?.avatar || "/default-avatar.png"}
+                              src={
+                                completeUserData?.avatar ||
+                                "/default-avatar.png"
+                              }
                               alt="Profile"
                               className="avatar-image"
                             />
@@ -1359,7 +1759,10 @@ const AdminDashboardPage = ({ currentUser }) => {
                                 style={{ display: "none" }}
                                 disabled={avatarUploading}
                               />
-                              <label htmlFor="avatar-upload" className="avatar-upload-btn">
+                              <label
+                                htmlFor="avatar-upload"
+                                className="avatar-upload-btn"
+                              >
                                 {avatarUploading ? (
                                   <i className="fas fa-spinner fa-spin"></i>
                                 ) : (
@@ -1375,19 +1778,27 @@ const AdminDashboardPage = ({ currentUser }) => {
                             <div className="profile-info">
                               <div className="info-item">
                                 <label>الاسم</label>
-                                <span>{completeUserData?.name || "غير محدد"}</span>
+                                <span>
+                                  {completeUserData?.name || "غير محدد"}
+                                </span>
                               </div>
                               <div className="info-item">
                                 <label>البريد الإلكتروني</label>
-                                <span>{completeUserData?.email || "غير محدد"}</span>
+                                <span>
+                                  {completeUserData?.email || "غير محدد"}
+                                </span>
                               </div>
                               <div className="info-item">
                                 <label>رقم الهاتف</label>
-                                <span>{completeUserData?.phone || "غير محدد"}</span>
+                                <span>
+                                  {completeUserData?.phone || "غير محدد"}
+                                </span>
                               </div>
                               <div className="info-item">
                                 <label>العنوان</label>
-                                <span>{completeUserData?.address || "غير محدد"}</span>
+                                <span>
+                                  {completeUserData?.address || "غير محدد"}
+                                </span>
                               </div>
                               <button
                                 className="btn-secondary"
@@ -1415,9 +1826,14 @@ const AdminDashboardPage = ({ currentUser }) => {
                                   value={completeUserData?.email || ""}
                                   className="form-input"
                                   disabled
-                                  style={{ backgroundColor: "#f5f5f5", cursor: "not-allowed" }}
+                                  style={{
+                                    backgroundColor: "#f5f5f5",
+                                    cursor: "not-allowed",
+                                  }}
                                 />
-                                <small className="form-note">البريد الإلكتروني غير قابل للتعديل</small>
+                                <small className="form-note">
+                                  البريد الإلكتروني غير قابل للتعديل
+                                </small>
                               </div>
                               <div className="form-group">
                                 <label>رقم الهاتف</label>
@@ -1445,7 +1861,9 @@ const AdminDashboardPage = ({ currentUser }) => {
                                   onClick={handleSaveProfile}
                                   disabled={submitting}
                                 >
-                                  {submitting ? "جاري الحفظ..." : "حفظ التغييرات"}
+                                  {submitting
+                                    ? "جاري الحفظ..."
+                                    : "حفظ التغييرات"}
                                 </button>
                                 <button
                                   className="btn-secondary"
@@ -1539,6 +1957,7 @@ const AdminDashboardPage = ({ currentUser }) => {
         }}
         onSubmit={handleServiceSubmit}
         service={editingService}
+        serviceCategories={serviceCategories}
       />
 
       {/* Product Edit Modal */}
@@ -1550,6 +1969,31 @@ const AdminDashboardPage = ({ currentUser }) => {
         }}
         onSubmit={handleProductSubmit}
         product={editingProduct}
+        productCategories={productCategories}
+      />
+
+      {/* Appointment Edit Modal */}
+      <AdminAppointmentEditModal
+        isOpen={isAppointmentModalOpen}
+        onClose={() => {
+          setIsAppointmentModalOpen(false);
+          setEditingAppointment(null);
+        }}
+        onSubmit={handleAppointmentSubmit}
+        appointment={editingAppointment}
+        staff={staff}
+      />
+
+      {/* Category Modal */}
+      <CategoryModal
+        isOpen={isCategoryModalOpen}
+        onClose={() => {
+          setIsCategoryModalOpen(false);
+          setEditingCategory(null);
+        }}
+        onSubmit={handleCategorySubmit}
+        editingCategory={editingCategory}
+        categoryType={categoryModalType}
       />
     </div>
   );

@@ -7,8 +7,9 @@ import {
   getPrimaryImage,
   validateImageFile 
 } from "../../utils/imageUpload";
+import { getAllProductCategories } from "../../services/categoriesService";
 
-const ProductEditModal = ({ isOpen, onClose, onSubmit, product }) => {
+const ProductEditModal = ({ isOpen, onClose, onSubmit, product, productCategories = [] }) => {
   const [formData, setFormData] = useState({
     name: product?.name || "",
     description: product?.description || "",
@@ -30,6 +31,7 @@ const ProductEditModal = ({ isOpen, onClose, onSubmit, product }) => {
   const [loading, setLoading] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [categories, setCategories] = useState(productCategories);
 
   useEffect(() => {
     if (product) {
@@ -72,6 +74,38 @@ const ProductEditModal = ({ isOpen, onClose, onSubmit, product }) => {
       setSelectedFiles([]);
     }
   }, [product]);
+
+  // Update categories when productCategories prop changes
+  useEffect(() => {
+    setCategories(productCategories);
+  }, [productCategories]);
+
+  // Load categories if not provided as props
+  useEffect(() => {
+    const loadCategories = async () => {
+      if (isOpen && categories.length === 0) {
+        try {
+          const fetchedCategories = await getAllProductCategories();
+          setCategories(fetchedCategories);
+        } catch (error) {
+          console.error("Error loading product categories:", error);
+        }
+      }
+    };
+
+    loadCategories();
+  }, [isOpen, categories.length]);
+
+  const handleCategoryChange = (e) => {
+    const selectedCategoryId = e.target.value;
+    const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
+    
+    setFormData(prev => ({
+      ...prev,
+      category: selectedCategoryId,
+      categoryName: selectedCategory ? selectedCategory.name : ""
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -193,8 +227,8 @@ const ProductEditModal = ({ isOpen, onClose, onSubmit, product }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="product-edit-modal-overlay">
-      <div className="product-edit-modal">
+    <div className="product-edit-modal-overlay" onClick={onClose}>
+      <div className="product-edit-modal" onClick={(e) => e.stopPropagation()}>
         <div className="product-edit-modal-header">
           <h3>{product ? "تعديل منتج" : "إضافة منتج"}</h3>
           <button className="product-edit-modal-close" onClick={onClose}>
@@ -264,43 +298,24 @@ const ProductEditModal = ({ isOpen, onClose, onSubmit, product }) => {
 
           <div className="product-edit-form-row-2">
             <div className="product-edit-form-group">
-              <label htmlFor="category">رمز الفئة *</label>
+              <label htmlFor="category">الفئة *</label>
               <select
                 id="category"
                 name="category"
                 value={formData.category}
-                onChange={handleChange}
+                onChange={handleCategoryChange}
                 required
                 className="product-edit-form-input"
               >
                 <option value="">اختر الفئة</option>
-                <option value="skincare">عناية بالبشرة</option>
-                <option value="anti-aging">مكافحة الشيخوخة</option>
-                <option value="whitening">تفتيح البشرة</option>
-                <option value="serums">سيروم</option>
-                <option value="masks">ماسكات</option>
-                <option value="eye-care">عناية بالعين</option>
-                <option value="sunscreen">واقي الشمس</option>
-                <option value="body-care">عناية بالجسم</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
               </select>
             </div>
 
-            <div className="product-edit-form-group">
-              <label htmlFor="categoryName">اسم الفئة *</label>
-              <input
-                type="text"
-                id="categoryName"
-                name="categoryName"
-                value={formData.categoryName}
-                onChange={handleChange}
-                required
-                className="product-edit-form-input"
-                placeholder="مثال: العناية بالبشرة"
-              />
-            </div>
-          </div>
-
-          <div className="product-edit-form-row-2">
             <div className="product-edit-form-group">
               <label htmlFor="brand">العلامة التجارية *</label>
               <input
@@ -314,7 +329,9 @@ const ProductEditModal = ({ isOpen, onClose, onSubmit, product }) => {
                 placeholder="مثال: ميرا بيوتي"
               />
             </div>
+          </div>
 
+          <div className="product-edit-form-row-2">
             <div className="product-edit-form-group">
               <label htmlFor="rating">التقييم (1-5)</label>
               <input

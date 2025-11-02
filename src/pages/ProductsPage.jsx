@@ -5,6 +5,7 @@ import {
   getAllProducts,
   getProductsByCategory,
 } from "../services/productsService";
+import { getAllProductCategories } from "../services/categoriesService";
 import CartOverlay from "../components/common/CartOverlay";
 
 const ProductsPage = ({ setCurrentPage }) => {
@@ -18,22 +19,14 @@ const ProductsPage = ({ setCurrentPage }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const categories = [
-    { id: "all", name: "جميع المنتجات" },
-    { id: "skincare", name: "العناية بالبشرة" },
-    { id: "anti-aging", name: "مكافحة الشيخوخة" },
-    { id: "whitening", name: "تفتيح البشرة" },
-    { id: "serums", name: "السيروم" },
-    { id: "masks", name: "الماسكات" },
-    { id: "eye-care", name: "العناية بالعين" },
-    { id: "sunscreen", name: "واقي الشمس" },
-    { id: "body-care", name: "العناية بالجسم" },
-  ];
+  const [categories, setCategories] = useState([
+    { id: "all", name: "جميع المنتجات" }
+  ]);
 
   useEffect(() => {
     updateCartData();
     loadProducts();
+    loadCategories();
 
     const handleCartUpdate = () => {
       updateCartData();
@@ -81,6 +74,20 @@ const ProductsPage = ({ setCurrentPage }) => {
       setError("فشل في تحميل المنتجات. يرجى المحاولة مرة أخرى.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const categoriesData = await getAllProductCategories();
+      const allCategories = [
+        { id: "all", name: "جميع المنتجات" },
+        ...categoriesData
+      ];
+      setCategories(allCategories);
+    } catch (error) {
+      console.error("Error loading categories:", error);
+      // Keep default categories if loading fails
     }
   };
 

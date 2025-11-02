@@ -674,6 +674,89 @@
   color: var(--white);
 }
 
+.time-slot.disabled {
+  border-color: #e0e0e0;
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.time-slot.disabled:hover {
+  border-color: #e0e0e0;
+  background-color: #f5f5f5;
+}
+
+.no-slots-message {
+  text-align: center;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+/* Booking Warning Message */
+.booking-warning-message {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 1rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.booking-warning-message .warning-icon {
+  font-size: 1.2rem;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+}
+
+.booking-warning-message p {
+  margin: 0;
+  color: #856404;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Mobile responsiveness for warning message */
+@media (max-width: 768px) {
+  .booking-warning-message {
+    padding: 0.875rem 1rem;
+    margin: 0.75rem 0;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .booking-warning-message .warning-icon {
+    font-size: 1.1rem;
+  }
+
+  .booking-warning-message p {
+    font-size: 0.9rem;
+  }
+}
+
+.summary-note {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #e8f4fd;
+  border: 1px solid #b3d9f7;
+  border-radius: 8px;
+}
+
+.summary-note p {
+  margin: 0;
+  color: var(--navy-blue);
+  font-size: 0.9rem;
+}
+
 /* Booking Summary */
 .booking-summary {
   background-color: var(--white);
