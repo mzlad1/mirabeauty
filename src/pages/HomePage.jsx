@@ -7,9 +7,11 @@ import { getAllServices } from "../services/servicesService";
 import PromotionalBanner from "../components/common/PromotionalBanner";
 import ProductCard from "../components/customer/ProductCard";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+import { useNavigationLoading } from "../hooks/useNavigationLoading";
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { navigateWithLoading } = useNavigationLoading();
 
   // Hero carousel images
   const heroImages = [
@@ -85,7 +87,7 @@ const HomePage = () => {
               <div className="text-right">
                 <button
                   className="btn-primary hero-btn"
-                  onClick={() => navigate("/book")}
+                  onClick={() => navigateWithLoading("/book")}
                 >
                   احجزي موعدك الآن
                 </button>
@@ -171,7 +173,7 @@ const HomePage = () => {
                     <p>{service.description}</p>
                     <button
                       className="btn-secondary service-btn"
-                      onClick={() => navigate("/services")}
+                      onClick={() => navigateWithLoading("/services")}
                     >
                       اعرفي المزيد
                     </button>
@@ -183,7 +185,7 @@ const HomePage = () => {
           <div className="text-center" style={{ marginTop: "2rem" }}>
             <button
               className="btn-primary"
-              onClick={() => navigate("/services")}
+              onClick={() => navigateWithLoading("/services")}
             >
               عرض جميع الخدمات
             </button>
@@ -244,7 +246,7 @@ const HomePage = () => {
           <div className="text-center" style={{ marginTop: "2rem" }}>
             <button
               className="btn-primary"
-              onClick={() => navigate("/products")}
+              onClick={() => navigateWithLoading("/products")}
             >
               عرض جميع المنتجات
             </button>
@@ -306,12 +308,12 @@ const HomePage = () => {
               بيوتي
             </p>
             <div className="cta-buttons">
-              <button className="btn-primary" onClick={() => navigate("/book")}>
+              <button className="btn-primary" onClick={() => navigateWithLoading("/book")}>
                 احجزي موعدك الآن
               </button>
               <button
                 className="btn-secondary"
-                onClick={() => navigate("/services")}
+                onClick={() => navigateWithLoading("/services")}
               >
                 اكتشفي خدماتنا
               </button>

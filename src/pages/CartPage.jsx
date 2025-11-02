@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CartPage.css";
+import CustomModal from "../components/common/CustomModal";
+import { useModal } from "../hooks/useModal";
 
 const CartPage = () => {
   const navigate = useNavigate();
+  const { modalState, closeModal, showSuccess, showError, showWarning, showConfirm } = useModal();
   const [cartItems, setCartItems] = useState([]);
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
@@ -47,7 +50,7 @@ const CartPage = () => {
     } else if (promoCode.toLowerCase() === "welcome20") {
       setDiscount(0.2);
     } else {
-      alert("رمز الخصم غير صحيح");
+      showError("رمز الخصم غير صحيح");
       setDiscount(0);
     }
   };
@@ -66,7 +69,7 @@ const CartPage = () => {
 
   const handleCheckout = () => {
     if (cartItems.length === 0) {
-      alert("السلة فارغة");
+      showWarning("السلة فارغة");
       return;
     }
     // Navigate to checkout or booking page
@@ -219,6 +222,18 @@ const CartPage = () => {
           </div>
         </div>
       </section>
+      
+      <CustomModal
+        isOpen={modalState.isOpen}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        onConfirm={modalState.onConfirm}
+        onClose={closeModal}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+      />
     </div>
   );
 };

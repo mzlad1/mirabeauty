@@ -233,13 +233,15 @@ export const confirmAppointment = async (appointmentId) => {
 };
 
 // Complete appointment
-export const completeAppointment = async (appointmentId) => {
+export const completeAppointment = async (appointmentId, customerNote = "", staffNote = "") => {
   try {
     const appointmentDoc = doc(db, APPOINTMENTS_COLLECTION, appointmentId);
     await updateDoc(appointmentDoc, {
       status: "مكتمل", // completed
       completedAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
+      customerNote: customerNote, // Note visible to customer
+      staffNote: staffNote, // Note visible only to staff and admin
     });
 
     return appointmentId;

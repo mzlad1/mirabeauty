@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import "./Navigation.css";
 import { logoutUser } from "../../services/authService";
+import { useNavigationLoading } from "../../hooks/useNavigationLoading";
 
 const Navigation = ({ currentUser, userData }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { navigateWithLoading } = useNavigationLoading();
 
   const handleLogout = async () => {
     try {
@@ -22,7 +24,7 @@ const Navigation = ({ currentUser, userData }) => {
   };
 
   const handleNavigation = (path) => {
-    navigate(path);
+    navigateWithLoading(path);
     setIsMobileMenuOpen(false);
   };
 

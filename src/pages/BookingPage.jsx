@@ -12,6 +12,8 @@ import {
   getAppointmentsByCustomer,
   getAppointmentsByDate,
 } from "../services/appointmentsService";
+import CustomModal from "../components/common/CustomModal";
+import { useModal } from "../hooks/useModal";
 
 // Available time slots
 const timeSlots = [
@@ -23,6 +25,7 @@ const timeSlots = [
 
 const BookingPage = ({ currentUser, userData }) => {
   const navigate = useNavigate();
+  const { modalState, closeModal, showSuccess, showError, showWarning, showConfirm } = useModal();
   const [step, setStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState(""); // إضافة حالة لنوع الجلسة
   const [bookingData, setBookingData] = useState({
@@ -160,7 +163,7 @@ const BookingPage = ({ currentUser, userData }) => {
     e.preventDefault();
 
     if (!currentUser) {
-      alert("يرجى تسجيل الدخول أولاً");
+      showWarning("يرجى تسجيل الدخول أولاً");
       navigate("/login");
       return;
     }
@@ -173,12 +176,12 @@ const BookingPage = ({ currentUser, userData }) => {
     );
 
     if (sameServiceSameDay) {
-      alert("لديك حجز مسبق لنفس الخدمة في هذا اليوم. لا يمكن حجز نفس الخدمة أكثر من مرة في اليوم الواحد.");
+      showError("لديك حجز مسبق لنفس الخدمة في هذا اليوم. لا يمكن حجز نفس الخدمة أكثر من مرة في اليوم الواحد.");
       return;
     }
 
     if (sameDateTime) {
-      alert("لديك حجز مسبق في نفس التاريخ والوقت. يرجى اختيار وقت آخر.");
+      showError("لديك حجز مسبق في نفس التاريخ والوقت. يرجى اختيار وقت آخر.");
       return;
     }
 
@@ -205,11 +208,11 @@ const BookingPage = ({ currentUser, userData }) => {
       };
 
       await createAppointment(appointmentData);
-      alert("تم حجز موعدك بنجاح! سيتم تعيين الأخصائية المناسبة والتواصل معك قريباً لتأكيد الموعد.");
+      showSuccess("تم حجز موعدك بنجاح! سيتم تعيين الأخصائية المناسبة والتواصل معك قريباً لتأكيد الموعد.");
       navigate("/profile");
     } catch (error) {
       console.error("Error creating appointment:", error);
-      alert("حدث خطأ أثناء حجز الموعد. يرجى المحاولة مرة أخرى.");
+      showError("حدث خطأ أثناء حجز الموعد. يرجى المحاولة مرة أخرى.");
     } finally {
       setSubmitting(false);
     }
@@ -910,6 +913,18 @@ const BookingPage = ({ currentUser, userData }) => {
           </div>
         </section>
       )}
+      
+      <CustomModal
+        isOpen={modalState.isOpen}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        onConfirm={modalState.onConfirm}
+        onClose={closeModal}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+      />
     </div>
   );
 };

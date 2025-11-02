@@ -1,13 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./Footer.css";
+import { useNavigationLoading } from "../../hooks/useNavigationLoading";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const navigate = useNavigate();
+  const { navigateWithLoading } = useNavigationLoading();
 
   const handleNavigation = (path) => {
-    navigate(path);
+    navigateWithLoading(path);
     // Scroll to top when navigating
     window.scrollTo({ top: 0, behavior: "smooth" });
   };

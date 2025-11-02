@@ -150,7 +150,7 @@ const UserModal = ({
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                required
+                disabled
                 className="admin-user-form-input"
               />
             </div>

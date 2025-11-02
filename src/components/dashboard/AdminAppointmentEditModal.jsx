@@ -8,6 +8,18 @@ const AdminAppointmentEditModal = ({
   appointment, 
   staff = [] 
 }) => {
+  // Helper function to format price display (avoid duplicate currency)
+  const formatPrice = (priceString) => {
+    if (!priceString) return "0 شيكل";
+    const priceStr = priceString.toString();
+    // If price already contains "شيكل", return as is
+    if (priceStr.includes("شيكل")) {
+      return priceStr;
+    }
+    // If it's just a number, add "شيكل"
+    return `${priceStr} شيكل`;
+  };
+
   const [formData, setFormData] = useState({
     date: appointment?.date || "",
     time: appointment?.time || "",
@@ -131,7 +143,7 @@ const AdminAppointmentEditModal = ({
             </div>
             <div className="admin-appointment-edit-info-item">
               <span className="label">السعر:</span>
-              <span className="value">{appointment?.servicePrice || appointment?.price} شيكل</span>
+              <span className="value">{formatPrice(appointment?.servicePrice || appointment?.price)}</span>
             </div>
           </div>
 

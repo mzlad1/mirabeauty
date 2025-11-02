@@ -28,9 +28,14 @@ import Footer from "./components/common/Footer";
 // Import Auth Hook and Provider
 import { useAuth, AuthProvider } from "./hooks/useAuth.jsx";
 
+// Import Loading Hook and Provider
+import { useLoading, LoadingProvider } from "./hooks/useLoading.jsx";
+import LoadingPage from "./components/common/LoadingPage";
+
 // Main App Content Component
 const AppContent = () => {
   const { currentUser, userData, loading } = useAuth();
+  const { isLoading } = useLoading();
 
   // Show loading spinner while checking authentication
   if (loading) {
@@ -81,6 +86,9 @@ const AppContent = () => {
   return (
     <Router>
       <div className="App" dir="rtl">
+        {/* Show loading page when isLoading is true */}
+        {isLoading && <LoadingPage />}
+        
         <Navigation currentUser={currentUser} userData={userData} />
         <main className="main-content">
           <Routes>
@@ -108,11 +116,13 @@ const AppContent = () => {
   );
 };
 
-// Main App Component with Auth Provider
+// Main App Component with Auth Provider and Loading Provider
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <LoadingProvider>
+        <AppContent />
+      </LoadingProvider>
     </AuthProvider>
   );
 }

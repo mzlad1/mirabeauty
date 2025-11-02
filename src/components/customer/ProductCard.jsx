@@ -1,9 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./ProductCard.css";
+import { useNavigationLoading } from "../../hooks/useNavigationLoading";
 
 const ProductCard = ({ product, onAddToCart }) => {
   const navigate = useNavigate();
+  const { navigateWithLoading } = useNavigationLoading();
 
   // Debug logging
   console.log("ProductCard - Product data:", {
@@ -11,7 +13,7 @@ const ProductCard = ({ product, onAddToCart }) => {
     name: product.name,
     image: product.image,
     images: product.images,
-    primaryImageIndex: product.primaryImageIndex
+    primaryImageIndex: product.primaryImageIndex,
   });
 
   const handleAddToCart = (e) => {
@@ -22,13 +24,15 @@ const ProductCard = ({ product, onAddToCart }) => {
   };
 
   const handleCardClick = () => {
-    navigate(`/products/${product.id}`);
+    navigateWithLoading(`/products/${product.id}`);
   };
 
   // Get primary image or first image - handle object-based images
-  const primaryImage = product.images && product.images.length > 0 
-    ? (product.images[product.primaryImageIndex || 0]?.url || product.images[product.primaryImageIndex || 0])
-    : product.image || '/assets/default-product.jpg';
+  const primaryImage =
+    product.images && product.images.length > 0
+      ? product.images[product.primaryImageIndex || 0]?.url ||
+        product.images[product.primaryImageIndex || 0]
+      : product.image || "/assets/default-product.jpg";
 
   console.log("ProductCard - Primary image selected:", primaryImage);
 
@@ -69,9 +73,7 @@ const ProductCard = ({ product, onAddToCart }) => {
             }}
             title="إضافة إلى السلة"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6m-8 0V9a2 2 0 012-2h4a2 2 0 012 2v4" />
-            </svg>
+            <i className="fas fa-shopping-cart" style={{ color: "white" }}></i>
           </button>
         )}
       </div>

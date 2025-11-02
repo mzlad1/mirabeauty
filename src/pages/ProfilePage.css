@@ -528,6 +528,28 @@
   opacity: 0.8;
 }
 
+.customer-notes {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+}
+
+.customer-notes strong {
+  color: var(--navy-blue);
+  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.customer-notes p {
+  margin: 0;
+  color: var(--charcoal);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
 /* Settings Section */
 .settings-section {
   background-color: #f9f8f7;

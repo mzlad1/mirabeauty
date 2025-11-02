@@ -10,9 +10,12 @@ import {
 import { updateUser, getUserById } from "../services/usersService";
 import AppointmentEditModal from "../components/profile/AppointmentEditModal";
 import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
+import CustomModal from "../components/common/CustomModal";
+import { useModal } from "../hooks/useModal";
 
 const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
   const navigate = useNavigate();
+  const { modalState, closeModal, showSuccess, showError, showWarning, showConfirm } = useModal();
   const [activeTab, setActiveTab] = useState("overview");
   const [editMode, setEditMode] = useState(false);
   const [userAppointments, setUserAppointments] = useState([]);
@@ -38,6 +41,18 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
     // Extract numeric value from strings like "200 شيكل" or "200"
     const match = priceString.toString().match(/\d+/);
     return match ? parseInt(match[0]) : 0;
+  };
+
+  // Helper function to format price display (avoid duplicate currency)
+  const formatPrice = (priceString) => {
+    if (!priceString) return "0 شيكل";
+    const priceStr = priceString.toString();
+    // If price already contains "شيكل", return as is
+    if (priceStr.includes("شيكل")) {
+      return priceStr;
+    }
+    // If it's just a number, add "شيكل"
+    return `${priceStr} شيكل`;
   };
 
   useEffect(() => {
@@ -119,10 +134,10 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
       }
       setCompleteUserData(updatedCompleteData);
       setEditMode(false);
-      alert("تم تحديث بياناتك بنجاح");
+      showSuccess("تم تحديث بياناتك بنجاح");
     } catch (error) {
       console.error("Error updating profile:", error);
-      alert("حدث خطأ أثناء تحديث البيانات");
+      showError("حدث خطأ أثناء تحديث البيانات");
     } finally {
       setSubmitting(false);
     }
@@ -149,13 +164,13 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('يرجى اختيار ملف صورة صالح');
+      showError('يرجى اختيار ملف صورة صالح');
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('حجم الصورة كبير جداً. يرجى اختيار صورة أصغر من 5 ميجابايت');
+      showError('حجم الصورة كبير جداً. يرجى اختيار صورة أصغر من 5 ميجابايت');
       return;
     }
 
@@ -186,10 +201,10 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
         });
       }
 
-      alert('تم تحديث صورة الملف الشخصي بنجاح');
+      showSuccess('تم تحديث صورة الملف الشخصي بنجاح');
     } catch (error) {
       console.error('Error uploading avatar:', error);
-      alert('حدث خطأ أثناء رفع الصورة. يرجى المحاولة مرة أخرى');
+      showError('حدث خطأ أثناء رفع الصورة. يرجى المحاولة مرة أخرى');
     } finally {
       setAvatarUploading(false);
       // Reset file input
@@ -214,20 +229,22 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
 
   // Handle appointment cancellation
   const handleCancelAppointment = async (appointmentId) => {
-    if (!window.confirm("هل أنت متأكدة من إلغاء هذا الموعد؟")) {
-      return;
-    }
-
-    try {
-      await cancelAppointment(appointmentId, "إلغاء من قبل العميل");
-      // Reload appointments
-      const appointments = await getAppointmentsByCustomer(currentUser.uid);
-      setUserAppointments(appointments);
-      alert("تم إلغاء الموعد بنجاح");
-    } catch (error) {
-      console.error("Error cancelling appointment:", error);
-      alert("حدث خطأ أثناء إلغاء الموعد");
-    }
+    showConfirm(
+      "تأكيد الإلغاء",
+      "هل أنت متأكدة من إلغاء هذا الموعد؟",
+      async () => {
+        try {
+          await cancelAppointment(appointmentId, "إلغاء من قبل العميل");
+          // Reload appointments
+          const appointments = await getAppointmentsByCustomer(currentUser.uid);
+          setUserAppointments(appointments);
+          showSuccess("تم إلغاء الموعد بنجاح");
+        } catch (error) {
+          console.error("Error cancelling appointment:", error);
+          showError("حدث خطأ أثناء إلغاء الموعد");
+        }
+      }
+    );
   };
 
   // Handle appointment edit - open edit modal
@@ -247,7 +264,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
       );
 
       if (!isAvailable) {
-        alert("عذراً، الموعد المختار محجوز بالفعل. يرجى اختيار موعد آخر.");
+        showError("عذراً، الموعد المختار محجوز بالفعل. يرجى اختيار موعد آخر.");
         return;
       }
 
@@ -265,7 +282,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
 
       setIsEditModalOpen(false);
       setEditingAppointment(null);
-      alert("تم تعديل الموعد بنجاح. سيتم مراجعته والتواصل معك للتأكيد.");
+      showSuccess("تم تعديل الموعد بنجاح. سيتم مراجعته والتواصل معك للتأكيد.");
     } catch (error) {
       console.error("Error updating appointment:", error);
       throw error;
@@ -543,15 +560,14 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                             <div className="detail-row">
                               <span className="label">السعر:</span>
                               <span className="value">
-                                {appointment.servicePrice || appointment.price}{" "}
-                                شيكل
+                                {formatPrice(appointment.servicePrice || appointment.price)}
                               </span>
                             </div>
-                            {appointment.notes && (
+                            {appointment.customerNote && (
                               <div className="detail-row">
                                 <span className="label">ملاحظات:</span>
                                 <span className="value">
-                                  {appointment.notes}
+                                  {appointment.customerNote}
                                 </span>
                               </div>
                             )}
@@ -629,6 +645,12 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                               <p className="feedback">
                                 "{appointment.feedback}"
                               </p>
+                            )}
+                            {appointment.customerNote && (
+                              <div className="customer-notes">
+                                <strong>ملاحظات الجلسة:</strong>
+                                <p>{appointment.customerNote}</p>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -796,6 +818,18 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
         }}
         onSubmit={handleAppointmentEditSubmit}
         appointment={editingAppointment}
+      />
+      
+      <CustomModal
+        isOpen={modalState.isOpen}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        onConfirm={modalState.onConfirm}
+        onClose={closeModal}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
       />
     </div>
   );

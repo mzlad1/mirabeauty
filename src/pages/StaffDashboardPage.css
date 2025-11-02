@@ -495,6 +495,61 @@
   border-color: var(--navy-blue);
 }
 
+/* Pagination Styles for Staff Dashboard */
+.staff-dashboard .pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--light-gray);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.staff-dashboard .pagination-btn {
+  background-color: var(--navy-blue);
+  color: var(--white);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  min-width: 80px;
+}
+
+.staff-dashboard .pagination-btn:hover:not(:disabled) {
+  background-color: var(--gold);
+  transform: translateY(-1px);
+}
+
+.staff-dashboard .pagination-btn:disabled {
+  background-color: var(--text-secondary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.staff-dashboard .pagination-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.staff-dashboard .pagination-info span {
+  font-weight: 500;
+}
+
+.staff-dashboard .results-count {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 400 !important;
+}
+
 /* Appointments List */
 .appointments-list {
   display: flex;
