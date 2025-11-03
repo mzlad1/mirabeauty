@@ -680,7 +680,7 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                                   <span className="slot-duration">
                                     {appointment.serviceDuration ||
                                       appointment.duration}{" "}
-                                    دقيقة
+                                    {/* دقيقة */}
                                   </span>
                                   <span
                                     className={`slot-status ${getStatusColor(
@@ -779,7 +779,7 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                                   <i className="fas fa-hourglass-half"></i>{" "}
                                   {appointment.serviceDuration ||
                                     appointment.duration}{" "}
-                                  دقيقة
+                                  {/* دقيقة */}
                                 </span>
                                 <span>
                                   <i className="fas fa-money-bill"></i>{" "}
@@ -924,22 +924,8 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                                 {customerAppointments.length}
                               </span>
                             </div>
-                            <div className="detail-item">
-                              <span className="detail-label">
-                                إجمالي المصروفات:
-                              </span>
-                              <span className="detail-value">
-                                {customerRevenue} شيكل
-                              </span>
-                            </div>
                           </div>
                           <div className="customer-actions">
-                            <button
-                              className="action-btn"
-                              onClick={handleBookAppointment}
-                            >
-                              حجز موعد
-                            </button>
                             <button
                               className="action-btn"
                               onClick={() =>

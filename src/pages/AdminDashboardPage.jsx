@@ -2438,7 +2438,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                       </div>
                     </div>
 
-                    <div className="settings-section">
+                    {/* <div className="settings-section">
                       <h3>إعدادات عامة</h3>
                       <div className="settings-form">
                         <div className="form-group">
@@ -2466,7 +2466,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                           />
                         </div>
                       </div>
-                    </div>
+                    </div> */}
 
                     <div className="settings-section">
                       <h3>إعدادات الحجز</h3>

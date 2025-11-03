@@ -91,7 +91,7 @@ const AppointmentCompletionModal = ({
               id="customerNote"
               value={customerNote}
               onChange={(e) => setCustomerNote(e.target.value)}
-              placeholder="أضف ملاحظات للعميل حول الجلسة أو نصائح للعناية..."
+              placeholder="أضف ملاحظات للعميل حول الجلسة أو نصائح للعناية"
               rows="4"
               disabled={isSubmitting}
             />
@@ -109,7 +109,7 @@ const AppointmentCompletionModal = ({
               id="staffNote"
               value={staffNote}
               onChange={(e) => setStaffNote(e.target.value)}
-              placeholder="أضف ملاحظات داخلية للجلسة القادمة أو معلومات مهمة للفريق..."
+              placeholder="أضف ملاحظات خاصة أو مهمة للجلسات القادمة و للمركز"
               rows="4"
               disabled={isSubmitting}
             />
