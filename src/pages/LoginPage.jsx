@@ -100,7 +100,8 @@ const LoginPage = () => {
               </div>
 
               {errors.general && (
-                <div className="login-error-message">{errors.general}</div>
+                // <div className="login-error-message">{errors.general}</div>
+                <div className="login-error-message">الايميل او كلمة المرور خاطئة, حاول مرة اخرى</div>
               )}
 
               <form onSubmit={handleSubmit} className="login-page-form">
@@ -196,7 +197,7 @@ const LoginPage = () => {
             <div className="why-points">
               <ul>
                 <li>إدارة وتعديل المواعيد بسهولة</li>
-                <li>تتبع تاريخ العلاجات ونتائجها</li>
+                <li>تتبع تاريخ المواعيد ونتائجها</li>
                 <li>عروض وخصومات حصرية للأعضاء</li>
                 <li>نقاط الولاء واستبدالها بخدمات</li>
               </ul>

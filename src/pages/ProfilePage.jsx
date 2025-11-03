@@ -750,7 +750,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
               {/* History Tab */}
               {activeTab === "history" && (
                 <div className="tab-content">
-                  <h2>تاريخ العلاجات</h2>
+                  <h2>سجل مواعيدي</h2>
 
                   {pastAppointments.length > 0 ? (
                     <div className="history-list">

@@ -260,7 +260,7 @@ const RegisterPage = () => {
                         className={`form-input ${
                           errors.password ? "error" : ""
                         }`}
-                        placeholder="أدخلي كلمة مرور قوية"
+                        placeholder="أدخل كلمة مرور قوية"
                         disabled={loading}
                       />
                       {errors.password && (
@@ -281,7 +281,7 @@ const RegisterPage = () => {
                         className={`form-input ${
                           errors.confirmPassword ? "error" : ""
                         }`}
-                        placeholder="أعيدي كتابة كلمة المرور"
+                        placeholder="عد كتابة كلمة المرور"
                         disabled={loading}
                       />
                       {errors.confirmPassword && (
