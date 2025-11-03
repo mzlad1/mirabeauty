@@ -1221,14 +1221,17 @@
   font-size: 1.125rem;
 }
 
-.booking-cta .btn-secondary {
+.booking-cta .consultation-btn-secondary {
   border-color: var(--white);
   color: var(--white);
+  background-color: transparent;
+  border: 1px solid var(--white);
   padding: 13px 28px;
   font-size: 1.125rem;
+  border-radius: 0.5rem;
 }
 
-.booking-cta .btn-secondary:hover {
+.booking-cta .consultation-btn-secondary:hover {
   background-color: var(--white);
   color: var(--navy-blue);
 }

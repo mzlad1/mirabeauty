@@ -582,7 +582,6 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                                 <span className="duration">
                                   {appointment.serviceDuration ||
                                     appointment.duration}{" "}
-                                  دقيقة
                                 </span>
                               </div>
                               <span

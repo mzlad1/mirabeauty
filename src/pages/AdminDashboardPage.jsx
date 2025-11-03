@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./AdminDashboardPage.css";
 import CustomModal from "../components/common/CustomModal";
 import { useModal } from "../hooks/useModal";
+import { formatFirestoreDate } from "../utils/dateHelpers";
 import {
   getCustomers,
   getStaff,
@@ -24,6 +25,14 @@ import {
   updateAppointment,
   deleteAppointment,
 } from "../services/appointmentsService";
+import {
+  getAllConsultations,
+  updateConsultation,
+  deleteConsultation,
+  confirmConsultation,
+  completeConsultation,
+  assignStaffToConsultation,
+} from "../services/consultationsService";
 import {
   getAllServices,
   addService,
@@ -51,12 +60,20 @@ import ServiceEditModal from "../components/dashboard/ServiceEditModal";
 import ProductEditModal from "../components/dashboard/ProductEditModal";
 import AdminAppointmentEditModal from "../components/dashboard/AdminAppointmentEditModal";
 import AppointmentDetailsModal from "../components/dashboard/AppointmentDetailsModal";
+import ConsultationDetailsModal from "../components/dashboard/ConsultationDetailsModal";
 import CategoryModal from "../components/dashboard/CategoryModal";
 import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
 
 const AdminDashboardPage = ({ currentUser }) => {
   const navigate = useNavigate();
-  const { modalState, closeModal, showSuccess, showError, showWarning, showConfirm } = useModal();
+  const {
+    modalState,
+    closeModal,
+    showSuccess,
+    showError,
+    showWarning,
+    showConfirm,
+  } = useModal();
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedTimeframe, setSelectedTimeframe] = useState("thisMonth");
 
@@ -64,6 +81,7 @@ const AdminDashboardPage = ({ currentUser }) => {
   const [customers, setCustomers] = useState([]);
   const [staff, setStaff] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [consultations, setConsultations] = useState([]);
   const [services, setServices] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -76,6 +94,9 @@ const AdminDashboardPage = ({ currentUser }) => {
   // Details modal states
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [appointmentToView, setAppointmentToView] = useState(null);
+  const [isConsultationDetailsModalOpen, setIsConsultationDetailsModalOpen] =
+    useState(false);
+  const [consultationToView, setConsultationToView] = useState(null);
 
   // Modal states
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -124,6 +145,13 @@ const AdminDashboardPage = ({ currentUser }) => {
   // Appointment pagination
   const [currentAppointmentPage, setCurrentAppointmentPage] = useState(1);
   const appointmentsPerPage = 10;
+
+  // Filter states for consultations
+  const [consultationStatusFilter, setConsultationStatusFilter] = useState("");
+  const [consultationDateFilter, setConsultationDateFilter] = useState("");
+  const [consultationSearchFilter, setConsultationSearchFilter] = useState("");
+  const [currentConsultationPage, setCurrentConsultationPage] = useState(1);
+  const consultationsPerPage = 10;
 
   const [editingCategory, setEditingCategory] = useState(null);
   const [categoryModalType, setCategoryModalType] = useState("product");
@@ -186,17 +214,20 @@ const AdminDashboardPage = ({ currentUser }) => {
 
   // Filter function for appointments
   const getFilteredAppointments = () => {
-    return appointments.filter(appointment => {
+    return appointments.filter((appointment) => {
       // Status filter
-      if (appointmentStatusFilter && appointment.status !== appointmentStatusFilter) {
+      if (
+        appointmentStatusFilter &&
+        appointment.status !== appointmentStatusFilter
+      ) {
         return false;
       }
-      
+
       // Date filter
       if (appointmentDateFilter && appointment.date !== appointmentDateFilter) {
         return false;
       }
-      
+
       // Search filter (customer name, phone, or service name)
       if (appointmentSearchFilter) {
         const searchLower = appointmentSearchFilter.toLowerCase();
@@ -204,29 +235,30 @@ const AdminDashboardPage = ({ currentUser }) => {
         const customerPhone = appointment.customerPhone?.toLowerCase() || "";
         const serviceName = appointment.serviceName?.toLowerCase() || "";
         const staffName = appointment.staffName?.toLowerCase() || "";
-        
-        if (!customerName.includes(searchLower) && 
-            !customerPhone.includes(searchLower) && 
-            !serviceName.includes(searchLower) &&
-            !staffName.includes(searchLower)) {
+
+        if (
+          !customerName.includes(searchLower) &&
+          !customerPhone.includes(searchLower) &&
+          !serviceName.includes(searchLower) &&
+          !staffName.includes(searchLower)
+        ) {
           return false;
         }
       }
-      
+
       return true;
     });
   };
 
-  const recentAppointments = [...getFilteredAppointments()]
-    .sort((a, b) => {
-      const dateA = a.createdAt?.seconds
-        ? new Date(a.createdAt.seconds * 1000)
-        : new Date(a.createdAt);
-      const dateB = b.createdAt?.seconds
-        ? new Date(b.createdAt.seconds * 1000)
-        : new Date(b.createdAt);
-      return dateB - dateA;
-    });
+  const recentAppointments = [...getFilteredAppointments()].sort((a, b) => {
+    const dateA = a.createdAt?.seconds
+      ? new Date(a.createdAt.seconds * 1000)
+      : new Date(a.createdAt);
+    const dateB = b.createdAt?.seconds
+      ? new Date(b.createdAt.seconds * 1000)
+      : new Date(b.createdAt);
+    return dateB - dateA;
+  });
 
   // Firebase data loading functions
   const loadCustomers = async () => {
@@ -263,6 +295,19 @@ const AdminDashboardPage = ({ currentUser }) => {
     } catch (err) {
       console.error("Error loading appointments:", err);
       setError("فشل في تحميل بيانات المواعيد");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadConsultations = async () => {
+    try {
+      setLoading(true);
+      const consultationsData = await getAllConsultations();
+      setConsultations(consultationsData);
+    } catch (err) {
+      console.error("Error loading consultations:", err);
+      setError("فشل في تحميل بيانات الاستشارات");
     } finally {
       setLoading(false);
     }
@@ -366,15 +411,55 @@ const AdminDashboardPage = ({ currentUser }) => {
     }
   };
 
+  // Consultation management functions
+  const handleDeleteConsultation = async (consultationId, customerName) => {
+    showConfirm(
+      `هل أنت متأكد من حذف استشارة العميلة "${customerName}"؟\n\nتحذير: سيتم حذف الاستشارة بشكل نهائي.`,
+      async () => {
+        try {
+          await deleteConsultation(consultationId);
+          await loadConsultations();
+          showSuccess("تم حذف الاستشارة بنجاح");
+        } catch (error) {
+          console.error("Error deleting consultation:", error);
+          showError("حدث خطأ أثناء حذف الاستشارة");
+        }
+      },
+      "تأكيد حذف الاستشارة",
+      "حذف",
+      "إلغاء"
+    );
+  };
+
+  const handleConfirmConsultation = async (consultationId) => {
+    try {
+      await confirmConsultation(consultationId);
+      await loadConsultations();
+      showSuccess("تم تأكيد الاستشارة بنجاح");
+    } catch (error) {
+      console.error("Error confirming consultation:", error);
+      showError("حدث خطأ أثناء تأكيد الاستشارة");
+    }
+  };
+
+  const handleAssignStaffToConsultation = async (consultationId) => {
+    // This will be handled through a modal later
+    // For now, just reload
+    await loadConsultations();
+  };
+
   // Filter function for appointments
   // Filter function for products
   const getFilteredProducts = () => {
     return products.filter((product) => {
       // Category filter
-      if (productCategoryFilter && product.categoryName !== productCategoryFilter) {
+      if (
+        productCategoryFilter &&
+        product.categoryName !== productCategoryFilter
+      ) {
         return false;
       }
-      
+
       // Status filter
       if (productStatusFilter) {
         if (productStatusFilter === "available" && !product.inStock) {
@@ -384,17 +469,17 @@ const AdminDashboardPage = ({ currentUser }) => {
           return false;
         }
       }
-      
+
       // Search filter (name)
       if (productSearchFilter) {
         const searchLower = productSearchFilter.toLowerCase();
         const productName = product.name?.toLowerCase() || "";
-        
+
         if (!productName.includes(searchLower)) {
           return false;
         }
       }
-      
+
       return true;
     });
   };
@@ -417,20 +502,23 @@ const AdminDashboardPage = ({ currentUser }) => {
   const getFilteredServices = () => {
     return serviceStats.filter((service) => {
       // Category filter
-      if (serviceCategoryFilter && service.categoryName !== serviceCategoryFilter) {
+      if (
+        serviceCategoryFilter &&
+        service.categoryName !== serviceCategoryFilter
+      ) {
         return false;
       }
-      
+
       // Search filter (name)
       if (serviceSearchFilter) {
         const searchLower = serviceSearchFilter.toLowerCase();
         const serviceName = service.name?.toLowerCase() || "";
-        
+
         if (!serviceName.includes(searchLower)) {
           return false;
         }
       }
-      
+
       return true;
     });
   };
@@ -458,14 +546,16 @@ const AdminDashboardPage = ({ currentUser }) => {
         const customerName = customer.name?.toLowerCase() || "";
         const customerEmail = customer.email?.toLowerCase() || "";
         const customerPhone = customer.phone?.toLowerCase() || "";
-        
-        if (!customerName.includes(searchLower) && 
-            !customerEmail.includes(searchLower) && 
-            !customerPhone.includes(searchLower)) {
+
+        if (
+          !customerName.includes(searchLower) &&
+          !customerEmail.includes(searchLower) &&
+          !customerPhone.includes(searchLower)
+        ) {
           return false;
         }
       }
-      
+
       return true;
     });
   };
@@ -491,14 +581,17 @@ const AdminDashboardPage = ({ currentUser }) => {
       if (staffSearchFilter) {
         const searchLower = staffSearchFilter.toLowerCase();
         const staffName = staffMember.name?.toLowerCase() || "";
-        const staffSpecialization = staffMember.specialization?.toLowerCase() || "";
-        
-        if (!staffName.includes(searchLower) && 
-            !staffSpecialization.includes(searchLower)) {
+        const staffSpecialization =
+          staffMember.specialization?.toLowerCase() || "";
+
+        if (
+          !staffName.includes(searchLower) &&
+          !staffSpecialization.includes(searchLower)
+        ) {
           return false;
         }
       }
-      
+
       // Status filter
       if (staffStatusFilter) {
         if (staffStatusFilter === "active" && !staffMember.active) {
@@ -508,7 +601,7 @@ const AdminDashboardPage = ({ currentUser }) => {
           return false;
         }
       }
-      
+
       return true;
     });
   };
@@ -539,6 +632,59 @@ const AdminDashboardPage = ({ currentUser }) => {
   const getTotalAppointmentPages = () => {
     const filtered = getFilteredAppointments();
     return Math.ceil(filtered.length / appointmentsPerPage);
+  };
+
+  // Filter function for consultations
+  const getFilteredConsultations = () => {
+    return consultations.filter((consultation) => {
+      // Status filter
+      if (
+        consultationStatusFilter &&
+        consultation.status !== consultationStatusFilter
+      ) {
+        return false;
+      }
+
+      // Date filter
+      if (
+        consultationDateFilter &&
+        consultation.date !== consultationDateFilter
+      ) {
+        return false;
+      }
+
+      // Search filter
+      if (consultationSearchFilter) {
+        const searchLower = consultationSearchFilter.toLowerCase();
+        const customerName = consultation.customerName?.toLowerCase() || "";
+        const customerPhone = consultation.customerPhone?.toLowerCase() || "";
+        const staffName = consultation.staffName?.toLowerCase() || "";
+
+        if (
+          !customerName.includes(searchLower) &&
+          !customerPhone.includes(searchLower) &&
+          !staffName.includes(searchLower)
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  };
+
+  // Get paginated consultations
+  const getPaginatedConsultations = () => {
+    const filtered = getFilteredConsultations();
+    const startIndex = (currentConsultationPage - 1) * consultationsPerPage;
+    const endIndex = startIndex + consultationsPerPage;
+    return filtered.slice(startIndex, endIndex);
+  };
+
+  // Get total pages for consultations
+  const getTotalConsultationPages = () => {
+    const filtered = getFilteredConsultations();
+    return Math.ceil(filtered.length / consultationsPerPage);
   };
 
   // Load initial data on component mount
@@ -599,6 +745,9 @@ const AdminDashboardPage = ({ currentUser }) => {
     } else if (activeTab === "appointments") {
       loadAppointments();
       loadStaff(); // Load staff data for appointment editing
+    } else if (activeTab === "consultations") {
+      loadConsultations();
+      loadStaff(); // Load staff data for consultation assignment
     } else if (activeTab === "services") {
       loadServices();
     } else if (activeTab === "products") {
@@ -803,7 +952,9 @@ const AdminDashboardPage = ({ currentUser }) => {
         } catch (error) {
           console.error("Error deleting category:", error);
           if (error.message.includes("in use")) {
-            showError("لا يمكن حذف هذا التصنيف لأنه مستخدم في منتجات أو خدمات موجودة");
+            showError(
+              "لا يمكن حذف هذا التصنيف لأنه مستخدم في منتجات أو خدمات موجودة"
+            );
           } else {
             showError("حدث خطأ أثناء حذف التصنيف");
           }
@@ -829,29 +980,31 @@ const AdminDashboardPage = ({ currentUser }) => {
   };
 
   const handleDeleteUser = async (userId, userType) => {
-    if (
-      !window.confirm(
-        `هل أنت متأكد من حذف هذا ${
-          userType === "customer" ? "العميل" : "الموظف"
-        }؟`
-      )
-    ) {
-      return;
-    }
-
-    try {
-      if (userType === "customer") {
-        await adminDeleteCustomer(userId);
-        await loadCustomers();
-      } else {
-        await adminDeleteStaff(userId);
-        await loadStaff();
-      }
-      showSuccess("تم الحذف بنجاح");
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      showError("حدث خطأ أثناء الحذف");
-    }
+    showConfirm(
+      `هل أنت متأكد من حذف هذا ${
+        userType === "customer" ? "العميل" : "الموظف"
+      }؟\n\nتحذير: سيتم حذف ${
+        userType === "customer" ? "العميل" : "الموظف"
+      } بشكل نهائي.`,
+      async () => {
+        try {
+          if (userType === "customer") {
+            await adminDeleteCustomer(userId);
+            await loadCustomers();
+          } else {
+            await adminDeleteStaff(userId);
+            await loadStaff();
+          }
+          showSuccess("تم الحذف بنجاح");
+        } catch (error) {
+          console.error("Error deleting user:", error);
+          showError("حدث خطأ أثناء الحذف");
+        }
+      },
+      `تأكيد حذف ${userType === "customer" ? "العميل" : "الموظف"}`,
+      "حذف",
+      "إلغاء"
+    );
   };
 
   const handleUserSubmit = async (userData) => {
@@ -871,16 +1024,18 @@ const AdminDashboardPage = ({ currentUser }) => {
         showSuccess("تم التحديث بنجاح");
       } else {
         // Add new user - use authentication functions to create both auth and Firestore records
+        let result;
         if (userModalType === "customer") {
-          await adminRegisterCustomer(userData);
+          result = await adminRegisterCustomer(userData);
           await loadCustomers();
         } else {
-          await adminRegisterStaff(userData);
+          result = await adminRegisterStaff(userData);
           await loadStaff();
         }
-        const tempPassword = userData.password || "LaserBooking2024!";
+        const tempPassword =
+          result.tempPassword || userData.password || "TempPassword123!";
         showSuccess(
-          `تم إنشاء الحساب بنجاح!\nكلمة المرور المؤقتة: ${tempPassword}\nيُرجى إعلام المستخدم بتغيير كلمة المرور عند أول تسجيل دخول.`
+          `تم إنشاء الحساب بنجاح!\nكلمة المرور المؤقتة: ${tempPassword}\nيُرجى إعلام المستخدم بضرورة تغيير كلمة المرور عند أول تسجيل دخول.`
         );
       }
 
@@ -1064,6 +1219,15 @@ const AdminDashboardPage = ({ currentUser }) => {
                 >
                   <i className="nav-icon fas fa-calendar-alt"></i>
                   المواعيد
+                </button>
+                <button
+                  className={`nav-item ${
+                    activeTab === "consultations" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("consultations")}
+                >
+                  <i className="nav-icon fas fa-comments"></i>
+                  الاستشارات
                 </button>
                 <button
                   className={`nav-item ${
@@ -1260,9 +1424,10 @@ const AdminDashboardPage = ({ currentUser }) => {
                             <h4>{appointment.customerName}</h4>
                             <p>حجز {appointment.serviceName}</p>
                             <span className="activity-time">
-                              {new Date(
-                                appointment.updatedAt
-                              ).toLocaleDateString("en-US")}
+                              {formatFirestoreDate(
+                                appointment.updatedAt,
+                                "en-US"
+                              )}
                             </span>
                           </div>
                           <span
@@ -1288,7 +1453,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                   </div>
 
                   <div className="appointments-filters">
-                    <select 
+                    <select
                       className="filter-select"
                       value={appointmentStatusFilter}
                       onChange={(e) => {
@@ -1302,8 +1467,8 @@ const AdminDashboardPage = ({ currentUser }) => {
                       <option value="مكتمل">مكتمل</option>
                       <option value="ملغي">ملغي</option>
                     </select>
-                    <input 
-                      type="date" 
+                    <input
+                      type="date"
                       className="filter-date"
                       value={appointmentDateFilter}
                       onChange={(e) => {
@@ -1352,7 +1517,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                           getPaginatedAppointments().map((appointment) => (
                             <tr key={appointment.id}>
                               <td>
-                                <div className="customer-info">
+                                <div className="admin-customer-info">
                                   <strong>{appointment.customerName}</strong>
                                   <span>{appointment.customerPhone}</span>
                                 </div>
@@ -1375,7 +1540,10 @@ const AdminDashboardPage = ({ currentUser }) => {
                                   {appointment.customerNote ? (
                                     <span title={appointment.customerNote}>
                                       {appointment.customerNote.length > 30
-                                        ? `${appointment.customerNote.substring(0, 30)}...`
+                                        ? `${appointment.customerNote.substring(
+                                            0,
+                                            30
+                                          )}...`
                                         : appointment.customerNote}
                                     </span>
                                   ) : (
@@ -1388,7 +1556,10 @@ const AdminDashboardPage = ({ currentUser }) => {
                                   {appointment.staffNote ? (
                                     <span title={appointment.staffNote}>
                                       {appointment.staffNote.length > 30
-                                        ? `${appointment.staffNote.substring(0, 30)}...`
+                                        ? `${appointment.staffNote.substring(
+                                            0,
+                                            30
+                                          )}...`
                                         : appointment.staffNote}
                                     </span>
                                   ) : (
@@ -1419,7 +1590,14 @@ const AdminDashboardPage = ({ currentUser }) => {
                                   >
                                     حذف
                                   </button>
-                                  <button className="action-btn view" onClick={() => handleViewAppointmentDetails(appointment)}>عرض</button>
+                                  <button
+                                    className="action-btn view"
+                                    onClick={() =>
+                                      handleViewAppointmentDetails(appointment)
+                                    }
+                                  >
+                                    عرض
+                                  </button>
                                 </div>
                               </td>
                             </tr>
@@ -1434,23 +1612,213 @@ const AdminDashboardPage = ({ currentUser }) => {
                     <div className="pagination">
                       <button
                         className="pagination-btn"
-                        onClick={() => setCurrentAppointmentPage(currentAppointmentPage - 1)}
+                        onClick={() =>
+                          setCurrentAppointmentPage(currentAppointmentPage - 1)
+                        }
                         disabled={currentAppointmentPage === 1}
                       >
                         السابق
                       </button>
                       <div className="pagination-info">
-                        <span>صفحة {currentAppointmentPage} من {getTotalAppointmentPages()}</span>
-                        <span className="results-count">({getFilteredAppointments().length} موعد)</span>
+                        <span>
+                          صفحة {currentAppointmentPage} من{" "}
+                          {getTotalAppointmentPages()}
+                        </span>
+                        <span className="results-count">
+                          ({getFilteredAppointments().length} موعد)
+                        </span>
                       </div>
                       <button
                         className="pagination-btn"
-                        onClick={() => setCurrentAppointmentPage(currentAppointmentPage + 1)}
-                        disabled={currentAppointmentPage === getTotalAppointmentPages()}
+                        onClick={() =>
+                          setCurrentAppointmentPage(currentAppointmentPage + 1)
+                        }
+                        disabled={
+                          currentAppointmentPage === getTotalAppointmentPages()
+                        }
                       >
                         التالي
                       </button>
                     </div>
+                  )}
+                </div>
+              )}
+
+              {/* Consultations Tab */}
+              {activeTab === "consultations" && (
+                <div className="tab-content">
+                  <div className="tab-header">
+                    <h2>إدارة الاستشارات</h2>
+                  </div>
+
+                  {/* Consultation Filters */}
+                  <div className="appointments-filters">
+                    <select
+                      className="filter-select"
+                      value={consultationStatusFilter}
+                      onChange={(e) => {
+                        setConsultationStatusFilter(e.target.value);
+                        setCurrentConsultationPage(1);
+                      }}
+                    >
+                      <option value="">جميع الحالات</option>
+                      <option value="في الانتظار">في الانتظار</option>
+                      <option value="مؤكد">مؤكد</option>
+                      <option value="مكتمل">مكتمل</option>
+                      <option value="ملغي">ملغي</option>
+                    </select>
+
+                    <input
+                      type="date"
+                      className="filter-date"
+                      value={consultationDateFilter}
+                      onChange={(e) => {
+                        setConsultationDateFilter(e.target.value);
+                        setCurrentConsultationPage(1);
+                      }}
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="البحث بالاسم أو رقم الهاتف..."
+                      className="filter-search"
+                      value={consultationSearchFilter}
+                      onChange={(e) => {
+                        setConsultationSearchFilter(e.target.value);
+                        setCurrentConsultationPage(1);
+                      }}
+                    />
+                  </div>
+
+                  {loading ? (
+                    <div className="loading-state">
+                      <div className="loading-spinner"></div>
+                      <p>جاري تحميل بيانات الاستشارات...</p>
+                    </div>
+                  ) : error ? (
+                    <div className="error-state">
+                      <i className="fas fa-exclamation-triangle"></i>
+                      <p>{error}</p>
+                      <button
+                        onClick={loadConsultations}
+                        className="btn-primary"
+                      >
+                        إعادة المحاولة
+                      </button>
+                    </div>
+                  ) : getFilteredConsultations().length === 0 ? (
+                    <div className="empty-state">
+                      <i className="fas fa-comments"></i>
+                      <p>لا توجد استشارات حالياً</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="appointments-table">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>اسم العميلة</th>
+                              <th>رقم الهاتف</th>
+                              <th>التاريخ</th>
+                              <th>الحالة</th>
+                              <th>الإجراءات</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {getPaginatedConsultations().map((consultation) => (
+                              <tr key={consultation.id}>
+                                <td>{consultation.customerName}</td>
+                                <td>{consultation.customerPhone}</td>
+                                <td>{consultation.date}</td>
+                                <td>
+                                  <span
+                                    className={`status-badge ${getStatusColor(
+                                      consultation.status
+                                    )}`}
+                                  >
+                                    {consultation.status}
+                                  </span>
+                                </td>
+                                <td>
+                                  <div className="action-buttons">
+                                    <button
+                                      className="action-btn view"
+                                      onClick={() => {
+                                        setConsultationToView(consultation);
+                                        setIsConsultationDetailsModalOpen(true);
+                                      }}
+                                      title="عرض التفاصيل"
+                                    >
+                                      <i className="fas fa-eye"></i>
+                                    </button>
+                                    {consultation.status === "في الانتظار" && (
+                                      <button
+                                        className="action-btn confirm"
+                                        onClick={() =>
+                                          handleConfirmConsultation(
+                                            consultation.id
+                                          )
+                                        }
+                                        title="تأكيد"
+                                      >
+                                        <i className="fas fa-check"></i>
+                                      </button>
+                                    )}
+                                    <button
+                                      className="action-btn delete"
+                                      onClick={() =>
+                                        handleDeleteConsultation(
+                                          consultation.id,
+                                          consultation.customerName
+                                        )
+                                      }
+                                      title="حذف"
+                                    >
+                                      <i className="fas fa-trash"></i>
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Pagination */}
+                      {getTotalConsultationPages() > 1 && (
+                        <div className="pagination">
+                          <button
+                            onClick={() =>
+                              setCurrentConsultationPage((prev) =>
+                                Math.max(prev - 1, 1)
+                              )
+                            }
+                            disabled={currentConsultationPage === 1}
+                            className="pagination-btn"
+                          >
+                            السابق
+                          </button>
+                          <span className="pagination-info">
+                            صفحة {currentConsultationPage} من{" "}
+                            {getTotalConsultationPages()}
+                          </span>
+                          <button
+                            onClick={() =>
+                              setCurrentConsultationPage((prev) =>
+                                Math.min(prev + 1, getTotalConsultationPages())
+                              )
+                            }
+                            disabled={
+                              currentConsultationPage ===
+                              getTotalConsultationPages()
+                            }
+                            className="pagination-btn"
+                          >
+                            التالي
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
@@ -1508,14 +1876,15 @@ const AdminDashboardPage = ({ currentUser }) => {
                             <div className="customer-header">
                               <img
                                 src={
-                                  customer.avatar || "/assets/default-avatar.jpg"
+                                  customer.avatar ||
+                                  "/assets/default-avatar.jpg"
                                 }
                                 alt={customer.name}
                                 onError={(e) => {
                                   e.target.src = "/assets/default-avatar.jpg";
                                 }}
                               />
-                              <div className="customer-info">
+                              <div className="admin-customer-info">
                                 <h4>{customer.name}</h4>
                                 <p>{customer.email}</p>
                                 <p>{customer.phone}</p>
@@ -1568,19 +1937,30 @@ const AdminDashboardPage = ({ currentUser }) => {
                         <div className="pagination">
                           <button
                             className="pagination-btn"
-                            onClick={() => setCurrentCustomerPage(currentCustomerPage - 1)}
+                            onClick={() =>
+                              setCurrentCustomerPage(currentCustomerPage - 1)
+                            }
                             disabled={currentCustomerPage === 1}
                           >
                             السابق
                           </button>
                           <div className="pagination-info">
-                            <span>صفحة {currentCustomerPage} من {getTotalCustomerPages()}</span>
-                            <span className="results-count">({getFilteredCustomers().length} عميل)</span>
+                            <span>
+                              صفحة {currentCustomerPage} من{" "}
+                              {getTotalCustomerPages()}
+                            </span>
+                            <span className="results-count">
+                              ({getFilteredCustomers().length} عميل)
+                            </span>
                           </div>
                           <button
                             className="pagination-btn"
-                            onClick={() => setCurrentCustomerPage(currentCustomerPage + 1)}
-                            disabled={currentCustomerPage === getTotalCustomerPages()}
+                            onClick={() =>
+                              setCurrentCustomerPage(currentCustomerPage + 1)
+                            }
+                            disabled={
+                              currentCustomerPage === getTotalCustomerPages()
+                            }
                           >
                             التالي
                           </button>
@@ -1739,18 +2119,26 @@ const AdminDashboardPage = ({ currentUser }) => {
                         <div className="pagination">
                           <button
                             className="pagination-btn"
-                            onClick={() => setCurrentStaffPage(currentStaffPage - 1)}
+                            onClick={() =>
+                              setCurrentStaffPage(currentStaffPage - 1)
+                            }
                             disabled={currentStaffPage === 1}
                           >
                             السابق
                           </button>
                           <div className="pagination-info">
-                            <span>صفحة {currentStaffPage} من {getTotalStaffPages()}</span>
-                            <span className="results-count">({getFilteredStaff().length} موظف)</span>
+                            <span>
+                              صفحة {currentStaffPage} من {getTotalStaffPages()}
+                            </span>
+                            <span className="results-count">
+                              ({getFilteredStaff().length} موظف)
+                            </span>
                           </div>
                           <button
                             className="pagination-btn"
-                            onClick={() => setCurrentStaffPage(currentStaffPage + 1)}
+                            onClick={() =>
+                              setCurrentStaffPage(currentStaffPage + 1)
+                            }
                             disabled={currentStaffPage === getTotalStaffPages()}
                           >
                             التالي
@@ -1848,31 +2236,38 @@ const AdminDashboardPage = ({ currentUser }) => {
                         ))}
                       </tbody>
                     </table>
-                    
+
                     {/* Services Pagination */}
                     {getTotalServicePages() > 1 && (
                       <div className="pagination">
                         <button
                           className="pagination-btn"
-                          onClick={() => setCurrentServicePage(currentServicePage - 1)}
+                          onClick={() =>
+                            setCurrentServicePage(currentServicePage - 1)
+                          }
                           disabled={currentServicePage === 1}
                         >
                           السابق
                         </button>
-                        
+
                         <div className="pagination-info">
                           <span>
-                            صفحة {currentServicePage} من {getTotalServicePages()}
+                            صفحة {currentServicePage} من{" "}
+                            {getTotalServicePages()}
                           </span>
                           <span className="results-count">
                             ({getFilteredServices().length} خدمة)
                           </span>
                         </div>
-                        
+
                         <button
                           className="pagination-btn"
-                          onClick={() => setCurrentServicePage(currentServicePage + 1)}
-                          disabled={currentServicePage === getTotalServicePages()}
+                          onClick={() =>
+                            setCurrentServicePage(currentServicePage + 1)
+                          }
+                          disabled={
+                            currentServicePage === getTotalServicePages()
+                          }
                         >
                           التالي
                         </button>
@@ -2019,31 +2414,38 @@ const AdminDashboardPage = ({ currentUser }) => {
                           ))}
                         </tbody>
                       </table>
-                      
+
                       {/* Products Pagination */}
                       {getTotalProductPages() > 1 && (
                         <div className="pagination">
                           <button
                             className="pagination-btn"
-                            onClick={() => setCurrentProductPage(currentProductPage - 1)}
+                            onClick={() =>
+                              setCurrentProductPage(currentProductPage - 1)
+                            }
                             disabled={currentProductPage === 1}
                           >
                             السابق
                           </button>
-                          
+
                           <div className="pagination-info">
                             <span>
-                              صفحة {currentProductPage} من {getTotalProductPages()}
+                              صفحة {currentProductPage} من{" "}
+                              {getTotalProductPages()}
                             </span>
                             <span className="results-count">
                               ({getFilteredProducts().length} منتج)
                             </span>
                           </div>
-                          
+
                           <button
                             className="pagination-btn"
-                            onClick={() => setCurrentProductPage(currentProductPage + 1)}
-                            disabled={currentProductPage === getTotalProductPages()}
+                            onClick={() =>
+                              setCurrentProductPage(currentProductPage + 1)
+                            }
+                            disabled={
+                              currentProductPage === getTotalProductPages()
+                            }
                           >
                             التالي
                           </button>
@@ -2147,9 +2549,10 @@ const AdminDashboardPage = ({ currentUser }) => {
                               <div className="category-meta">
                                 <span className="category-date">
                                   تم الإنشاء:{" "}
-                                  {new Date(
-                                    category.createdAt?.toDate()
-                                  ).toLocaleDateString("ar-EG")}
+                                  {formatFirestoreDate(
+                                    category.createdAt,
+                                    "ar-EG"
+                                  )}
                                 </span>
                               </div>
                             </div>
@@ -2225,9 +2628,10 @@ const AdminDashboardPage = ({ currentUser }) => {
                               <div className="category-meta">
                                 <span className="category-date">
                                   تم الإنشاء:{" "}
-                                  {new Date(
-                                    category.createdAt?.toDate()
-                                  ).toLocaleDateString("ar-EG")}
+                                  {formatFirestoreDate(
+                                    category.createdAt,
+                                    "ar-EG"
+                                  )}
                                 </span>
                               </div>
                             </div>
@@ -2384,7 +2788,6 @@ const AdminDashboardPage = ({ currentUser }) => {
                                   type="email"
                                   value={completeUserData?.email || ""}
                                   className="form-input"
-                                  disabled
                                   style={{
                                     backgroundColor: "#f5f5f5",
                                     cursor: "not-allowed",
@@ -2563,6 +2966,17 @@ const AdminDashboardPage = ({ currentUser }) => {
           onClose={() => {
             setIsDetailsModalOpen(false);
             setAppointmentToView(null);
+          }}
+        />
+      )}
+
+      {/* Consultation Details Modal */}
+      {isConsultationDetailsModalOpen && consultationToView && (
+        <ConsultationDetailsModal
+          consultation={consultationToView}
+          onClose={() => {
+            setIsConsultationDetailsModalOpen(false);
+            setConsultationToView(null);
           }}
         />
       )}

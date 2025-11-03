@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./UserModal.css";
+import useModal from "../../hooks/useModal";
+import CustomModal from "../common/CustomModal";
 
 const UserModal = ({
   isOpen,
@@ -8,6 +10,7 @@ const UserModal = ({
   user = null,
   userType = "customer", // "customer" or "staff"
 }) => {
+  const { modalState, closeModal, showError } = useModal();
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -96,7 +99,7 @@ const UserModal = ({
       onClose();
     } catch (error) {
       console.error("Error submitting user form:", error);
-      alert("حدث خطأ أثناء الحفظ");
+      showError("حدث خطأ أثناء الحفظ");
     } finally {
       setLoading(false);
     }
@@ -150,8 +153,10 @@ const UserModal = ({
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                disabled
+                disabled={!!user} // Disabled only when editing existing user
+                required
                 className="admin-user-form-input"
+                placeholder={user ? "" : "أدخل البريد الإلكتروني"}
               />
             </div>
           </div>
@@ -175,7 +180,7 @@ const UserModal = ({
           {!user && (
             <div className="admin-user-form-row">
               <div className="admin-user-form-group">
-                <label htmlFor="password">كلمة المرور *</label>
+                <label htmlFor="password">كلمة المرور المؤقتة *</label>
                 <input
                   type="password"
                   id="password"
@@ -184,11 +189,10 @@ const UserModal = ({
                   onChange={handleChange}
                   required={!user}
                   className="admin-user-form-input"
-                  placeholder="اتركها فارغة لاستخدام كلمة مرور افتراضية"
+                  placeholder="أدخل كلمة المرور المؤقتة للمستخدم الجديد"
                 />
                 <small style={{ color: "#666", fontSize: "0.85rem" }}>
-                  إذا تُركت فارغة، ستكون كلمة المرور الافتراضية:
-                  LaserBooking2024!
+                  سيحتاج المستخدم لتغيير كلمة المرور هذه عند أول تسجيل دخول
                 </small>
               </div>
             </div>
@@ -266,25 +270,6 @@ const UserModal = ({
             </div>
           )}
 
-          <div className="admin-user-form-row">
-            <div className="admin-user-form-group">
-              <label htmlFor="avatar">رابط الصورة الشخصية (اختياري)</label>
-              <input
-                type="url"
-                id="avatar"
-                name="avatar"
-                value={
-                  formData.avatar === "/assets/default-avatar.jpg"
-                    ? ""
-                    : formData.avatar
-                }
-                onChange={handleChange}
-                className="admin-user-form-input"
-                placeholder="https://example.com/image.jpg (سيتم استخدام صورة افتراضية إذا تُركت فارغة)"
-              />
-            </div>
-          </div>
-
           {userType === "staff" && (
             <div className="admin-user-form-row">
               <div className="admin-user-form-group admin-user-checkbox-group">
@@ -320,6 +305,18 @@ const UserModal = ({
           </div>
         </form>
       </div>
+
+      <CustomModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        onConfirm={modalState.onConfirm || closeModal}
+        title={modalState.title}
+        message={modalState.message}
+        type={modalState.type}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+      />
     </div>
   );
 };

@@ -17,8 +17,12 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+// Initialize a secondary Firebase app for admin operations
+const secondaryApp = initializeApp(firebaseConfig, "secondary");
+
 // Initialize Firebase services
-export const auth = getAuth(app);
+export const auth = getAuth(app); // Main auth instance for user sessions
+export const secondaryAuth = getAuth(secondaryApp); // Secondary auth instance for admin operations
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export default app;

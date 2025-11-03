@@ -312,7 +312,7 @@ const HomePage = () => {
                 احجزي موعدك الآن
               </button>
               <button
-                className="btn-secondary"
+                className="home-btn-secondary"
                 onClick={() => navigateWithLoading("/services")}
               >
                 اكتشفي خدماتنا

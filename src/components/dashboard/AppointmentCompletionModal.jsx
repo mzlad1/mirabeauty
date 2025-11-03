@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "./AppointmentCompletionModal.css";
+import useModal from "../../hooks/useModal";
+import CustomModal from "../common/CustomModal";
 
 const AppointmentCompletionModal = ({
   isOpen,
@@ -7,6 +9,7 @@ const AppointmentCompletionModal = ({
   appointment,
   onComplete,
 }) => {
+  const { modalState, closeModal, showError } = useModal();
   const [customerNote, setCustomerNote] = useState("");
   const [staffNote, setStaffNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,7 +29,7 @@ const AppointmentCompletionModal = ({
       onClose();
     } catch (error) {
       console.error("Error completing appointment:", error);
-      alert("حدث خطأ أثناء إتمام الموعد");
+      showError("حدث خطأ أثناء إتمام الموعد");
     } finally {
       setIsSubmitting(false);
     }
@@ -141,6 +144,18 @@ const AppointmentCompletionModal = ({
           </div>
         </form>
       </div>
+
+      <CustomModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        onConfirm={modalState.onConfirm || closeModal}
+        title={modalState.title}
+        message={modalState.message}
+        type={modalState.type}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+      />
     </div>
   );
 };

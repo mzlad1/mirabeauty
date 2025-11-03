@@ -6,6 +6,10 @@ import {
   onAuthStateChanged,
   sendPasswordResetEmail,
   updateProfile,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  deleteUser,
 } from "firebase/auth";
 import {
   doc,
@@ -13,8 +17,9 @@ import {
   getDoc,
   updateDoc,
   serverTimestamp,
+  deleteDoc,
 } from "firebase/firestore";
-import { auth, db } from "../config/firebase";
+import { auth, secondaryAuth, db } from "../config/firebase";
 
 // Register new customer
 export const registerCustomer = async (userData) => {
@@ -264,7 +269,7 @@ export const adminRegisterCustomer = async (customerData) => {
   try {
     const {
       email,
-      password = "LaserBooking2024!", // Default password
+      password = "TempPassword123!", // Fallback if no password provided
       name,
       phone,
       birthDate,
@@ -272,11 +277,11 @@ export const adminRegisterCustomer = async (customerData) => {
       allergies,
     } = customerData;
 
-    // Create user with email and password
+    // Create user with secondary auth instance to avoid logging out admin
     const userCredential = await createUserWithEmailAndPassword(
-      auth,
+      secondaryAuth,
       email,
-      password
+      password // Use the custom password provided by admin
     );
     const user = userCredential.user;
 
@@ -301,10 +306,14 @@ export const adminRegisterCustomer = async (customerData) => {
       appointmentsCount: 0,
       totalSpent: 0,
       loyaltyPoints: 0,
-      avatar: customerData.avatar || "/assets/default-avatar.jpg",
+      avatar: "/assets/default-avatar.jpg",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
+      passwordResetRequired: true, // Flag to indicate password reset is required
     });
+
+    // Sign out from secondary auth to clean up
+    await signOut(secondaryAuth);
 
     return {
       user: user,
@@ -322,6 +331,7 @@ export const adminRegisterCustomer = async (customerData) => {
         totalSpent: 0,
         loyaltyPoints: 0,
       },
+      tempPassword: password, // Return the password used for display
     };
   } catch (error) {
     console.error("Error admin registering customer:", error);
@@ -334,18 +344,18 @@ export const adminRegisterStaff = async (staffData) => {
   try {
     const {
       email,
-      password = "LaserBooking2024!", // Default password
+      password = "TempPassword123!", // Fallback if no password provided
       name,
       phone,
       specialization,
       active = true,
     } = staffData;
 
-    // Create user with email and password
+    // Create user with secondary auth instance to avoid logging out admin
     const userCredential = await createUserWithEmailAndPassword(
-      auth,
+      secondaryAuth,
       email,
-      password
+      password // Use the custom password provided by admin
     );
     const user = userCredential.user;
 
@@ -368,10 +378,14 @@ export const adminRegisterStaff = async (staffData) => {
       appointmentsCount: 0,
       totalRevenue: 0,
       rating: 5.0,
-      avatar: staffData.avatar || "/assets/default-avatar.jpg",
+      avatar: "/assets/default-avatar.jpg",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
+      passwordResetRequired: true, // Flag to indicate password reset is required
     });
+
+    // Sign out from secondary auth to clean up
+    await signOut(secondaryAuth);
 
     return {
       user: user,
@@ -387,6 +401,7 @@ export const adminRegisterStaff = async (staffData) => {
         totalRevenue: 0,
         rating: 5.0,
       },
+      tempPassword: password, // Return the password used for display
     };
   } catch (error) {
     console.error("Error admin registering staff:", error);

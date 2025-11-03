@@ -12,20 +12,50 @@ import {
   getAppointmentsByCustomer,
   getAppointmentsByDate,
 } from "../services/appointmentsService";
+import {
+  createConsultation,
+  getConsultationsByCustomer,
+} from "../services/consultationsService";
 import CustomModal from "../components/common/CustomModal";
 import { useModal } from "../hooks/useModal";
 
 // Available time slots
 const timeSlots = [
-  "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
-  "15:00", "15:30", "16:00", "16:30", "17:00", "17:30",
-  "18:00", "18:30", "19:00", "19:30", "20:00"
+  "09:00",
+  "09:30",
+  "10:00",
+  "10:30",
+  "11:00",
+  "11:30",
+  "12:00",
+  "12:30",
+  "13:00",
+  "13:30",
+  "14:00",
+  "14:30",
+  "15:00",
+  "15:30",
+  "16:00",
+  "16:30",
+  "17:00",
+  "17:30",
+  "18:00",
+  "18:30",
+  "19:00",
+  "19:30",
+  "20:00",
 ];
 
 const BookingPage = ({ currentUser, userData }) => {
   const navigate = useNavigate();
-  const { modalState, closeModal, showSuccess, showError, showWarning, showConfirm } = useModal();
+  const {
+    modalState,
+    closeModal,
+    showSuccess,
+    showError,
+    showWarning,
+    showConfirm,
+  } = useModal();
   const [step, setStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState(""); // إضافة حالة لنوع الجلسة
   const [bookingData, setBookingData] = useState({
@@ -40,6 +70,20 @@ const BookingPage = ({ currentUser, userData }) => {
     },
   });
 
+  // Consultation data state
+  const [consultationData, setConsultationData] = useState({
+    customerInfo: {
+      name: userData?.name || currentUser?.displayName || "",
+      phone: userData?.phone || "",
+      email: userData?.email || currentUser?.email || "",
+    },
+    ageRange: "",
+    skinConcerns: [],
+    date: "",
+    timeSlot: "",
+    notes: "",
+  });
+
   // Firebase data states
   const [services, setServices] = useState([]);
   const [staffMembers, setStaffMembers] = useState([]);
@@ -48,6 +92,29 @@ const BookingPage = ({ currentUser, userData }) => {
   const [submitting, setSubmitting] = useState(false);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [userAppointments, setUserAppointments] = useState([]);
+  const [userConsultations, setUserConsultations] = useState([]);
+
+  // Update consultation data when userData changes
+  useEffect(() => {
+    if (userData || currentUser) {
+      setConsultationData((prev) => ({
+        ...prev,
+        customerInfo: {
+          name: userData?.name || currentUser?.displayName || "",
+          phone: userData?.phone || "",
+          email: userData?.email || currentUser?.email || "",
+        },
+      }));
+      setBookingData((prev) => ({
+        ...prev,
+        customerInfo: {
+          name: userData?.name || currentUser?.displayName || "",
+          phone: userData?.phone || "",
+          email: userData?.email || currentUser?.email || "",
+        },
+      }));
+    }
+  }, [userData, currentUser]);
 
   // Load services and staff on component mount
   useEffect(() => {
@@ -60,11 +127,15 @@ const BookingPage = ({ currentUser, userData }) => {
         ]);
         setServices(servicesData);
         setStaffMembers(staffData);
-        
-        // Load user appointments if user is logged in
+
+        // Load user appointments and consultations if user is logged in
         if (currentUser) {
-          const userAppts = await getAppointmentsByCustomer(currentUser.uid);
+          const [userAppts, userConsults] = await Promise.all([
+            getAppointmentsByCustomer(currentUser.uid),
+            getConsultationsByCustomer(currentUser.uid),
+          ]);
           setUserAppointments(userAppts);
+          setUserConsultations(userConsults);
         }
       } catch (error) {
         console.error("Error loading data:", error);
@@ -117,14 +188,14 @@ const BookingPage = ({ currentUser, userData }) => {
     try {
       // Get all appointments for the selected date
       const dateAppointments = await getAppointmentsByDate(selectedDate);
-      
+
       // Get booked time slots
       const bookedTimes = dateAppointments
-        .filter(apt => apt.status === "في الانتظار" || apt.status === "مؤكد")
-        .map(apt => apt.time);
+        .filter((apt) => apt.status === "في الانتظار" || apt.status === "مؤكد")
+        .map((apt) => apt.time);
 
       // Filter available time slots
-      const available = timeSlots.filter(time => !bookedTimes.includes(time));
+      const available = timeSlots.filter((time) => !bookedTimes.includes(time));
       setAvailableTimeSlots(available);
     } catch (error) {
       console.error("Error loading available time slots:", error);
@@ -134,20 +205,22 @@ const BookingPage = ({ currentUser, userData }) => {
 
   // Check for duplicate bookings
   const checkDuplicateBooking = (serviceId, date, time) => {
-    const selectedService = services.find(s => s.id === serviceId);
-    
+    const selectedService = services.find((s) => s.id === serviceId);
+
     // Check if user has same service on same day
-    const sameServiceSameDay = userAppointments.some(apt => 
-      apt.serviceId === serviceId && 
-      apt.date === date && 
-      (apt.status === "في الانتظار" || apt.status === "مؤكد")
+    const sameServiceSameDay = userAppointments.some(
+      (apt) =>
+        apt.serviceId === serviceId &&
+        apt.date === date &&
+        (apt.status === "في الانتظار" || apt.status === "مؤكد")
     );
 
     // Check if user has any appointment at same date and time
-    const sameDateTime = userAppointments.some(apt => 
-      apt.date === date && 
-      apt.time === time && 
-      (apt.status === "في الانتظار" || apt.status === "مؤكد")
+    const sameDateTime = userAppointments.some(
+      (apt) =>
+        apt.date === date &&
+        apt.time === time &&
+        (apt.status === "في الانتظار" || apt.status === "مؤكد")
     );
 
     return { sameServiceSameDay, sameDateTime };
@@ -156,7 +229,7 @@ const BookingPage = ({ currentUser, userData }) => {
   // Get minimum date for booking (today)
   const getMinDate = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0];
+    return today.toISOString().split("T")[0];
   };
 
   const handleSubmit = async (e) => {
@@ -168,26 +241,89 @@ const BookingPage = ({ currentUser, userData }) => {
       return;
     }
 
-    // Check for duplicate bookings
-    const { sameServiceSameDay, sameDateTime } = checkDuplicateBooking(
-      bookingData.serviceId,
-      bookingData.date,
-      bookingData.time
-    );
-
-    if (sameServiceSameDay) {
-      showError("لديك حجز مسبق لنفس الخدمة في هذا اليوم. لا يمكن حجز نفس الخدمة أكثر من مرة في اليوم الواحد.");
-      return;
-    }
-
-    if (sameDateTime) {
-      showError("لديك حجز مسبق في نفس التاريخ والوقت. يرجى اختيار وقت آخر.");
-      return;
-    }
-
     setSubmitting(true);
 
     try {
+      // Handle consultation booking
+      if (selectedCategory === "consultation") {
+        console.log("Submitting consultation with data:", consultationData);
+
+        // Check if user already has a consultation on the same day
+        const hasConsultationSameDay = userConsultations.some(
+          (consult) =>
+            consult.date === consultationData.date &&
+            (consult.status === "في الانتظار" || consult.status === "مؤكد")
+        );
+
+        if (hasConsultationSameDay) {
+          showError(
+            "لديك استشارة مسبقة في نفس اليوم. لا يمكن حجز أكثر من استشارة واحدة في اليوم الواحد."
+          );
+          setSubmitting(false);
+          return;
+        }
+
+        // Validate required fields
+        if (
+          !consultationData.customerInfo.name ||
+          !consultationData.customerInfo.phone ||
+          !consultationData.customerInfo.email ||
+          !consultationData.ageRange ||
+          !consultationData.date ||
+          !consultationData.timeSlot
+        ) {
+          showError("الرجاء ملء جميع الحقول المطلوبة");
+          setSubmitting(false);
+          return;
+        }
+
+        const consultationSubmitData = {
+          customerId: currentUser.uid,
+          customerName: consultationData.customerInfo.name,
+          customerPhone: consultationData.customerInfo.phone,
+          customerEmail: consultationData.customerInfo.email,
+          ageRange: consultationData.ageRange,
+          skinConcerns: consultationData.skinConcerns,
+          date: consultationData.date,
+          timeSlot: consultationData.timeSlot,
+          notes: consultationData.notes,
+          staffId: null, // Will be assigned by admin
+          staffName: null, // Will be assigned by admin
+          status: "في الانتظار",
+        };
+
+        console.log("Creating consultation with:", consultationSubmitData);
+        const result = await createConsultation(consultationSubmitData);
+        console.log("Consultation created successfully:", result);
+        showSuccess(
+          "تم حجز استشارتك بنجاح! سيتم التواصل معك خلال 24 ساعة لتأكيد الموعد."
+        );
+        navigate("/profile");
+        return;
+      }
+
+      // Handle regular appointment booking
+      // Check for duplicate bookings
+      const { sameServiceSameDay, sameDateTime } = checkDuplicateBooking(
+        bookingData.serviceId,
+        bookingData.date,
+        bookingData.time
+      );
+
+      if (sameServiceSameDay) {
+        showError(
+          "لديك حجز مسبق لنفس الخدمة في هذا اليوم. لا يمكن حجز نفس الخدمة أكثر من مرة في اليوم الواحد."
+        );
+        setSubmitting(false);
+        return;
+      }
+
+      if (sameDateTime) {
+        showError("لديك حجز مسبق في نفس التاريخ والوقت. يرجى اختيار وقت آخر.");
+        setSubmitting(false);
+        return;
+      }
+
       // Create appointment without staff assignment (admin will assign later)
       const appointmentData = {
         customerId: currentUser.uid,
@@ -208,11 +344,16 @@ const BookingPage = ({ currentUser, userData }) => {
       };
 
       await createAppointment(appointmentData);
-      showSuccess("تم حجز موعدك بنجاح! سيتم تعيين الأخصائية المناسبة والتواصل معك قريباً لتأكيد الموعد.");
+      showSuccess(
+        "تم حجز موعدك بنجاح! سيتم تعيين الأخصائية المناسبة والتواصل معك قريباً لتأكيد الموعد."
+      );
       navigate("/profile");
     } catch (error) {
-      console.error("Error creating appointment:", error);
-      showError("حدث خطأ أثناء حجز الموعد. يرجى المحاولة مرة أخرى.");
+      console.error("Error creating booking:", error);
+      console.error("Error details:", error.message, error.code);
+      showError(
+        `حدث خطأ أثناء الحجز: ${error.message || "يرجى المحاولة مرة أخرى"}`
+      );
     } finally {
       setSubmitting(false);
     }
@@ -413,13 +554,15 @@ const BookingPage = ({ currentUser, userData }) => {
                         onClick={() => handleServiceSelect(service.id)}
                       >
                         <div className="service-image">
-                          <img 
+                          <img
                             src={
                               service.images && service.images.length > 0
-                                ? (service.images[service.primaryImageIndex || 0]?.url || service.images[service.primaryImageIndex || 0])
-                                : service.image || '/assets/default-service.jpg'
-                            } 
-                            alt={service.name} 
+                                ? service.images[service.primaryImageIndex || 0]
+                                    ?.url ||
+                                  service.images[service.primaryImageIndex || 0]
+                                : service.image || "/assets/default-service.jpg"
+                            }
+                            alt={service.name}
                           />
                         </div>
                         <div className="service-details">
@@ -452,7 +595,7 @@ const BookingPage = ({ currentUser, userData }) => {
                     <strong>الخدمة:</strong> {selectedService?.name}
                   </div>
                   <div className="info-item">
-                    <strong>المدة:</strong> {selectedService?.duration || 60} دقيقة
+                    <strong>المدة:</strong> {selectedService?.duration || 60}
                   </div>
                   <div className="info-item">
                     <strong>السعر:</strong> {selectedService?.price}
@@ -467,7 +610,11 @@ const BookingPage = ({ currentUser, userData }) => {
                       min={getMinDate()}
                       onChange={async (e) => {
                         const selectedDate = e.target.value;
-                        setBookingData({ ...bookingData, date: selectedDate, time: "" });
+                        setBookingData({
+                          ...bookingData,
+                          date: selectedDate,
+                          time: "",
+                        });
                         await loadAvailableTimeSlots(selectedDate);
                       }}
                       className="form-input"
@@ -478,65 +625,83 @@ const BookingPage = ({ currentUser, userData }) => {
                       <h3>اختاري الوقت المتاح</h3>
                       {availableTimeSlots.length === 0 ? (
                         <p className="no-slots-message">
-                          لا توجد أوقات متاحة في هذا التاريخ. يرجى اختيار تاريخ آخر.
+                          لا توجد أوقات متاحة في هذا التاريخ. يرجى اختيار تاريخ
+                          آخر.
                         </p>
                       ) : (
                         <>
                           {/* Check if there are any disabled slots and show warning message */}
                           {(() => {
-                            const disabledSlots = availableTimeSlots.filter((time) => {
-                              const { sameServiceSameDay, sameDateTime } = checkDuplicateBooking(
-                                bookingData.serviceId,
-                                bookingData.date,
-                                time
-                              );
-                              return sameServiceSameDay || sameDateTime;
-                            });
-                            
-                            const hasSameServiceSameDay = disabledSlots.some((time) => {
-                              const { sameServiceSameDay } = checkDuplicateBooking(
-                                bookingData.serviceId,
-                                bookingData.date,
-                                time
-                              );
-                              return sameServiceSameDay;
-                            });
-                            
-                            const hasSameDateTime = disabledSlots.some((time) => {
-                              const { sameDateTime } = checkDuplicateBooking(
-                                bookingData.serviceId,
-                                bookingData.date,
-                                time
-                              );
-                              return sameDateTime;
-                            });
-                            
+                            const disabledSlots = availableTimeSlots.filter(
+                              (time) => {
+                                const { sameServiceSameDay, sameDateTime } =
+                                  checkDuplicateBooking(
+                                    bookingData.serviceId,
+                                    bookingData.date,
+                                    time
+                                  );
+                                return sameServiceSameDay || sameDateTime;
+                              }
+                            );
+
+                            const hasSameServiceSameDay = disabledSlots.some(
+                              (time) => {
+                                const { sameServiceSameDay } =
+                                  checkDuplicateBooking(
+                                    bookingData.serviceId,
+                                    bookingData.date,
+                                    time
+                                  );
+                                return sameServiceSameDay;
+                              }
+                            );
+
+                            const hasSameDateTime = disabledSlots.some(
+                              (time) => {
+                                const { sameDateTime } = checkDuplicateBooking(
+                                  bookingData.serviceId,
+                                  bookingData.date,
+                                  time
+                                );
+                                return sameDateTime;
+                              }
+                            );
+
                             if (disabledSlots.length > 0) {
                               return (
                                 <div className="booking-warning-message">
                                   <i className="fas fa-exclamation-triangle warning-icon"></i>
                                   {hasSameServiceSameDay && (
-                                    <p>لديك حجز مسبق لنفس الخدمة في هذا اليوم. الأوقات المعطلة غير متاحة للحجز.</p>
+                                    <p>
+                                      لديك حجز مسبق لنفس الخدمة في هذا اليوم.
+                                      الأوقات المعطلة غير متاحة للحجز.
+                                    </p>
                                   )}
-                                  {hasSameDateTime && !hasSameServiceSameDay && (
-                                    <p>لديك حجز مسبق في بعض الأوقات. الأوقات المعطلة غير متاحة للحجز.</p>
-                                  )}
+                                  {hasSameDateTime &&
+                                    !hasSameServiceSameDay && (
+                                      <p>
+                                        لديك حجز مسبق في بعض الأوقات. الأوقات
+                                        المعطلة غير متاحة للحجز.
+                                      </p>
+                                    )}
                                 </div>
                               );
                             }
                             return null;
                           })()}
-                          
+
                           <div className="time-slots">
                             {availableTimeSlots.map((time) => {
                               // Check if this time would create a duplicate booking
-                              const { sameServiceSameDay, sameDateTime } = checkDuplicateBooking(
-                                bookingData.serviceId,
-                                bookingData.date,
-                                time
-                              );
-                              const isDisabled = sameServiceSameDay || sameDateTime;
-                              
+                              const { sameServiceSameDay, sameDateTime } =
+                                checkDuplicateBooking(
+                                  bookingData.serviceId,
+                                  bookingData.date,
+                                  time
+                                );
+                              const isDisabled =
+                                sameServiceSameDay || sameDateTime;
+
                               return (
                                 <button
                                   key={time}
@@ -545,7 +710,10 @@ const BookingPage = ({ currentUser, userData }) => {
                                   } ${isDisabled ? "disabled" : ""}`}
                                   onClick={() => {
                                     if (!isDisabled) {
-                                      handleDateTimeSelect(bookingData.date, time);
+                                      handleDateTimeSelect(
+                                        bookingData.date,
+                                        time
+                                      );
                                     }
                                   }}
                                   disabled={isDisabled}
@@ -596,14 +764,19 @@ const BookingPage = ({ currentUser, userData }) => {
                     </div>
                     <div className="summary-item">
                       <span className="label">المدة:</span>
-                      <span className="value">{selectedService?.duration || 60} دقيقة</span>
+                      <span className="value">
+                        {selectedService?.duration || 60}
+                      </span>
                     </div>
                     <div className="summary-item price-item">
                       <span className="label">السعر:</span>
                       <span className="value">{selectedService?.price}</span>
                     </div>
                     <div className="summary-note">
-                      <p><strong>ملاحظة:</strong> سيتم تعيين الأخصائية المناسبة من قبل الإدارة وسيتم إشعارك بالتفاصيل.</p>
+                      <p>
+                        <strong>ملاحظة:</strong> سيتم تعيين الأخصائية المناسبة
+                        من قبل الإدارة وسيتم إشعارك بالتفاصيل.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -730,12 +903,12 @@ const BookingPage = ({ currentUser, userData }) => {
                       <input
                         type="text"
                         className="form-input"
-                        value={bookingData.customerInfo.name}
+                        value={consultationData.customerInfo.name}
                         onChange={(e) =>
-                          setBookingData({
-                            ...bookingData,
+                          setConsultationData({
+                            ...consultationData,
                             customerInfo: {
-                              ...bookingData.customerInfo,
+                              ...consultationData.customerInfo,
                               name: e.target.value,
                             },
                           })
@@ -749,12 +922,12 @@ const BookingPage = ({ currentUser, userData }) => {
                       <input
                         type="tel"
                         className="form-input"
-                        value={bookingData.customerInfo.phone}
+                        value={consultationData.customerInfo.phone}
                         onChange={(e) =>
-                          setBookingData({
-                            ...bookingData,
+                          setConsultationData({
+                            ...consultationData,
                             customerInfo: {
-                              ...bookingData.customerInfo,
+                              ...consultationData.customerInfo,
                               phone: e.target.value,
                             },
                           })
@@ -768,12 +941,12 @@ const BookingPage = ({ currentUser, userData }) => {
                       <input
                         type="email"
                         className="form-input"
-                        value={bookingData.customerInfo.email}
+                        value={consultationData.customerInfo.email}
                         onChange={(e) =>
-                          setBookingData({
-                            ...bookingData,
+                          setConsultationData({
+                            ...consultationData,
                             customerInfo: {
-                              ...bookingData.customerInfo,
+                              ...consultationData.customerInfo,
                               email: e.target.value,
                             },
                           })
@@ -784,7 +957,17 @@ const BookingPage = ({ currentUser, userData }) => {
 
                     <div className="form-group">
                       <label className="form-label">العمر</label>
-                      <select className="form-input" required>
+                      <select
+                        className="form-input"
+                        value={consultationData.ageRange}
+                        onChange={(e) =>
+                          setConsultationData({
+                            ...consultationData,
+                            ageRange: e.target.value,
+                          })
+                        }
+                        required
+                      >
                         <option value="">اختاري الفئة العمرية</option>
                         <option value="18-25">18-25 سنة</option>
                         <option value="26-35">26-35 سنة</option>
@@ -800,22 +983,124 @@ const BookingPage = ({ currentUser, userData }) => {
                     </label>
                     <div className="checkbox-group">
                       <label className="checkbox-item">
-                        <input type="checkbox" /> حب الشباب
+                        <input
+                          type="checkbox"
+                          checked={consultationData.skinConcerns.includes(
+                            "حب الشباب"
+                          )}
+                          onChange={(e) => {
+                            const concern = "حب الشباب";
+                            setConsultationData({
+                              ...consultationData,
+                              skinConcerns: e.target.checked
+                                ? [...consultationData.skinConcerns, concern]
+                                : consultationData.skinConcerns.filter(
+                                    (c) => c !== concern
+                                  ),
+                            });
+                          }}
+                        />{" "}
+                        حب الشباب
                       </label>
                       <label className="checkbox-item">
-                        <input type="checkbox" /> تصبغات البشرة
+                        <input
+                          type="checkbox"
+                          checked={consultationData.skinConcerns.includes(
+                            "تصبغات البشرة"
+                          )}
+                          onChange={(e) => {
+                            const concern = "تصبغات البشرة";
+                            setConsultationData({
+                              ...consultationData,
+                              skinConcerns: e.target.checked
+                                ? [...consultationData.skinConcerns, concern]
+                                : consultationData.skinConcerns.filter(
+                                    (c) => c !== concern
+                                  ),
+                            });
+                          }}
+                        />{" "}
+                        تصبغات البشرة
                       </label>
                       <label className="checkbox-item">
-                        <input type="checkbox" /> شعر زائد
+                        <input
+                          type="checkbox"
+                          checked={consultationData.skinConcerns.includes(
+                            "شعر زائد"
+                          )}
+                          onChange={(e) => {
+                            const concern = "شعر زائد";
+                            setConsultationData({
+                              ...consultationData,
+                              skinConcerns: e.target.checked
+                                ? [...consultationData.skinConcerns, concern]
+                                : consultationData.skinConcerns.filter(
+                                    (c) => c !== concern
+                                  ),
+                            });
+                          }}
+                        />{" "}
+                        شعر زائد
                       </label>
                       <label className="checkbox-item">
-                        <input type="checkbox" /> تجاعيد وخطوط
+                        <input
+                          type="checkbox"
+                          checked={consultationData.skinConcerns.includes(
+                            "تجاعيد وخطوط"
+                          )}
+                          onChange={(e) => {
+                            const concern = "تجاعيد وخطوط";
+                            setConsultationData({
+                              ...consultationData,
+                              skinConcerns: e.target.checked
+                                ? [...consultationData.skinConcerns, concern]
+                                : consultationData.skinConcerns.filter(
+                                    (c) => c !== concern
+                                  ),
+                            });
+                          }}
+                        />{" "}
+                        تجاعيد وخطوط
                       </label>
                       <label className="checkbox-item">
-                        <input type="checkbox" /> ندوب
+                        <input
+                          type="checkbox"
+                          checked={consultationData.skinConcerns.includes(
+                            "ندوب"
+                          )}
+                          onChange={(e) => {
+                            const concern = "ندوب";
+                            setConsultationData({
+                              ...consultationData,
+                              skinConcerns: e.target.checked
+                                ? [...consultationData.skinConcerns, concern]
+                                : consultationData.skinConcerns.filter(
+                                    (c) => c !== concern
+                                  ),
+                            });
+                          }}
+                        />{" "}
+                        ندوب
                       </label>
                       <label className="checkbox-item">
-                        <input type="checkbox" /> جفاف البشرة
+                        <input
+                          type="checkbox"
+                          checked={consultationData.skinConcerns.includes(
+                            "جفاف البشرة"
+                          )}
+                          onChange={(e) => {
+                            const concern = "جفاف البشرة";
+                            setConsultationData({
+                              ...consultationData,
+                              skinConcerns: e.target.checked
+                                ? [...consultationData.skinConcerns, concern]
+                                : consultationData.skinConcerns.filter(
+                                    (c) => c !== concern
+                                  ),
+                            });
+                          }}
+                        />{" "}
+                        جفاف البشرة
                       </label>
                     </div>
                   </div>
@@ -825,10 +1110,13 @@ const BookingPage = ({ currentUser, userData }) => {
                     <input
                       type="date"
                       className="form-input"
-                      value={bookingData.date}
+                      value={consultationData.date}
                       min={getMinDate()}
                       onChange={(e) =>
-                        setBookingData({ ...bookingData, date: e.target.value })
+                        setConsultationData({
+                          ...consultationData,
+                          date: e.target.value,
+                        })
                       }
                       required
                     />
@@ -838,9 +1126,12 @@ const BookingPage = ({ currentUser, userData }) => {
                     <label className="form-label">الوقت المفضل</label>
                     <select
                       className="form-input"
-                      value={bookingData.time}
+                      value={consultationData.timeSlot}
                       onChange={(e) =>
-                        setBookingData({ ...bookingData, time: e.target.value })
+                        setConsultationData({
+                          ...consultationData,
+                          timeSlot: e.target.value,
+                        })
                       }
                       required
                     >
@@ -857,10 +1148,10 @@ const BookingPage = ({ currentUser, userData }) => {
                     <label className="form-label">ملاحظات إضافية</label>
                     <textarea
                       className="form-textarea"
-                      value={bookingData.notes}
+                      value={consultationData.notes}
                       onChange={(e) =>
-                        setBookingData({
-                          ...bookingData,
+                        setConsultationData({
+                          ...consultationData,
                           notes: e.target.value,
                         })
                       }
@@ -903,7 +1194,7 @@ const BookingPage = ({ currentUser, userData }) => {
                   احجزي استشارة مجانية
                 </button>
                 <button
-                  className="btn-secondary"
+                  className="consultation-btn-secondary"
                   onClick={() => navigate("/faq")}
                 >
                   الأسئلة الشائعة
@@ -913,7 +1204,7 @@ const BookingPage = ({ currentUser, userData }) => {
           </div>
         </section>
       )}
-      
+
       <CustomModal
         isOpen={modalState.isOpen}
         type={modalState.type}

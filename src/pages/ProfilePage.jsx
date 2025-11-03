@@ -7,6 +7,10 @@ import {
   updateAppointment,
   checkStaffAvailability,
 } from "../services/appointmentsService";
+import {
+  getConsultationsByCustomer,
+  cancelConsultation,
+} from "../services/consultationsService";
 import { updateUser, getUserById } from "../services/usersService";
 import AppointmentEditModal from "../components/profile/AppointmentEditModal";
 import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
@@ -15,10 +19,18 @@ import { useModal } from "../hooks/useModal";
 
 const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
   const navigate = useNavigate();
-  const { modalState, closeModal, showSuccess, showError, showWarning, showConfirm } = useModal();
+  const {
+    modalState,
+    closeModal,
+    showSuccess,
+    showError,
+    showWarning,
+    showConfirm,
+  } = useModal();
   const [activeTab, setActiveTab] = useState("overview");
   const [editMode, setEditMode] = useState(false);
   const [userAppointments, setUserAppointments] = useState([]);
+  const [userConsultations, setUserConsultations] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [completeUserData, setCompleteUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -81,12 +93,17 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
               : "",
           });
 
-          // Load appointments
-          const appointments = await getAppointmentsByCustomer(currentUser.uid);
+          // Load appointments and consultations
+          const [appointments, consultations] = await Promise.all([
+            getAppointmentsByCustomer(currentUser.uid),
+            getConsultationsByCustomer(currentUser.uid),
+          ]);
           setUserAppointments(appointments);
+          setUserConsultations(consultations);
         } catch (error) {
           console.error("Error loading user data:", error);
           setUserAppointments([]);
+          setUserConsultations([]);
         } finally {
           setLoading(false);
         }
@@ -163,14 +180,14 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
     if (!file) return;
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      showError('يرجى اختيار ملف صورة صالح');
+    if (!file.type.startsWith("image/")) {
+      showError("يرجى اختيار ملف صورة صالح");
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      showError('حجم الصورة كبير جداً. يرجى اختيار صورة أصغر من 5 ميجابايت');
+      showError("حجم الصورة كبير جداً. يرجى اختيار صورة أصغر من 5 ميجابايت");
       return;
     }
 
@@ -180,9 +197,13 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
       // The old avatar will be overwritten by the new upload
 
       // Upload new avatar
-      const avatarImageObject = await uploadSingleImage(file, 'avatars', currentUser.uid);
+      const avatarImageObject = await uploadSingleImage(
+        file,
+        "avatars",
+        currentUser.uid
+      );
       const avatarUrl = avatarImageObject.url;
-      
+
       // Update user data with new avatar
       await updateUser(currentUser.uid, { avatar: avatarUrl });
 
@@ -201,14 +222,14 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
         });
       }
 
-      showSuccess('تم تحديث صورة الملف الشخصي بنجاح');
+      showSuccess("تم تحديث صورة الملف الشخصي بنجاح");
     } catch (error) {
-      console.error('Error uploading avatar:', error);
-      showError('حدث خطأ أثناء رفع الصورة. يرجى المحاولة مرة أخرى');
+      console.error("Error uploading avatar:", error);
+      showError("حدث خطأ أثناء رفع الصورة. يرجى المحاولة مرة أخرى");
     } finally {
       setAvatarUploading(false);
       // Reset file input
-      event.target.value = '';
+      event.target.value = "";
     }
   };
 
@@ -242,6 +263,28 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
         } catch (error) {
           console.error("Error cancelling appointment:", error);
           showError("حدث خطأ أثناء إلغاء الموعد");
+        }
+      }
+    );
+  };
+
+  // Handle consultation cancellation
+  const handleCancelConsultation = async (consultationId) => {
+    showConfirm(
+      "تأكيد الإلغاء",
+      "هل أنت متأكدة من إلغاء هذه الاستشارة؟",
+      async () => {
+        try {
+          await cancelConsultation(consultationId, "إلغاء من قبل العميلة");
+          // Reload consultations
+          const consultations = await getConsultationsByCustomer(
+            currentUser.uid
+          );
+          setUserConsultations(consultations);
+          showSuccess("تم إلغاء الاستشارة بنجاح");
+        } catch (error) {
+          console.error("Error cancelling consultation:", error);
+          showError("حدث خطأ أثناء إلغاء الاستشارة");
         }
       }
     );
@@ -343,18 +386,24 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                       id="avatar-upload"
                       accept="image/*"
                       onChange={handleAvatarUpload}
-                      style={{ display: 'none' }}
+                      style={{ display: "none" }}
                       disabled={avatarUploading}
                     />
-                    <label 
-                      htmlFor="avatar-upload" 
-                      className={`avatar-upload-btn ${avatarUploading ? 'uploading' : ''}`}
+                    <label
+                      htmlFor="avatar-upload"
+                      className={`avatar-upload-btn ${
+                        avatarUploading ? "uploading" : ""
+                      }`}
                       title="تغيير صورة الملف الشخصي"
                     >
                       {avatarUploading ? (
-                        <span className="upload-spinner"><i className="fas fa-spinner fa-spin"></i></span>
+                        <span className="upload-spinner">
+                          <i className="fas fa-spinner fa-spin"></i>
+                        </span>
                       ) : (
-                        <span className="upload-icon"><i className="fas fa-camera"></i></span>
+                        <span className="upload-icon">
+                          <i className="fas fa-camera"></i>
+                        </span>
                       )}
                     </label>
                   </div>
@@ -372,10 +421,10 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                     <span className="stat-number">{totalSpent}</span>
                     <span className="stat-label">شيكل</span>
                   </div>
-                  <div className="stat-item">
+                  {/* <div className="stat-item">
                     <span className="stat-number">{loyaltyPoints}</span>
                     <span className="stat-label">نقطة</span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -442,13 +491,13 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                         <p>جلسات مكتملة</p>
                       </div>
                     </div>
-                    <div className="stat-card">
+                    {/* <div className="stat-card">
                       <i className="stat-icon fas fa-award"></i>
                       <div className="stat-info">
                         <h3>{loyaltyPoints}</h3>
                         <p>نقاط الولاء</p>
                       </div>
-                    </div>
+                    </div> */}
                     <div className="stat-card">
                       <i className="stat-icon fas fa-wallet"></i>
                       <div className="stat-info">
@@ -482,7 +531,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                   )}
 
                   {/* Loyalty Program */}
-                  <div className="loyalty-section">
+                  {/* <div className="loyalty-section">
                     <h3>برنامج الولاء</h3>
                     <div className="loyalty-card">
                       <div className="loyalty-header">
@@ -511,7 +560,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               )}
 
@@ -553,14 +602,15 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                               <span className="label">المدة:</span>
                               <span className="value">
                                 {appointment.serviceDuration ||
-                                  appointment.duration}{" "}
-                                دقيقة
+                                  appointment.duration}
                               </span>
                             </div>
                             <div className="detail-row">
                               <span className="label">السعر:</span>
                               <span className="value">
-                                {formatPrice(appointment.servicePrice || appointment.price)}
+                                {formatPrice(
+                                  appointment.servicePrice || appointment.price
+                                )}
                               </span>
                             </div>
                             {appointment.customerNote && (
@@ -603,6 +653,97 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                       </button>
                     </div>
                   )}
+
+                  {/* Consultations Section */}
+                  <div className="consultations-section">
+                    <h3>استشاراتي</h3>
+                    {userConsultations.filter(
+                      (c) => c.status !== "مكتمل" && c.status !== "ملغي"
+                    ).length > 0 ? (
+                      <div className="appointments-list">
+                        {userConsultations
+                          .filter(
+                            (c) => c.status !== "مكتمل" && c.status !== "ملغي"
+                          )
+                          .map((consultation) => (
+                            <div
+                              key={consultation.id}
+                              className="appointment-card consultation-card"
+                            >
+                              <div className="appointment-header">
+                                <h4>استشارة مجانية</h4>
+                                <span
+                                  className={`status ${
+                                    consultation.status === "مؤكد"
+                                      ? "confirmed"
+                                      : "pending"
+                                  }`}
+                                >
+                                  {consultation.status}
+                                </span>
+                              </div>
+                              <div className="appointment-details">
+                                <div className="detail-row">
+                                  <i className="fas fa-calendar"></i>
+                                  <span>{consultation.date}</span>
+                                </div>
+                                <div className="detail-row">
+                                  <i className="fas fa-clock"></i>
+                                  <span>
+                                    {consultation.timeSlot === "morning" &&
+                                      "الصباح (9:00 - 12:00)"}
+                                    {consultation.timeSlot === "afternoon" &&
+                                      "بعد الظهر (12:00 - 16:00)"}
+                                    {consultation.timeSlot === "evening" &&
+                                      "المساء (16:00 - 20:00)"}
+                                  </span>
+                                </div>
+                                {consultation.staffName && (
+                                  <div className="detail-row">
+                                    <i className="fas fa-user"></i>
+                                    <span>
+                                      الأخصائية: {consultation.staffName}
+                                    </span>
+                                  </div>
+                                )}
+                                {consultation.skinConcerns &&
+                                  consultation.skinConcerns.length > 0 && (
+                                    <div className="detail-row">
+                                      <i className="fas fa-notes-medical"></i>
+                                      <span>
+                                        المشاكل:{" "}
+                                        {consultation.skinConcerns.join("، ")}
+                                      </span>
+                                    </div>
+                                  )}
+                              </div>
+                              <div className="appointment-actions">
+                                {consultation.status === "في الانتظار" && (
+                                  <button
+                                    className="action-btn cancel"
+                                    onClick={() =>
+                                      handleCancelConsultation(consultation.id)
+                                    }
+                                  >
+                                    إلغاء
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      <div className="empty-state-small">
+                        <p>لا توجد استشارات قادمة</p>
+                        <button
+                          className="btn-secondary"
+                          onClick={() => navigate("/book")}
+                        >
+                          احجزي استشارة مجانية
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -819,7 +960,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
         onSubmit={handleAppointmentEditSubmit}
         appointment={editingAppointment}
       />
-      
+
       <CustomModal
         isOpen={modalState.isOpen}
         type={modalState.type}

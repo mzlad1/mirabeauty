@@ -759,14 +759,17 @@
   border-radius: 8px;
 }
 
-.cta-buttons .btn-secondary {
+.cta-buttons .home-btn-secondary {
   border-color: var(--white);
   color: var(--white);
+  background-color: transparent;
+  border: 1px solid var(--white);
   padding: 13px 28px;
   font-size: 1.125rem;
+  border-radius: 0.5rem;
 }
 
-.cta-buttons .btn-secondary:hover {
+.cta-buttons .home-btn-secondary:hover {
   background-color: var(--white);
   color: var(--navy-blue);
 }

@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import "./AdminAppointmentEditModal.css";
+import useModal from "../../hooks/useModal";
+import CustomModal from "../common/CustomModal";
 
-const AdminAppointmentEditModal = ({ 
-  isOpen, 
-  onClose, 
-  onSubmit, 
-  appointment, 
-  staff = [] 
+const AdminAppointmentEditModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  appointment,
+  staff = [],
 }) => {
+  const { modalState, closeModal, showError } = useModal();
   // Helper function to format price display (avoid duplicate currency)
   const formatPrice = (priceString) => {
     if (!priceString) return "0 شيكل";
@@ -66,12 +69,7 @@ const AdminAppointmentEditModal = ({
     "17:30",
   ];
 
-  const statusOptions = [
-    "في الانتظار",
-    "مؤكد",
-    "مكتمل",
-    "ملغي"
-  ];
+  const statusOptions = ["في الانتظار", "مؤكد", "مكتمل", "ملغي"];
 
   const getMinDate = () => {
     const today = new Date();
@@ -84,17 +82,17 @@ const AdminAppointmentEditModal = ({
 
     try {
       // Find selected staff member
-      const selectedStaff = staff.find(s => s.id === formData.staffId);
+      const selectedStaff = staff.find((s) => s.id === formData.staffId);
       const updatedData = {
         ...formData,
-        staffName: selectedStaff ? selectedStaff.name : formData.staffName
+        staffName: selectedStaff ? selectedStaff.name : formData.staffName,
       };
-      
+
       await onSubmit(updatedData);
       onClose();
     } catch (error) {
       console.error("Error submitting appointment edit:", error);
-      alert("حدث خطأ أثناء الحفظ");
+      showError("حدث خطأ أثناء الحفظ");
     } finally {
       setLoading(false);
     }
@@ -110,12 +108,12 @@ const AdminAppointmentEditModal = ({
 
   const handleStaffChange = (e) => {
     const staffId = e.target.value;
-    const selectedStaff = staff.find(s => s.id === staffId);
-    
+    const selectedStaff = staff.find((s) => s.id === staffId);
+
     setFormData((prev) => ({
       ...prev,
       staffId: staffId,
-      staffName: selectedStaff ? selectedStaff.name : ""
+      staffName: selectedStaff ? selectedStaff.name : "",
     }));
   };
 
@@ -123,15 +121,24 @@ const AdminAppointmentEditModal = ({
 
   return (
     <div className="admin-appointment-edit-modal-overlay" onClick={onClose}>
-      <div className="admin-appointment-edit-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="admin-appointment-edit-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="admin-appointment-edit-modal-header">
           <h3>تعديل الموعد وتعيين الأخصائية</h3>
-          <button className="admin-appointment-edit-modal-close" onClick={onClose}>
+          <button
+            className="admin-appointment-edit-modal-close"
+            onClick={onClose}
+          >
             ×
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="admin-appointment-edit-modal-form">
+        <form
+          onSubmit={handleSubmit}
+          className="admin-appointment-edit-modal-form"
+        >
           <div className="admin-appointment-edit-info-section">
             <div className="admin-appointment-edit-info-item">
               <span className="label">العميل:</span>
@@ -143,7 +150,9 @@ const AdminAppointmentEditModal = ({
             </div>
             <div className="admin-appointment-edit-info-item">
               <span className="label">السعر:</span>
-              <span className="value">{formatPrice(appointment?.servicePrice || appointment?.price)}</span>
+              <span className="value">
+                {formatPrice(appointment?.servicePrice || appointment?.price)}
+              </span>
             </div>
           </div>
 
@@ -266,6 +275,18 @@ const AdminAppointmentEditModal = ({
           </div>
         </form>
       </div>
+
+      <CustomModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        onConfirm={modalState.onConfirm || closeModal}
+        title={modalState.title}
+        message={modalState.message}
+        type={modalState.type}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+      />
     </div>
   );
 };

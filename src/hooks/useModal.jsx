@@ -24,7 +24,7 @@ export const useModal = () => {
       message,
       confirmText: "موافق",
       cancelText: "إلغاء",
-      showCancel: true, // Always show cancel button
+      showCancel: false, // Don't show cancel button for alerts
       onConfirm: null,
     });
   };

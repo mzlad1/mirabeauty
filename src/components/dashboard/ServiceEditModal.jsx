@@ -1,15 +1,24 @@
 import React, { useState, useEffect } from "react";
 import "./ServiceEditModal.css";
-import { 
-  uploadMultipleImages, 
-  deleteImage, 
-  setPrimaryImage, 
+import {
+  uploadMultipleImages,
+  deleteImage,
+  setPrimaryImage,
   getPrimaryImage,
-  validateImageFile 
+  validateImageFile,
 } from "../../utils/imageUpload";
 import { getAllServiceCategories } from "../../services/categoriesService";
+import useModal from "../../hooks/useModal";
+import CustomModal from "../common/CustomModal";
 
-const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategories = [] }) => {
+const ServiceEditModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  service,
+  serviceCategories = [],
+}) => {
+  const { modalState, closeModal, showError } = useModal();
   const [formData, setFormData] = useState({
     name: service?.name || "",
     description: service?.description || "",
@@ -86,12 +95,14 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategorie
 
   const handleCategoryChange = (e) => {
     const selectedCategoryId = e.target.value;
-    const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
-    
-    setFormData(prev => ({
+    const selectedCategory = categories.find(
+      (cat) => cat.id === selectedCategoryId
+    );
+
+    setFormData((prev) => ({
       ...prev,
       category: selectedCategoryId,
-      categoryName: selectedCategory ? selectedCategory.name : ""
+      categoryName: selectedCategory ? selectedCategory.name : "",
     }));
   };
 
@@ -107,7 +118,7 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategorie
         setUploadingImages(true);
         const uploadedImages = await uploadMultipleImages(
           selectedFiles,
-          `services/${service?.id || 'new'}`
+          `services/${service?.id || "new"}`
         );
         finalFormData.images = [...finalFormData.images, ...uploadedImages];
         setUploadingImages(false);
@@ -115,7 +126,7 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategorie
 
       // Ensure we have at least one image for new services
       if (!service && finalFormData.images.length === 0) {
-        alert("يجب إضافة صورة واحدة على الأقل");
+        showError("يجب إضافة صورة واحدة على الأقل");
         return;
       }
 
@@ -124,7 +135,7 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategorie
       setSelectedFiles([]);
     } catch (error) {
       console.error("Error submitting service edit:", error);
-      alert("حدث خطأ أثناء الحفظ");
+      showError("حدث خطأ أثناء الحفظ");
     } finally {
       setLoading(false);
       setUploadingImages(false);
@@ -139,15 +150,15 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategorie
       if (validateImageFile(file)) {
         validFiles.push(file);
       } else {
-        alert(`الملف ${file.name} غير صالح. يجب أن يكون صورة أقل من 5MB`);
+        showError(`الملف ${file.name} غير صالح. يجب أن يكون صورة أقل من 5MB`);
       }
     }
 
-    setSelectedFiles(prev => [...prev, ...validFiles]);
+    setSelectedFiles((prev) => [...prev, ...validFiles]);
   };
 
   const removeSelectedFile = (index) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const removeExistingImage = async (index) => {
@@ -156,7 +167,7 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategorie
       await deleteImage(imageToRemove.url);
       const newImages = formData.images.filter((_, i) => i !== index);
       let newPrimaryIndex = formData.primaryImageIndex;
-      
+
       // Adjust primary index if needed
       if (index === formData.primaryImageIndex) {
         newPrimaryIndex = 0;
@@ -164,21 +175,21 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategorie
         newPrimaryIndex = formData.primaryImageIndex - 1;
       }
 
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         images: newImages,
-        primaryImageIndex: newPrimaryIndex
+        primaryImageIndex: newPrimaryIndex,
       }));
     } catch (error) {
       console.error("Error removing image:", error);
-      alert("حدث خطأ أثناء حذف الصورة");
+      showError("حدث خطأ أثناء حذف الصورة");
     }
   };
 
   const setPrimaryImageIndex = (index) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      primaryImageIndex: index
+      primaryImageIndex: index,
     }));
   };
 
@@ -301,7 +312,7 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategorie
           <div className="service-edit-form-row">
             <div className="service-edit-form-group">
               <label>الصور *</label>
-              
+
               {/* File Upload */}
               <div className="image-upload-section">
                 <input
@@ -311,14 +322,20 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategorie
                   accept="image/*"
                   onChange={handleFileSelect}
                   className="image-upload-input"
-                  style={{ display: 'none' }}
+                  style={{ display: "none" }}
                 />
                 <label htmlFor="imageUpload" className="image-upload-button">
                   <span>اختر صور</span>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7,10 12,15 17,10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7,10 12,15 17,10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
                 </label>
               </div>
@@ -330,8 +347,8 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategorie
                   <div className="files-grid">
                     {selectedFiles.map((file, index) => (
                       <div key={index} className="file-preview-item">
-                        <img 
-                          src={URL.createObjectURL(file)} 
+                        <img
+                          src={URL.createObjectURL(file)}
                           alt={file.name}
                           className="file-preview-image"
                         />
@@ -358,8 +375,8 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategorie
                   <div className="images-grid">
                     {formData.images.map((image, index) => (
                       <div key={index} className="image-item">
-                        <img 
-                          src={image.url} 
+                        <img
+                          src={image.url}
                           alt={`صورة ${index + 1}`}
                           className="existing-image"
                         />
@@ -367,9 +384,15 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategorie
                           <button
                             type="button"
                             onClick={() => setPrimaryImageIndex(index)}
-                            className={`primary-btn ${index === formData.primaryImageIndex ? 'active' : ''}`}
+                            className={`primary-btn ${
+                              index === formData.primaryImageIndex
+                                ? "active"
+                                : ""
+                            }`}
                           >
-                            {index === formData.primaryImageIndex ? 'صورة رئيسية' : 'جعل رئيسية'}
+                            {index === formData.primaryImageIndex
+                              ? "صورة رئيسية"
+                              : "جعل رئيسية"}
                           </button>
                           <button
                             type="button"
@@ -440,6 +463,18 @@ const ServiceEditModal = ({ isOpen, onClose, onSubmit, service, serviceCategorie
           </div>
         </form>
       </div>
+
+      <CustomModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        onConfirm={modalState.onConfirm || closeModal}
+        title={modalState.title}
+        message={modalState.message}
+        type={modalState.type}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+      />
     </div>
   );
 };
