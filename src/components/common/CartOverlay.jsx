@@ -88,7 +88,7 @@ const CartOverlay = ({ isOpen, onClose, fromAddToCart = false }) => {
 
   const handleCheckout = () => {
     onClose();
-    navigate("/booking");
+    navigate("/cart");
   };
 
   if (!isOpen) return null;

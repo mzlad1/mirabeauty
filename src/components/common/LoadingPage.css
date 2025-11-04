@@ -58,20 +58,8 @@
 }
 
 .progress-fill {
-  width: 0%;
   height: 100%;
   background: var(--gold);
-  animation: loading 2.2s infinite ease-in-out;
-}
-
-@keyframes loading {
-  0% {
-    width: 0%;
-  }
-  50% {
-    width: 90%;
-  }
-  100% {
-    width: 0%;
-  }
+  box-shadow: 0 0 10px var(--gold);
+  border-radius: 10px;
 }

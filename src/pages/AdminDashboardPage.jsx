@@ -2513,7 +2513,10 @@ const AdminDashboardPage = ({ currentUser }) => {
                       ) : (
                         <div className="categories-grid">
                           {productCategories.map((category) => (
-                            <div key={category.id} className="category-card">
+                            <div
+                              key={category.id}
+                              className="admin-category-card"
+                            >
                               <div className="category-header">
                                 <h4>{category.name}</h4>
                                 <div className="category-actions">
@@ -2551,7 +2554,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                                   تم الإنشاء:{" "}
                                   {formatFirestoreDate(
                                     category.createdAt,
-                                    "ar-EG"
+                                    "en-US"
                                   )}
                                 </span>
                               </div>
@@ -2592,7 +2595,10 @@ const AdminDashboardPage = ({ currentUser }) => {
                       ) : (
                         <div className="categories-grid">
                           {serviceCategories.map((category) => (
-                            <div key={category.id} className="category-card">
+                            <div
+                              key={category.id}
+                              className="admin-category-card"
+                            >
                               <div className="category-header">
                                 <h4>{category.name}</h4>
                                 <div className="category-actions">
@@ -2630,7 +2636,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                                   تم الإنشاء:{" "}
                                   {formatFirestoreDate(
                                     category.createdAt,
-                                    "ar-EG"
+                                    "en-US"
                                   )}
                                 </span>
                               </div>

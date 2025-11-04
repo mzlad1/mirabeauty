@@ -1,11 +1,11 @@
 import React from "react";
 import "./AppointmentDetailsModal.css";
 
-const AppointmentDetailsModal = ({ 
-  isOpen, 
-  onClose, 
+const AppointmentDetailsModal = ({
+  isOpen,
+  onClose,
   appointment,
-  userRole = "staff" // "staff" or "admin"
+  userRole = "staff", // "staff" or "admin"
 }) => {
   if (!isOpen || !appointment) return null;
 
@@ -42,11 +42,14 @@ const AppointmentDetailsModal = ({
 
   return (
     <div className="appointment-details-modal-overlay" onClick={handleClose}>
-      <div className="appointment-details-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="appointment-details-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="appointment-details-modal-header">
           <h3>تفاصيل الموعد</h3>
-          <button 
-            className="appointment-details-modal-close" 
+          <button
+            className="appointment-details-modal-close"
             onClick={handleClose}
           >
             ×
@@ -91,7 +94,11 @@ const AppointmentDetailsModal = ({
 
             <div className="detail-item">
               <span className="detail-label">الحالة:</span>
-              <span className={`detail-value status ${getStatusColor(appointment.status)}`}>
+              <span
+                className={`detail-value status ${getStatusColor(
+                  appointment.status
+                )}`}
+              >
                 {appointment.status}
               </span>
             </div>
@@ -106,7 +113,16 @@ const AppointmentDetailsModal = ({
             {appointment.customerPhone && (
               <div className="detail-item">
                 <span className="detail-label">رقم الهاتف:</span>
-                <span className="detail-value">{appointment.customerPhone}</span>
+                <span className="detail-value">
+                  {appointment.customerPhone}
+                </span>
+              </div>
+            )}
+
+            {appointment.notes && (
+              <div className="detail-item full-width">
+                <span className="detail-label">ملاحظات:</span>
+                <span className="detail-value">{appointment.notes}</span>
               </div>
             )}
           </div>
@@ -115,7 +131,7 @@ const AppointmentDetailsModal = ({
           <div className="appointment-notes-section">
             {appointment.customerNote && (
               <div className="note-item customer-note">
-                <h4>ملاحظات العميل:</h4>
+                <h4>ملاحظات للعميل:</h4>
                 <p>{appointment.customerNote}</p>
               </div>
             )}

@@ -140,6 +140,17 @@ const Navigation = ({ currentUser, userData }) => {
                     لوحة التحكم
                   </button>
                 )}
+                {userData?.role === "admin" && (
+                  <button
+                    className="dropdown-item"
+                    onClick={() => handleNavigation("/admin/orders")}
+                  >
+                    <span className="dropdown-icon">
+                      <i className="fas fa-shopping-bag"></i>
+                    </span>
+                    إدارة الطلبات
+                  </button>
+                )}
                 <button className="dropdown-item logout" onClick={handleLogout}>
                   <span className="dropdown-icon">
                     <i className="fas fa-sign-out-alt"></i>

@@ -3,13 +3,36 @@ import { useNavigate } from "react-router-dom";
 import "./CartPage.css";
 import CustomModal from "../components/common/CustomModal";
 import { useModal } from "../hooks/useModal";
+import { useAuth } from "../hooks/useAuth";
+import { createOrder, DELIVERY_AREAS } from "../services/ordersService";
 
 const CartPage = () => {
   const navigate = useNavigate();
-  const { modalState, closeModal, showSuccess, showError, showWarning, showConfirm } = useModal();
+  const {
+    modalState,
+    closeModal,
+    showSuccess,
+    showError,
+    showWarning,
+    showConfirm,
+  } = useModal();
+  const { currentUser, userData } = useAuth();
   const [cartItems, setCartItems] = useState([]);
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
+
+  // Delivery and user info states
+  const [selectedDeliveryArea, setSelectedDeliveryArea] = useState("");
+  const [deliveryPrice, setDeliveryPrice] = useState(0);
+  const [userInfo, setUserInfo] = useState({
+    name: "",
+    phone: "",
+    address: "",
+    note: "",
+  });
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const [showUserInfoModal, setShowUserInfoModal] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
     // Get cart items from localStorage
@@ -18,6 +41,29 @@ const CartPage = () => {
       setCartItems(JSON.parse(savedCart));
     }
   }, []);
+
+  // Pre-fill user info if logged in
+  useEffect(() => {
+    if (currentUser && userData) {
+      setUserInfo((prev) => ({
+        ...prev,
+        name: userData.name || "",
+        phone: userData.phone || "",
+      }));
+    }
+  }, [currentUser, userData]);
+
+  // Update delivery price when area changes
+  useEffect(() => {
+    if (selectedDeliveryArea) {
+      const area = Object.values(DELIVERY_AREAS).find(
+        (area) => area.name === selectedDeliveryArea
+      );
+      setDeliveryPrice(area ? area.price : 0);
+    } else {
+      setDeliveryPrice(0);
+    }
+  }, [selectedDeliveryArea]);
 
   const updateQuantity = (id, newQuantity) => {
     if (newQuantity <= 0) {
@@ -64,16 +110,92 @@ const CartPage = () => {
     0
   );
   const discountAmount = subtotal * discount;
-  const shipping = subtotal > 200 ? 0 : 25;
-  const total = subtotal - discountAmount + shipping;
+  const total = subtotal - discountAmount + deliveryPrice;
 
-  const handleCheckout = () => {
+  const handleCheckoutClick = () => {
     if (cartItems.length === 0) {
       showWarning("السلة فارغة");
       return;
     }
-    // Navigate to checkout or booking page
-    navigate("/book");
+
+    if (!selectedDeliveryArea) {
+      showWarning("يرجى اختيار منطقة التوصيل");
+      return;
+    }
+
+    setShowUserInfoModal(true);
+  };
+
+  const handleCheckout = async () => {
+    if (
+      !userInfo.name.trim() ||
+      !userInfo.phone.trim() ||
+      !userInfo.address.trim()
+    ) {
+      showWarning("يرجى ملء جميع الحقول المطلوبة");
+      return;
+    }
+
+    setIsSubmittingOrder(true);
+
+    try {
+      const orderData = {
+        items: cartItems,
+        subtotal,
+        discount,
+        discountAmount,
+        deliveryArea: selectedDeliveryArea,
+        deliveryPrice,
+        total,
+        promoCode: promoCode || null,
+        customerInfo: {
+          name: userInfo.name.trim(),
+          phone: userInfo.phone.trim(),
+          address: userInfo.address.trim(),
+          note: userInfo.note.trim(),
+        },
+        userId: currentUser?.uid || null,
+        isSignedIn: !!currentUser,
+        userEmail: currentUser?.email || null,
+      };
+
+      await createOrder(orderData);
+
+      // Close the user info modal first
+      setShowUserInfoModal(false);
+
+      // Show success alert BEFORE clearing cart
+      showSuccess("تم إرسال طلبك بنجاح! سيتم التواصل معك قريباً");
+
+      // Clear cart and navigate after delay to allow modal to show
+      setTimeout(() => {
+        // Clear cart
+        setCartItems([]);
+        localStorage.removeItem("cartItems");
+        window.dispatchEvent(new CustomEvent("cartUpdated"));
+
+        // Reset form
+        setSelectedDeliveryArea("");
+        setUserInfo({ name: "", phone: "", address: "", note: "" });
+        setPromoCode("");
+        setDiscount(0);
+
+        // Navigate to home
+        navigate("/");
+      }, 2500);
+    } catch (error) {
+      console.error("Error submitting order:", error);
+      showError("حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى");
+    } finally {
+      setIsSubmittingOrder(false);
+    }
+  };
+
+  const handleUserInfoChange = (field, value) => {
+    setUserInfo((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   if (cartItems.length === 0) {
@@ -176,6 +298,30 @@ const CartPage = () => {
             <div className="cart-summary">
               <h3>ملخص الطلب</h3>
 
+              {/* Delivery Options */}
+              <div className="delivery-section">
+                <h4>اختر منطقة التوصيل</h4>
+                <div className="delivery-options">
+                  {Object.entries(DELIVERY_AREAS).map(([key, area]) => (
+                    <label key={key} className="delivery-option">
+                      <input
+                        type="radio"
+                        name="deliveryArea"
+                        value={area.name}
+                        checked={selectedDeliveryArea === area.name}
+                        onChange={(e) =>
+                          setSelectedDeliveryArea(e.target.value)
+                        }
+                      />
+                      <span className="delivery-info">
+                        <span className="area-name">{area.name}</span>
+                        <span className="area-price">{area.price} شيكل</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               <div className="summary-row">
                 <span>المجموع الفرعي</span>
                 <span>{subtotal.toFixed(2)} شيكل</span>
@@ -188,10 +334,12 @@ const CartPage = () => {
                 </div>
               )}
 
-              <div className="summary-row">
-                <span>الشحن</span>
-                <span>{shipping === 0 ? "مجاني" : `${shipping} شيكل`}</span>
-              </div>
+              {selectedDeliveryArea && (
+                <div className="summary-row">
+                  <span>التوصيل ({selectedDeliveryArea})</span>
+                  <span>{deliveryPrice} شيكل</span>
+                </div>
+              )}
 
               <div className="summary-row total">
                 <span>المجموع الكلي</span>
@@ -208,21 +356,113 @@ const CartPage = () => {
                 <button onClick={applyPromoCode}>تطبيق</button>
               </div>
 
-              <button className="checkout-btn" onClick={handleCheckout}>
+              <button
+                className="checkout-btn"
+                onClick={handleCheckoutClick}
+                disabled={isSubmittingOrder}
+              >
                 إتمام الطلب
               </button>
 
-              <div className="shipping-info">
+              <div className="order-info">
                 <p>
-                  <i className="fas fa-truck"></i>
-                  شحن مجاني للطلبات أكثر من 200 شيكل
+                  <i className="fas fa-info-circle"></i>
+                  سيتم مراجعة طلبك وتأكيده من قبل الإدارة
                 </p>
               </div>
             </div>
           </div>
         </div>
       </section>
-      
+
+      {/* User Info Modal */}
+      {showUserInfoModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowUserInfoModal(false)}
+        >
+          <div className="user-info-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>معلومات التوصيل</h3>
+              <button
+                className="close-btn"
+                onClick={() => setShowUserInfoModal(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="user-info-form">
+                <input
+                  type="text"
+                  placeholder="الاسم الكامل *"
+                  value={userInfo.name}
+                  onChange={(e) => handleUserInfoChange("name", e.target.value)}
+                  required
+                />
+                <input
+                  type="tel"
+                  placeholder="رقم الهاتف *"
+                  value={userInfo.phone}
+                  onChange={(e) =>
+                    handleUserInfoChange("phone", e.target.value)
+                  }
+                  required
+                />
+                <textarea
+                  placeholder="العنوان التفصيلي *"
+                  value={userInfo.address}
+                  onChange={(e) =>
+                    handleUserInfoChange("address", e.target.value)
+                  }
+                  rows="3"
+                  required
+                />
+                <textarea
+                  placeholder="ملاحظات إضافية (اختياري)"
+                  value={userInfo.note}
+                  onChange={(e) => handleUserInfoChange("note", e.target.value)}
+                  rows="2"
+                />
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                className="cancel-btn"
+                onClick={() => setShowUserInfoModal(false)}
+              >
+                إلغاء
+              </button>
+              <button
+                className="submit-btn"
+                onClick={handleCheckout}
+                disabled={isSubmittingOrder}
+              >
+                {isSubmittingOrder ? "جاري الإرسال..." : "تأكيد الطلب"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Message */}
+      {showSuccessMessage && (
+        <div className="success-message-overlay">
+          <div className="success-message">
+            <div className="success-icon">
+              <i className="fas fa-check-circle"></i>
+            </div>
+            <h3>تم إرسال طلبك بنجاح!</h3>
+            <p>سنقوم بالتواصل معك قريباً لتأكيد الطلب</p>
+            <div className="success-loading">
+              <div className="loading-bar"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <CustomModal
         isOpen={modalState.isOpen}
         type={modalState.type}

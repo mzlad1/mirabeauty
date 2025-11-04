@@ -29,8 +29,23 @@ export const useModal = () => {
     });
   };
 
-  const showSuccess = (message, title = "نجح العملية") => {
-    showAlert(message, "success", title);
+  const showSuccess = (message, onConfirmOrTitle = "نجح العملية", title = null) => {
+    // If second parameter is a function, it's a callback
+    if (typeof onConfirmOrTitle === 'function') {
+      setModalState({
+        isOpen: true,
+        type: "success",
+        title: title || "نجح العملية",
+        message,
+        confirmText: "موافق",
+        cancelText: "إلغاء",
+        showCancel: false,
+        onConfirm: onConfirmOrTitle,
+      });
+    } else {
+      // If second parameter is a string, it's the title
+      showAlert(message, "success", onConfirmOrTitle);
+    }
   };
 
   const showError = (message, title = "خطأ") => {

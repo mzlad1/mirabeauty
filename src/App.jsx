@@ -18,8 +18,10 @@ import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminOrdersPage from "./pages/AdminOrdersPage";
 import StaffDashboardPage from "./pages/StaffDashboardPage";
 import CartPage from "./pages/CartPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 // Import Components
 import Navigation from "./components/common/Navigation";
@@ -35,7 +37,7 @@ import LoadingPage from "./components/common/LoadingPage";
 // Main App Content Component
 const AppContent = () => {
   const { currentUser, userData, loading } = useAuth();
-  const { isLoading } = useLoading();
+  const { isLoading, progress } = useLoading();
 
   // Show loading spinner while checking authentication
   if (loading) {
@@ -75,6 +77,19 @@ const AppContent = () => {
     }
   };
 
+  // Protected route component for admin orders
+  const ProtectedAdminOrders = () => {
+    if (!currentUser || !userData) {
+      return <Navigate to="/login" replace />;
+    }
+
+    if (userData.role === "admin") {
+      return <AdminOrdersPage />;
+    } else {
+      return <Navigate to="/" replace />;
+    }
+  };
+
   // Protected route component for profile
   const ProtectedProfile = () => {
     if (!currentUser || !userData) {
@@ -87,8 +102,8 @@ const AppContent = () => {
     <Router>
       <div className="App" dir="rtl">
         {/* Show loading page when isLoading is true */}
-        {isLoading && <LoadingPage />}
-        
+        {isLoading && <LoadingPage progress={progress} />}
+
         <Navigation currentUser={currentUser} userData={userData} />
         <main className="main-content">
           <Routes>
@@ -108,6 +123,9 @@ const AppContent = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/dashboard" element={<ProtectedDashboard />} />
+            <Route path="/admin/orders" element={<ProtectedAdminOrders />} />
+            {/* Catch-all route for 404 Not Found */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
         <Footer />

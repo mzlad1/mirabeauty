@@ -12,6 +12,7 @@ import {
   cancelConsultation,
 } from "../services/consultationsService";
 import { updateUser, getUserById } from "../services/usersService";
+import { getUserOrders, ORDER_STATUS_DISPLAY } from "../services/ordersService";
 import AppointmentEditModal from "../components/profile/AppointmentEditModal";
 import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
 import CustomModal from "../components/common/CustomModal";
@@ -31,6 +32,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
   const [editMode, setEditMode] = useState(false);
   const [userAppointments, setUserAppointments] = useState([]);
   const [userConsultations, setUserConsultations] = useState([]);
+  const [userOrders, setUserOrders] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [completeUserData, setCompleteUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -93,17 +95,20 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
               : "",
           });
 
-          // Load appointments and consultations
-          const [appointments, consultations] = await Promise.all([
+          // Load appointments, consultations, and orders
+          const [appointments, consultations, orders] = await Promise.all([
             getAppointmentsByCustomer(currentUser.uid),
             getConsultationsByCustomer(currentUser.uid),
+            getUserOrders(currentUser.uid),
           ]);
           setUserAppointments(appointments);
           setUserConsultations(consultations);
+          setUserOrders(orders);
         } catch (error) {
           console.error("Error loading user data:", error);
           setUserAppointments([]);
           setUserConsultations([]);
+          setUserOrders([]);
         } finally {
           setLoading(false);
         }
@@ -458,6 +463,15 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                 </button>
                 <button
                   className={`nav-item ${
+                    activeTab === "orders" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("orders")}
+                >
+                  <i className="nav-icon fas fa-shopping-bag"></i>
+                  طلباتي
+                </button>
+                <button
+                  className={`nav-item ${
                     activeTab === "settings" ? "active" : ""
                   }`}
                   onClick={() => setActiveTab("settings")}
@@ -801,6 +815,93 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                     <div className="empty-state">
                       <h3>لا يوجد تاريخ علاجات بعد</h3>
                       <p>احجزي أول جلسة لك لبناء تاريخ علاجاتك</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Orders Tab */}
+              {activeTab === "orders" && (
+                <div className="tab-content">
+                  <h2>طلباتي</h2>
+
+                  {userOrders.length === 0 ? (
+                    <div className="empty-state">
+                      <i className="fas fa-shopping-bag empty-icon"></i>
+                      <p>لا توجد طلبات حتى الآن</p>
+                    </div>
+                  ) : (
+                    <div className="orders-list">
+                      {userOrders.map((order) => (
+                        <div key={order.id} className="order-card">
+                          <div className="order-header">
+                            <div className="order-info">
+                              <h3>طلب رقم: {order.orderNumber}</h3>
+                              <p className="order-date">
+                                {new Date(
+                                  order.createdAt.toDate()
+                                ).toLocaleDateString("en-US")}
+                              </p>
+                            </div>
+                            <div className={`order-status ${order.status}`}>
+                              {ORDER_STATUS_DISPLAY[order.status] ||
+                                order.status}
+                            </div>
+                          </div>
+
+                          <div className="order-details">
+                            <div className="delivery-info">
+                              <p>
+                                <strong>منطقة التوصيل:</strong>{" "}
+                                {order.deliveryArea}
+                              </p>
+                              <p>
+                                <strong>العنوان:</strong>{" "}
+                                {order.customerInfo.address}
+                              </p>
+                              <p>
+                                <strong>الهاتف:</strong>{" "}
+                                {order.customerInfo.phone}
+                              </p>
+                            </div>
+
+                            <div className="order-items">
+                              <h4>المنتجات:</h4>
+                              {order.items.map((item, index) => (
+                                <div key={index} className="order-item">
+                                  <span>{item.name}</span>
+                                  <span>الكمية: {item.quantity}</span>
+                                  <span>{item.price} ₪</span>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="order-total">
+                              <div className="total-row">
+                                <span>المجموع الفرعي:</span>
+                                <span>{order.subtotal} ₪</span>
+                              </div>
+                              <div className="total-row">
+                                <span>التوصيل:</span>
+                                <span>{order.deliveryPrice} ₪</span>
+                              </div>
+                              <div className="total-row final-total">
+                                <span>المجموع الكلي:</span>
+                                <span>{order.total} ₪</span>
+                              </div>
+                            </div>
+
+                            {order.customerInfo.note && (
+                              <div className="order-note">
+                                <p>
+                                  <strong>ملاحظة:</strong>{" "}
+                                  {order.customerInfo.note}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

@@ -20,7 +20,7 @@ const ProductsPage = ({ setCurrentPage }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([
-    { id: "all", name: "جميع المنتجات" }
+    { id: "all", name: "جميع المنتجات" },
   ]);
 
   useEffect(() => {
@@ -82,7 +82,7 @@ const ProductsPage = ({ setCurrentPage }) => {
       const categoriesData = await getAllProductCategories();
       const allCategories = [
         { id: "all", name: "جميع المنتجات" },
-        ...categoriesData
+        ...categoriesData,
       ];
       setCategories(allCategories);
     } catch (error) {
@@ -273,15 +273,18 @@ const ProductsPage = ({ setCurrentPage }) => {
                       style={{ cursor: "pointer" }}
                     >
                       <div className="product-image">
-                        <img 
+                        <img
                           src={
                             product.images && product.images.length > 0
-                              ? product.primaryImageIndex !== undefined && product.images[product.primaryImageIndex]
-                                ? (product.images[product.primaryImageIndex]?.url || product.images[product.primaryImageIndex])
-                                : (product.images[0]?.url || product.images[0])
+                              ? product.primaryImageIndex !== undefined &&
+                                product.images[product.primaryImageIndex]
+                                ? product.images[product.primaryImageIndex]
+                                    ?.url ||
+                                  product.images[product.primaryImageIndex]
+                                : product.images[0]?.url || product.images[0]
                               : product.image || "/images/placeholder.jpg"
-                          } 
-                          alt={product.name} 
+                          }
+                          alt={product.name}
                         />
                         {product.originalPrice && (
                           <div className="discount-badge">
@@ -310,14 +313,10 @@ const ProductsPage = ({ setCurrentPage }) => {
                             }}
                             title="إضافة إلى السلة"
                           >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                            >
-                              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6m-8 0V9a2 2 0 012-2h4a2 2 0 012 2v4" />
-                            </svg>
+                            <i
+                              className="fas fa-shopping-cart"
+                              style={{ color: "white" }}
+                            ></i>
                           </button>
                         )}
                       </div>

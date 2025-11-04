@@ -190,8 +190,20 @@ const BookingPage = ({ currentUser, userData }) => {
       const dateAppointments = await getAppointmentsByDate(selectedDate);
 
       // Get booked time slots
+      // 1. Confirmed appointments block for everyone
+      // 2. User's own pending appointments block for them only
       const bookedTimes = dateAppointments
-        .filter((apt) => apt.status === "في الانتظار" || apt.status === "مؤكد")
+        .filter((apt) => {
+          // Block confirmed appointments for everyone
+          if (apt.status === "مؤكد") return true;
+          // Block user's own pending appointments
+          if (
+            apt.status === "في الانتظار" &&
+            apt.customerId === currentUser?.uid
+          )
+            return true;
+          return false;
+        })
         .map((apt) => apt.time);
 
       // Filter available time slots
