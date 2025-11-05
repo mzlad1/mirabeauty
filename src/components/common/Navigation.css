@@ -390,11 +390,11 @@
 
   .nav-actions {
     position: fixed;
+    min-width: 15rem;
     bottom: 2rem;
     right: 2rem;
     background-color: var(--white);
     padding: 1rem;
-    border-top: 2px solid var(--border-color);
     z-index: 1001;
     transform: translateX(100%);
     transition: transform 0.3s ease;
@@ -406,7 +406,6 @@
     transform: translateX(0);
     opacity: 1;
     visibility: visible;
-    width: 90%;
   }
 
   .auth-buttons {
@@ -439,6 +438,8 @@
 
   .dropdown-item {
     padding: 16px 20px;
+    display: flex;
+    justify-content: center;
   }
 }
 
@@ -450,6 +451,11 @@
   .nav-menu {
     width: 100%;
     right: -100%;
+  }
+  .nav-actions {
+    width: 95%;
+    right: 1rem;
+    left: 1rem;
   }
 
   .logo-text h2 {
