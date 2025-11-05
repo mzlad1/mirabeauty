@@ -490,11 +490,6 @@
     font-size: 1.75rem;
   }
 
-  .service-icon img {
-    width: 35px;
-    height: 35px;
-  }
-
   .service-icon i {
     font-size: 1.75rem;
   }
@@ -521,10 +516,6 @@
 .why-choose-us {
   background-color: var(--navy-blue);
   color: var(--white);
-}
-
-.features-grid {
-  display: none;
 }
 
 .feature-card {
@@ -793,9 +784,8 @@
   }
 
   .services-grid,
-  .features-grid,
   .testimonials-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   }
   /* Why Choose Us responsive (tablet) */
   .why-grid {
@@ -1009,7 +999,6 @@
   }
 
   .services-grid,
-  .features-grid,
   .testimonials-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
