@@ -348,7 +348,7 @@
   .nav-menu {
     position: fixed;
     top: 80px;
-    right: -100%;
+    right: 0;
     width: 300px;
     height: calc(100vh - 80px);
     background-color: var(--white);
@@ -356,14 +356,16 @@
     flex-direction: column;
     padding: 2rem 0;
     gap: 0;
-    transition: right 0.3s ease;
+    /* Use transform for smoother, GPU-accelerated animation and to match nav-actions */
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
     z-index: 1000;
     overflow-y: auto;
     box-shadow: -4px 0 10px rgba(0, 0, 0, 0.1);
   }
 
   .nav-menu.active {
-    right: 0;
+    transform: translateX(0);
   }
 
   .nav-menu li {
@@ -450,7 +452,7 @@
 
   .nav-menu {
     width: 100%;
-    right: -100%;
+      right: 0;
   }
   .nav-actions {
     width: 95%;
