@@ -376,6 +376,8 @@
     text-align: right;
     border-bottom: 1px solid var(--border-color);
     background: none;
+    display: flex;
+    justify-content: center;
   }
 
   .nav-link.active::after {
