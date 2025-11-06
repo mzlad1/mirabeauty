@@ -125,6 +125,19 @@ const BookingPage = ({ currentUser, userData }) => {
           getAllServices(),
           getUsersByRole("staff"),
         ]);
+
+        // Debug: Log services data
+        console.log("BookingPage - All services loaded:", servicesData);
+        console.log(
+          "BookingPage - Service categories:",
+          servicesData.map((s) => ({
+            name: s.name,
+            category: s.category,
+            categoryId: s.categoryId,
+            categoryName: s.categoryName,
+          }))
+        );
+
         setServices(servicesData);
         setStaffMembers(staffData);
 
@@ -310,7 +323,10 @@ const BookingPage = ({ currentUser, userData }) => {
         showSuccess(
           "تم حجز استشارتك بنجاح! سيتم التواصل معك خلال 24 ساعة لتأكيد الموعد."
         );
-        navigate("/profile");
+        // Wait for user to see the success message before redirecting
+        setTimeout(() => {
+          navigate("/profile");
+        }, 2500);
         return;
       }
 
@@ -359,7 +375,10 @@ const BookingPage = ({ currentUser, userData }) => {
       showSuccess(
         "تم حجز موعدك بنجاح! سيتم تعيين الأخصائية المناسبة والتواصل معك قريباً لتأكيد الموعد."
       );
-      navigate("/profile");
+      // Wait for user to see the success message before redirecting
+      setTimeout(() => {
+        navigate("/profile");
+      }, 2500);
     } catch (error) {
       console.error("Error creating booking:", error);
       console.error("Error details:", error.message, error.code);
@@ -464,7 +483,7 @@ const BookingPage = ({ currentUser, userData }) => {
             <div className="category-cards">
               <div
                 className="category-card flip-card"
-                onClick={() => setSelectedCategory("skincare")}
+                onClick={() => setSelectedCategory("بشرة")}
               >
                 <div className="flip-card-inner">
                   <div className="flip-card-front skincare-bg">
@@ -486,7 +505,7 @@ const BookingPage = ({ currentUser, userData }) => {
               </div>
               <div
                 className="category-card flip-card"
-                onClick={() => setSelectedCategory("laser")}
+                onClick={() => setSelectedCategory("ليزر")}
               >
                 <div className="flip-card-inner">
                   <div className="flip-card-front laser-bg">
@@ -551,15 +570,57 @@ const BookingPage = ({ currentUser, userData }) => {
                   </button>
                   <h2>
                     اختاري الخدمة -{" "}
-                    {selectedCategory === "skincare"
+                    {selectedCategory === "بشرة"
                       ? "جلسات البشرة"
-                      : "جلسات الليزر"}
+                      : selectedCategory === "ليزر"
+                      ? "جلسات الليزر"
+                      : `جلسات ${selectedCategory}`}
                   </h2>
                 </div>
                 <div className="services-selection">
-                  {services
-                    .filter((service) => service.category === selectedCategory)
-                    .map((service) => (
+                  {(() => {
+                    console.log("BookingPage - Filtering services...");
+                    console.log(
+                      "BookingPage - Selected category:",
+                      selectedCategory
+                    );
+                    console.log(
+                      "BookingPage - Total services:",
+                      services.length
+                    );
+
+                    const filtered = services.filter((service) => {
+                      // Check if category matches in different ways
+                      const matches =
+                        service.category === selectedCategory ||
+                        service.categoryName === selectedCategory ||
+                        service.categoryId === selectedCategory ||
+                        (service.categoryName &&
+                          service.categoryName
+                            .toLowerCase()
+                            .includes(selectedCategory.toLowerCase()));
+
+                      if (matches) {
+                        console.log(
+                          "BookingPage - Service matched:",
+                          service.name,
+                          {
+                            category: service.category,
+                            categoryName: service.categoryName,
+                            categoryId: service.categoryId,
+                          }
+                        );
+                      }
+
+                      return matches;
+                    });
+
+                    console.log(
+                      "BookingPage - Filtered services count:",
+                      filtered.length
+                    );
+
+                    return filtered.map((service) => (
                       <div
                         key={service.id}
                         className="service-option"
@@ -588,7 +649,8 @@ const BookingPage = ({ currentUser, userData }) => {
                           </div>
                         </div>
                       </div>
-                    ))}
+                    ));
+                  })()}
                 </div>
               </div>
             )}

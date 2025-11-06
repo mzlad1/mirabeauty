@@ -342,13 +342,15 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
   );
 
   const pastAppointments = userAppointments.filter(
-    (apt) => apt.status === "مكتمل"
+    (apt) => apt.status === "مكتمل" || apt.status === "ملغي"
   );
 
-  const totalSpent = pastAppointments.reduce((sum, apt) => {
-    const price = parsePrice(apt.servicePrice || apt.price);
-    return sum + price;
-  }, 0);
+  const totalSpent = pastAppointments
+    .filter((apt) => apt.status === "مكتمل") // Only count completed appointments for spending
+    .reduce((sum, apt) => {
+      const price = parsePrice(apt.servicePrice || apt.price);
+      return sum + price;
+    }, 0);
   const loyaltyPoints = Math.floor(totalSpent / 10);
 
   if (loading || !completeUserData) {
@@ -629,9 +631,79 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                             </div>
                             {appointment.customerNote && (
                               <div className="detail-row">
-                                <span className="label">ملاحظات:</span>
+                                <span className="label">
+                                  <i className="fas fa-comment"></i> ملاحظاتك:
+                                </span>
                                 <span className="value">
                                   {appointment.customerNote}
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Admin Note to Customer */}
+                            {appointment.adminNote && (
+                              <div
+                                className="detail-row admin-note"
+                                style={{
+                                  backgroundColor: "#f0f7ff",
+                                  padding: "0.75rem",
+                                  borderRadius: "8px",
+                                  border: "1px solid #0f2a5a",
+                                  marginTop: "0.5rem",
+                                }}
+                              >
+                                <span
+                                  className="label"
+                                  style={{
+                                    color: "#0f2a5a",
+                                    fontWeight: "600",
+                                  }}
+                                >
+                                  <i className="fas fa-user-shield"></i> ملاحظة
+                                  من الإدارة:
+                                </span>
+                                <span
+                                  className="value"
+                                  style={{
+                                    color: "#071626",
+                                    fontWeight: "500",
+                                  }}
+                                >
+                                  {appointment.adminNote}
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Staff Note to Customer (after completion) */}
+                            {appointment.staffNoteToCustomer && (
+                              <div
+                                className="detail-row staff-note-customer"
+                                style={{
+                                  backgroundColor: "#f0fff4",
+                                  padding: "0.75rem",
+                                  borderRadius: "8px",
+                                  border: "1px solid #22c55e",
+                                  marginTop: "0.5rem",
+                                }}
+                              >
+                                <span
+                                  className="label"
+                                  style={{
+                                    color: "#16a34a",
+                                    fontWeight: "600",
+                                  }}
+                                >
+                                  <i className="fas fa-user-nurse"></i> ملاحظة
+                                  من الموظفة:
+                                </span>
+                                <span
+                                  className="value"
+                                  style={{
+                                    color: "#14532d",
+                                    fontWeight: "500",
+                                  }}
+                                >
+                                  {appointment.staffNoteToCustomer}
                                 </span>
                               </div>
                             )}
@@ -772,14 +844,32 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                         <div key={appointment.id} className="history-item">
                           <div className="history-header">
                             <h4>{appointment.serviceName}</h4>
-                            <span className="date">{appointment.date}</span>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.5rem",
+                              }}
+                            >
+                              {appointment.status === "ملغي" && (
+                                <span
+                                  className="status cancelled"
+                                  style={{
+                                    fontSize: "0.85rem",
+                                    padding: "0.25rem 0.5rem",
+                                  }}
+                                >
+                                  ملغي
+                                </span>
+                              )}
+                              <span className="date">{appointment.date}</span>
+                            </div>
                           </div>
                           <div className="history-details">
                             <p>الأخصائية: {appointment.staffName}</p>
                             <p>
                               السعر:{" "}
                               {appointment.servicePrice || appointment.price}{" "}
-                              شيكل
                             </p>
                             {appointment.rating && (
                               <div className="rating">
@@ -803,8 +893,66 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                             )}
                             {appointment.customerNote && (
                               <div className="customer-notes">
-                                <strong>ملاحظات الجلسة:</strong>
+                                <strong>
+                                  <i className="fas fa-comment"></i> ملاحظاتك:
+                                </strong>
                                 <p>{appointment.customerNote}</p>
+                              </div>
+                            )}
+
+                            {/* Admin Note to Customer */}
+                            {appointment.adminNote && (
+                              <div
+                                className="admin-notes"
+                                style={{
+                                  backgroundColor: "#f0f7ff",
+                                  padding: "0.75rem",
+                                  borderRadius: "8px",
+                                  border: "1px solid #0f2a5a",
+                                  marginTop: "0.5rem",
+                                }}
+                              >
+                                <strong
+                                  style={{
+                                    color: "#0f2a5a",
+                                    display: "block",
+                                    marginBottom: "0.5rem",
+                                  }}
+                                >
+                                  <i className="fas fa-user-shield"></i> ملاحظة
+                                  من الإدارة:
+                                </strong>
+                                <p style={{ color: "#071626", margin: 0 }}>
+                                  {appointment.adminNote}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Staff Note to Customer */}
+                            {appointment.staffNoteToCustomer && (
+                              <div
+                                className="staff-notes-customer"
+                                style={{
+                                  backgroundColor: "#f0fff4",
+                                  padding: "0.75rem",
+                                  borderRadius: "8px",
+                                  border: "1px solid #22c55e",
+                                  marginTop: "0.5rem",
+                                }}
+                              >
+                                <strong
+                                  style={{
+                                    color: "#16a34a",
+                                    display: "block",
+                                    marginBottom: "0.5rem",
+                                  }}
+                                >
+                                  <i className="fas fa-user-nurse"></i> ملاحظة
+                                  من الموظفة:
+                                </strong>
+                                <p style={{ color: "#14532d", margin: 0 }}>
+                                  {appointment.staffNoteToCustomer}
+                                </p>
                               </div>
                             )}
                           </div>

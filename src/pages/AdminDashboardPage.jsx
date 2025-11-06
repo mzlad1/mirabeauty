@@ -1499,7 +1499,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                           <th>الوقت</th>
                           <th>الحالة</th>
                           <th>ملاحظات العميل</th>
-                          <th>ملاحظات الموظف</th>
+                          <th>ملاحظات داخلية</th>
                           <th>الإجراءات</th>
                         </tr>
                       </thead>
@@ -1553,14 +1553,14 @@ const AdminDashboardPage = ({ currentUser }) => {
                               </td>
                               <td>
                                 <div className="notes-cell">
-                                  {appointment.staffNote ? (
-                                    <span title={appointment.staffNote}>
-                                      {appointment.staffNote.length > 30
-                                        ? `${appointment.staffNote.substring(
+                                  {appointment.staffInternalNote ? (
+                                    <span title={appointment.staffInternalNote}>
+                                      {appointment.staffInternalNote.length > 30
+                                        ? `${appointment.staffInternalNote.substring(
                                             0,
                                             30
                                           )}...`
-                                        : appointment.staffNote}
+                                        : appointment.staffInternalNote}
                                     </span>
                                   ) : (
                                     <span className="no-notes">-</span>

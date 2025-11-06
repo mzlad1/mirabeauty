@@ -10,8 +10,8 @@ const AppointmentCompletionModal = ({
   onComplete,
 }) => {
   const { modalState, closeModal, showError } = useModal();
-  const [customerNote, setCustomerNote] = useState("");
-  const [staffNote, setStaffNote] = useState("");
+  const [staffNoteToCustomer, setStaffNoteToCustomer] = useState("");
+  const [staffInternalNote, setStaffInternalNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -22,10 +22,10 @@ const AppointmentCompletionModal = ({
     setIsSubmitting(true);
 
     try {
-      await onComplete(appointment.id, customerNote, staffNote);
+      await onComplete(appointment.id, staffNoteToCustomer, staffInternalNote);
       // Reset form
-      setCustomerNote("");
-      setStaffNote("");
+      setStaffNoteToCustomer("");
+      setStaffInternalNote("");
       onClose();
     } catch (error) {
       console.error("Error completing appointment:", error);
@@ -37,8 +37,8 @@ const AppointmentCompletionModal = ({
 
   const handleClose = () => {
     if (!isSubmitting) {
-      setCustomerNote("");
-      setStaffNote("");
+      setStaffNoteToCustomer("");
+      setStaffInternalNote("");
       onClose();
     }
   };
@@ -83,36 +83,36 @@ const AppointmentCompletionModal = ({
 
         <form onSubmit={handleSubmit} className="appointment-completion-form">
           <div className="completion-form-group">
-            <label htmlFor="customerNote">
+            <label htmlFor="staffNoteToCustomer">
               <i className="fas fa-user"></i>
-              ملاحظات للعميل
+              ملاحظات للعميل (من الموظفة)
               <span className="note-description">
-                (سيتمكن العميل من رؤية هذه الملاحظات)
+                (سيتمكن العميل من رؤية هذه الملاحظات في ملفه الشخصي)
               </span>
             </label>
             <textarea
-              id="customerNote"
-              value={customerNote}
-              onChange={(e) => setCustomerNote(e.target.value)}
-              placeholder="أضف ملاحظات للعميل حول الجلسة أو نصائح للعناية"
+              id="staffNoteToCustomer"
+              value={staffNoteToCustomer}
+              onChange={(e) => setStaffNoteToCustomer(e.target.value)}
+              placeholder="أضف ملاحظات للعميل حول الجلسة، نصائح للعناية، أو ملاحظات هامة..."
               rows="4"
               disabled={isSubmitting}
             />
           </div>
 
           <div className="completion-form-group">
-            <label htmlFor="staffNote">
+            <label htmlFor="staffInternalNote">
               <i className="fas fa-user-md"></i>
-              ملاحظات داخلية
+              ملاحظات داخلية (للموظفين والإدارة فقط)
               <span className="note-description">
-                (ملاحظات خاصة للموظفين والإدارة فقط)
+                (ملاحظات خاصة لن يراها العميل - فقط للموظفين والإدارة)
               </span>
             </label>
             <textarea
-              id="staffNote"
-              value={staffNote}
-              onChange={(e) => setStaffNote(e.target.value)}
-              placeholder="أضف ملاحظات خاصة أو مهمة للجلسات القادمة و للمركز"
+              id="staffInternalNote"
+              value={staffInternalNote}
+              onChange={(e) => setStaffInternalNote(e.target.value)}
+              placeholder="أضف ملاحظات خاصة للموظفين والإدارة حول حالة العميل أو الجلسة..."
               rows="4"
               disabled={isSubmitting}
             />

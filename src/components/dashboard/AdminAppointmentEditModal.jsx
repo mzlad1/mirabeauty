@@ -29,7 +29,7 @@ const AdminAppointmentEditModal = ({
     staffId: appointment?.staffId || "",
     staffName: appointment?.staffName || "",
     status: appointment?.status || "مؤكد",
-    notes: appointment?.notes || "",
+    adminNote: appointment?.adminNote || "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -43,7 +43,7 @@ const AdminAppointmentEditModal = ({
         staffId: appointment.staffId || "",
         staffName: appointment.staffName || "",
         status: appointment.status || "مؤكد",
-        notes: appointment.notes || "",
+        adminNote: appointment.adminNote || "",
       });
     }
   }, [appointment]);
@@ -234,18 +234,54 @@ const AdminAppointmentEditModal = ({
             </div>
           </div>
 
+          {/* Customer Note - Read Only */}
+          {appointment?.customerNote && (
+            <div className="admin-appointment-edit-form-row">
+              <div className="admin-appointment-edit-form-group">
+                <label htmlFor="customerNote">ملاحظة العميل</label>
+                <textarea
+                  id="customerNote"
+                  name="customerNote"
+                  value={appointment.customerNote}
+                  readOnly
+                  className="admin-appointment-edit-form-textarea readonly"
+                  rows="3"
+                  style={{
+                    backgroundColor: "#f5f5f5",
+                    cursor: "not-allowed",
+                    border: "1px solid #ddd",
+                  }}
+                />
+                <small style={{ color: "#666", fontSize: "0.85rem" }}>
+                  <i className="fas fa-lock"></i> هذه الملاحظة من العميل ولا
+                  يمكن تعديلها
+                </small>
+              </div>
+            </div>
+          )}
+
+          {/* Staff Note - Editable */}
           <div className="admin-appointment-edit-form-row">
             <div className="admin-appointment-edit-form-group">
-              <label htmlFor="notes">ملاحظات إضافية (اختياري)</label>
+              <label htmlFor="adminNote">
+                ملاحظة للعميل من الإدارة{" "}
+                <span style={{ color: "#071626", fontWeight: "600" }}>
+                  (سيتم إرسالها للعميل)
+                </span>
+              </label>
               <textarea
-                id="notes"
-                name="notes"
-                value={formData.notes}
+                id="adminNote"
+                name="adminNote"
+                value={formData.adminNote}
                 onChange={handleChange}
                 className="admin-appointment-edit-form-textarea"
                 rows="4"
-                placeholder="أي ملاحظات أو طلبات خاصة..."
+                placeholder="أضف ملاحظة للعميل... سيتم عرضها في صفحة ملفه الشخصي"
               />
+              <small style={{ color: "#0f2a5a", fontSize: "0.85rem" }}>
+                <i className="fas fa-info-circle"></i> سيرى العميل هذه الملاحظة
+                في صفحة الملف الشخصي مع إشارة أنها من الإدارة
+              </small>
             </div>
           </div>
 
@@ -253,7 +289,7 @@ const AdminAppointmentEditModal = ({
             <i className="fas fa-info-circle"></i>
             <p>
               كمدير، يمكنك تعيين الأخصائية المناسبة وتحديث جميع تفاصيل الموعد.
-              سيتم إشعار العميل والأخصائية بأي تغييرات.
+              يمكنك أيضاً إضافة ملاحظة للعميل سيتم عرضها في ملفه الشخصي.
             </p>
           </div>
 

@@ -81,7 +81,7 @@ const AppointmentDetailsModal = ({
             <div className="detail-item">
               <span className="detail-label">المدة:</span>
               <span className="detail-value">
-                {appointment.serviceDuration || appointment.duration} دقيقة
+                {appointment.serviceDuration || appointment.duration}
               </span>
             </div>
 
@@ -121,7 +121,7 @@ const AppointmentDetailsModal = ({
 
             {appointment.notes && (
               <div className="detail-item full-width">
-                <span className="detail-label">ملاحظات:</span>
+                <span className="detail-label">ملاحظات العميل:</span>
                 <span className="detail-value">{appointment.notes}</span>
               </div>
             )}
@@ -129,25 +129,57 @@ const AppointmentDetailsModal = ({
 
           {/* Notes Section */}
           <div className="appointment-notes-section">
+            {/* 1. Customer Note (when booking) */}
             {appointment.customerNote && (
               <div className="note-item customer-note">
-                <h4>ملاحظات للعميل:</h4>
+                <h4>
+                  <i className="fas fa-comment"></i> ملاحظة العميل (عند الحجز):
+                </h4>
                 <p>{appointment.customerNote}</p>
               </div>
             )}
 
-            {appointment.staffNote && (
-              <div className="note-item staff-note">
-                <h4>ملاحظات الموظف:</h4>
-                <p>{appointment.staffNote}</p>
+            {/* 2. Admin Note to Customer (when accepting) */}
+            {appointment.adminNote && (
+              <div className="note-item admin-note">
+                <h4>
+                  <i className="fas fa-user-shield"></i> ملاحظة الإدارة للعميل
+                  (عند القبول أو الالغاء):
+                </h4>
+                <p>{appointment.adminNote}</p>
               </div>
             )}
 
-            {!appointment.customerNote && !appointment.staffNote && (
-              <div className="no-notes">
-                <p>لا توجد ملاحظات لهذا الموعد</p>
+            {/* 3. Staff Note to Customer (after completion) */}
+            {appointment.staffNoteToCustomer && (
+              <div className="note-item staff-note-customer">
+                <h4>
+                  <i className="fas fa-user-nurse"></i> ملاحظة الموظفة للعميل
+                  (بعد الجلسة):
+                </h4>
+                <p>{appointment.staffNoteToCustomer}</p>
               </div>
             )}
+
+            {/* 4. Staff Internal Note (only for admin/staff) */}
+            {appointment.staffInternalNote && (
+              <div className="note-item staff-internal-note">
+                <h4>
+                  <i className="fas fa-lock"></i> ملاحظة داخلية (للموظفين
+                  والإدارة فقط):
+                </h4>
+                <p>{appointment.staffInternalNote}</p>
+              </div>
+            )}
+
+            {!appointment.customerNote &&
+              !appointment.adminNote &&
+              !appointment.staffNoteToCustomer &&
+              !appointment.staffInternalNote && (
+                <div className="no-notes">
+                  <p>لا توجد ملاحظات لهذا الموعد</p>
+                </div>
+              )}
           </div>
         </div>
 

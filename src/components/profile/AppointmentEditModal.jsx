@@ -134,7 +134,7 @@ const AppointmentEditModal = ({ isOpen, onClose, onSubmit, appointment }) => {
 
           <div className="appointment-edit-form-row">
             <div className="appointment-edit-form-group">
-              <label htmlFor="notes">ملاحظات إضافية (اختياري)</label>
+              <label htmlFor="notes">ملاحظة من العميل</label>
               <textarea
                 id="notes"
                 name="notes"

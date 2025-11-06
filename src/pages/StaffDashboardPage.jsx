@@ -7,7 +7,11 @@ import {
   confirmAppointment,
   completeAppointment,
 } from "../services/appointmentsService";
-import { getCustomers, updateUser, getUserById } from "../services/usersService";
+import {
+  getCustomers,
+  updateUser,
+  getUserById,
+} from "../services/usersService";
 import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
 import AppointmentCompletionModal from "../components/dashboard/AppointmentCompletionModal";
 import AppointmentDetailsModal from "../components/dashboard/AppointmentDetailsModal";
@@ -16,7 +20,14 @@ import useModal from "../hooks/useModal";
 
 const StaffDashboardPage = ({ currentUser, userData }) => {
   const navigate = useNavigate();
-  const { modalState, closeModal, showSuccess, showError, showWarning, showConfirm } = useModal();
+  const {
+    modalState,
+    closeModal,
+    showSuccess,
+    showError,
+    showWarning,
+    showConfirm,
+  } = useModal();
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
@@ -231,7 +242,11 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
   };
 
   // Handle appointment completion with notes
-  const handleAppointmentCompletion = async (appointmentId, customerNote, staffNote) => {
+  const handleAppointmentCompletion = async (
+    appointmentId,
+    customerNote,
+    staffNote
+  ) => {
     try {
       await completeAppointment(appointmentId, customerNote, staffNote);
       await reloadAppointments();
@@ -277,19 +292,19 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
   // Profile editing functions
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditData(prev => ({
+    setEditData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSaveProfile = async () => {
     try {
       setSubmitting(true);
-      
+
       const updatedData = {
         ...completeUserData,
-        ...editData
+        ...editData,
       };
 
       await updateUser(currentUser.uid, updatedData);
@@ -315,27 +330,30 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
 
   // Filter function for appointments
   const getFilteredAppointments = () => {
-    return myAppointments.filter(appointment => {
+    return myAppointments.filter((appointment) => {
       // Status filter
       if (statusFilter && appointment.status !== statusFilter) {
         return false;
       }
-      
+
       // Date filter
       if (dateFilter && appointment.date !== dateFilter) {
         return false;
       }
-      
+
       // Search filter (customer name or phone)
       if (searchFilter) {
         const searchLower = searchFilter.toLowerCase();
         const customerName = appointment.customerName?.toLowerCase() || "";
         const customerPhone = appointment.customerPhone?.toLowerCase() || "";
-        if (!customerName.includes(searchLower) && !customerPhone.includes(searchLower)) {
+        if (
+          !customerName.includes(searchLower) &&
+          !customerPhone.includes(searchLower)
+        ) {
           return false;
         }
       }
-      
+
       return true;
     });
   };
@@ -358,25 +376,27 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
     if (!file) return;
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      showError('يرجى اختيار ملف صورة صحيح');
+    if (!file.type.startsWith("image/")) {
+      showError("يرجى اختيار ملف صورة صحيح");
       return;
     }
 
     // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      showError('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+      showError("حجم الصورة يجب أن يكون أقل من 5 ميجابايت");
       return;
     }
 
     try {
       setAvatarUploading(true);
-      
+
       // Delete old avatar if exists and is not the default avatar
-      if (completeUserData?.avatar && 
-          typeof completeUserData.avatar === 'string' &&
-          !completeUserData.avatar.includes('/default-avatar') &&
-          !completeUserData.avatar.includes('default-avatar.png')) {
+      if (
+        completeUserData?.avatar &&
+        typeof completeUserData.avatar === "string" &&
+        !completeUserData.avatar.includes("/default-avatar") &&
+        !completeUserData.avatar.includes("default-avatar.png")
+      ) {
         try {
           await deleteImage(completeUserData.avatar);
         } catch (error) {
@@ -385,17 +405,21 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
       }
 
       // Upload new avatar
-      const avatarData = await uploadSingleImage(file, 'avatars', currentUser.uid);
-      
+      const avatarData = await uploadSingleImage(
+        file,
+        "avatars",
+        currentUser.uid
+      );
+
       // Update user data
       const updatedData = {
         ...completeUserData,
-        avatar: avatarData.url
+        avatar: avatarData.url,
       };
 
       await updateUser(currentUser.uid, updatedData);
       setCompleteUserData(updatedData);
-      
+
       showSuccess("تم تحديث الصورة الشخصية بنجاح");
     } catch (error) {
       console.error("Error uploading avatar:", error);
@@ -709,7 +733,7 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                   <h2>مواعيدي</h2>
 
                   <div className="appointments-filters">
-                    <select 
+                    <select
                       className="filter-select"
                       value={statusFilter}
                       onChange={(e) => {
@@ -723,8 +747,8 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                       <option value="مكتمل">مكتمل</option>
                       <option value="ملغي">ملغي</option>
                     </select>
-                    <input 
-                      type="date" 
+                    <input
+                      type="date"
                       className="filter-date"
                       value={dateFilter}
                       onChange={(e) => {
@@ -748,7 +772,10 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                     {getPaginatedAppointments()
                       .sort((a, b) => new Date(b.date) - new Date(a.date))
                       .map((appointment) => (
-                        <div key={appointment.id} className="staff-appointment-card">
+                        <div
+                          key={appointment.id}
+                          className="staff-appointment-card"
+                        >
                           <div className="appointment-header">
                             <div className="appointment-customer">
                               <h4>{appointment.customerName}</h4>
@@ -765,7 +792,7 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                           <div className="appointment-body">
                             <div className="appointment-service">
                               <h3>{appointment.serviceName}</h3>
-                              <div className="service-details">
+                              <div className="staff-service-details">
                                 <span>
                                   <i className="fas fa-calendar"></i>{" "}
                                   {appointment.date}
@@ -782,7 +809,10 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                                 </span>
                                 <span>
                                   <i className="fas fa-money-bill"></i>{" "}
-                                  {formatPrice(appointment.servicePrice || appointment.price)}
+                                  {formatPrice(
+                                    appointment.servicePrice ||
+                                      appointment.price
+                                  )}
                                 </span>
                               </div>
                             </div>
@@ -831,7 +861,7 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                           </div>
                         </div>
                       ))}
-                    
+
                     {getFilteredAppointments().length === 0 && (
                       <div className="empty-state">
                         <p>لا توجد مواعيد تطابق المعايير المحددة</p>
@@ -844,19 +874,32 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                     <div className="pagination-controls">
                       <button
                         className="pagination-btn"
-                        onClick={() => setCurrentAppointmentPage(prev => Math.max(prev - 1, 1))}
+                        onClick={() =>
+                          setCurrentAppointmentPage((prev) =>
+                            Math.max(prev - 1, 1)
+                          )
+                        }
                         disabled={currentAppointmentPage === 1}
                       >
                         السابق
                       </button>
                       <span className="pagination-info">
-                        صفحة {currentAppointmentPage} من {getTotalAppointmentPages()}
+                        صفحة {currentAppointmentPage} من{" "}
+                        {getTotalAppointmentPages()}
                       </span>
-                      <span className="results-count">({getFilteredAppointments().length} موعد)</span>
+                      <span className="results-count">
+                        ({getFilteredAppointments().length} موعد)
+                      </span>
                       <button
                         className="pagination-btn"
-                        onClick={() => setCurrentAppointmentPage(prev => Math.min(prev + 1, getTotalAppointmentPages()))}
-                        disabled={currentAppointmentPage === getTotalAppointmentPages()}
+                        onClick={() =>
+                          setCurrentAppointmentPage((prev) =>
+                            Math.min(prev + 1, getTotalAppointmentPages())
+                          )
+                        }
+                        disabled={
+                          currentAppointmentPage === getTotalAppointmentPages()
+                        }
                       >
                         التالي
                       </button>
@@ -1025,7 +1068,10 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                         <div className="profile-avatar">
                           <div className="avatar-container">
                             <img
-                              src={completeUserData?.avatar || "/default-avatar.png"}
+                              src={
+                                completeUserData?.avatar ||
+                                "/default-avatar.png"
+                              }
                               alt="Profile"
                               className="avatar-image"
                             />
@@ -1038,7 +1084,10 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                                 style={{ display: "none" }}
                                 disabled={avatarUploading}
                               />
-                              <label htmlFor="avatar-upload" className="avatar-upload-btn">
+                              <label
+                                htmlFor="avatar-upload"
+                                className="avatar-upload-btn"
+                              >
                                 {avatarUploading ? (
                                   <i className="fas fa-spinner fa-spin"></i>
                                 ) : (
@@ -1054,19 +1103,27 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                             <div className="profile-info">
                               <div className="info-item">
                                 <label>الاسم</label>
-                                <span>{completeUserData?.name || "غير محدد"}</span>
+                                <span>
+                                  {completeUserData?.name || "غير محدد"}
+                                </span>
                               </div>
                               <div className="info-item">
                                 <label>البريد الإلكتروني</label>
-                                <span>{completeUserData?.email || "غير محدد"}</span>
+                                <span>
+                                  {completeUserData?.email || "غير محدد"}
+                                </span>
                               </div>
                               <div className="info-item">
                                 <label>رقم الهاتف</label>
-                                <span>{completeUserData?.phone || "غير محدد"}</span>
+                                <span>
+                                  {completeUserData?.phone || "غير محدد"}
+                                </span>
                               </div>
                               <div className="info-item">
                                 <label>العنوان</label>
-                                <span>{completeUserData?.address || "غير محدد"}</span>
+                                <span>
+                                  {completeUserData?.address || "غير محدد"}
+                                </span>
                               </div>
                               <button
                                 className="btn-secondary"
@@ -1094,9 +1151,14 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                                   value={completeUserData?.email || ""}
                                   className="form-input"
                                   disabled
-                                  style={{ backgroundColor: "#f5f5f5", cursor: "not-allowed" }}
+                                  style={{
+                                    backgroundColor: "#f5f5f5",
+                                    cursor: "not-allowed",
+                                  }}
                                 />
-                                <small className="form-note">البريد الإلكتروني غير قابل للتعديل</small>
+                                <small className="form-note">
+                                  البريد الإلكتروني غير قابل للتعديل
+                                </small>
                               </div>
                               <div className="form-group">
                                 <label>رقم الهاتف</label>
@@ -1124,7 +1186,9 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                                   onClick={handleSaveProfile}
                                   disabled={submitting}
                                 >
-                                  {submitting ? "جاري الحفظ..." : "حفظ التغييرات"}
+                                  {submitting
+                                    ? "جاري الحفظ..."
+                                    : "حفظ التغييرات"}
                                 </button>
                                 <button
                                   className="btn-secondary"
@@ -1170,7 +1234,7 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
           }}
         />
       )}
-      
+
       <CustomModal
         isOpen={modalState.isOpen}
         type={modalState.type}

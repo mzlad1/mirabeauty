@@ -520,11 +520,20 @@
   margin-bottom: 1rem;
   opacity: 0.8;
 }
+.service-details span {
+  background-color: var(--white);
+  width: fit-content;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  font-size: 0.875rem;
+  color: var(--charcoal);
+}
 
 .service-meta {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  gap: 10px;
+  flex-direction: column;
 }
 
 .duration {
