@@ -15,7 +15,7 @@
 }
 
 .nav-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px;
   display: flex;
@@ -32,6 +32,7 @@
   gap: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  text-decoration: none;
 }
 
 .nav-logo:hover {
@@ -83,6 +84,8 @@
   transition: all 0.3s ease;
   position: relative;
   font-family: inherit;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .nav-link:hover {
@@ -232,6 +235,7 @@
   color: var(--charcoal);
   font-family: inherit;
   border-bottom: 1px solid var(--border-color);
+  text-decoration: none;
 }
 
 .dropdown-item:last-child {
@@ -452,7 +456,7 @@
 
   .nav-menu {
     width: 100%;
-      right: 0;
+    right: 0;
   }
   .nav-actions {
     width: 95%;

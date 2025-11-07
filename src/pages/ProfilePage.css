@@ -31,8 +31,8 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  position: sticky;
-  top: 100px;
+  /* position: sticky;
+  top: 100px; */
 }
 
 /* Profile Card */
@@ -733,6 +733,25 @@
     justify-content: center;
     flex-wrap: wrap;
   }
+
+  /* Consultations responsive */
+  .consultations-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+  }
+
+  .consultations-section h3 {
+    font-size: 1.3rem;
+  }
+
+  .consultation-card .appointment-header {
+    margin: -1.5rem -1.5rem 1rem -1.5rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .consultation-card .appointment-header h4 {
+    font-size: 1.1rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -788,6 +807,63 @@
   .detail-row .value {
     font-size: 0.9rem;
   }
+
+  /* Consultations mobile responsive */
+  .consultations-section {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+  }
+
+  .consultations-section h3 {
+    font-size: 1.2rem;
+  }
+
+  .consultation-card {
+    padding: 1rem;
+  }
+
+  .consultation-card .appointment-header {
+    margin: -1rem -1rem 1rem -1rem;
+    padding: 0.875rem 1rem;
+  }
+
+  .consultation-card .appointment-header h4 {
+    font-size: 1rem;
+  }
+
+  .consultation-card .detail-row {
+    padding: 0.6rem;
+    gap: 0.5rem;
+  }
+
+  .consultation-card .detail-row i {
+    font-size: 1rem;
+  }
+
+  .consultation-card .detail-row span {
+    font-size: 0.875rem;
+  }
+
+  .consultation-card .action-btn {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    flex: 1;
+  }
+
+  .empty-state-small {
+    padding: 1.5rem 1rem;
+  }
+
+  .empty-state-small p {
+    font-size: 1rem;
+  }
+
+  .empty-state-small .btn-secondary {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* Disabled button styles */
@@ -841,6 +917,217 @@ button:disabled:hover {
 .loading-card p {
   color: var(--text-secondary);
   margin: 1rem 0;
+}
+
+/* Consultations Section */
+.consultations-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px solid var(--border-color);
+}
+
+.consultations-section h3 {
+  color: var(--navy-blue);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.consultations-section h3::before {
+  content: "\f4ad";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: var(--gold);
+}
+
+.consultation-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f9f8f7 100%);
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: visible;
+  margin-bottom: 1.5rem;
+}
+
+.consultation-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(218, 165, 32, 0.2);
+  border-color: var(--navy-blue);
+}
+
+.consultation-card .appointment-header {
+  background: linear-gradient(135deg, var(--navy-blue) 0%, #0f2a5a 100%);
+  margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.consultation-card .appointment-header h4 {
+  color: var(--white);
+  font-size: 1.2rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.consultation-card .appointment-header h4::before {
+  content: "\f073";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 400;
+  font-size: 1.1rem;
+}
+
+.consultation-card .status {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.consultation-card .status.confirmed {
+  color: #28a745;
+  border: 2px solid #28a745;
+  background-color: #d4edda;
+}
+
+.consultation-card .status.pending {
+  color: #856404;
+  border: 2px solid #ffc107;
+  background-color: #fff3cd;
+}
+
+.consultation-card .appointment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.consultation-card .detail-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.consultation-card .detail-row:hover {
+  background-color: rgba(218, 165, 32, 0.05);
+  border-color: var(--gold);
+  transform: translateX(-3px);
+}
+
+.consultation-card .detail-row i {
+  font-size: 1.1rem;
+  color: var(--gold);
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.consultation-card .detail-row span {
+  color: var(--navy-blue);
+  font-weight: 500;
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+.consultation-card .appointment-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: 0.5rem;
+}
+
+.consultation-card .action-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.consultation-card .action-btn.cancel {
+  background-color: #fff;
+  color: #dc3545;
+  border: 2px solid #dc3545;
+}
+
+.consultation-card .action-btn.cancel:hover {
+  background-color: #dc3545;
+  color: var(--white);
+  transform: scale(1.05);
+}
+
+.consultation-card .action-btn.cancel i {
+  font-size: 0.9rem;
+}
+
+.empty-state-small {
+  text-align: center;
+  padding: 2.5rem 2rem;
+  background: linear-gradient(135deg, #f9f8f7 0%, #ffffff 100%);
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.empty-state-small:hover {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, #ffffff 0%, #f9f8f7 100%);
+}
+
+.empty-state-small p {
+  color: var(--charcoal);
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
+}
+
+.empty-state-small .btn-secondary {
+  padding: 12px 28px;
+  background-color: var(--gold);
+  color: var(--white);
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.empty-state-small .btn-secondary i {
+  font-size: 1.1rem;
+}
+
+.empty-state-small .btn-secondary:hover {
+  background-color: var(--navy-blue);
+  border-color: var(--navy-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(15, 42, 90, 0.3);
 }
 
 /* Orders Section Styles */

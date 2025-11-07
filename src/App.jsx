@@ -19,6 +19,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminOrdersPage from "./pages/AdminOrdersPage";
+import ReportsPage from "./pages/ReportsPage";
 import StaffDashboardPage from "./pages/StaffDashboardPage";
 import CartPage from "./pages/CartPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -90,6 +91,19 @@ const AppContent = () => {
     }
   };
 
+  // Protected route component for admin reports
+  const ProtectedAdminReports = () => {
+    if (!currentUser || !userData) {
+      return <Navigate to="/login" replace />;
+    }
+
+    if (userData.role === "admin") {
+      return <ReportsPage currentUser={currentUser} userData={userData} />;
+    } else {
+      return <Navigate to="/" replace />;
+    }
+  };
+
   // Protected route component for profile
   const ProtectedProfile = () => {
     if (!currentUser || !userData) {
@@ -123,6 +137,7 @@ const AppContent = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/dashboard" element={<ProtectedDashboard />} />
+            <Route path="/admin/reports" element={<ProtectedAdminReports />} />
             <Route path="/admin/orders" element={<ProtectedAdminOrders />} />
             {/* Catch-all route for 404 Not Found */}
             <Route path="*" element={<NotFoundPage />} />

@@ -112,6 +112,23 @@ const CartPage = () => {
   const discountAmount = subtotal * discount;
   const total = subtotal - discountAmount + deliveryPrice;
 
+  // Helper function to clear cart and navigate
+  const clearCartAndNavigate = (path) => {
+    // Clear cart
+    setCartItems([]);
+    localStorage.removeItem("cartItems");
+    window.dispatchEvent(new CustomEvent("cartUpdated"));
+
+    // Reset form
+    setSelectedDeliveryArea("");
+    setUserInfo({ name: "", phone: "", address: "", note: "" });
+    setPromoCode("");
+    setDiscount(0);
+
+    // Navigate
+    navigate(path);
+  };
+
   const handleCheckoutClick = () => {
     if (cartItems.length === 0) {
       showWarning("السلة فارغة");
@@ -164,24 +181,33 @@ const CartPage = () => {
       // Close the user info modal first
       setShowUserInfoModal(false);
 
-      // Show success alert BEFORE clearing cart
-      showSuccess("تم إرسال طلبك بنجاح! سيتم التواصل معك قريباً");
+      // Show success alert with extra action for signed-in users
+      if (currentUser) {
+        showSuccess(
+          "تم إرسال طلبك بنجاح! سيتم التواصل معك قريباً",
+          () => {
+            // Default confirm action - goes to home
+            clearCartAndNavigate("/");
+          },
+          "نجح العملية",
+          {
+            confirmText: "الصفحة الرئيسية",
+            extraActionText: "عرض طلباتي",
+            onExtraAction: () => {
+              clearCartAndNavigate("/profile#orders");
+            },
+          }
+        );
+      } else {
+        showSuccess("تم إرسال طلبك بنجاح! سيتم التواصل معك قريباً");
+      }
 
-      // Clear cart and navigate after delay to allow modal to show
+      // Auto-navigate after 2.5 seconds regardless of user action
       setTimeout(() => {
-        // Clear cart
-        setCartItems([]);
-        localStorage.removeItem("cartItems");
-        window.dispatchEvent(new CustomEvent("cartUpdated"));
-
-        // Reset form
-        setSelectedDeliveryArea("");
-        setUserInfo({ name: "", phone: "", address: "", note: "" });
-        setPromoCode("");
-        setDiscount(0);
-
-        // Navigate to home
-        navigate("/");
+        if (modalState.isOpen) {
+          closeModal();
+          clearCartAndNavigate("/");
+        }
       }, 2500);
     } catch (error) {
       console.error("Error submitting order:", error);
@@ -473,6 +499,8 @@ const CartPage = () => {
         confirmText={modalState.confirmText}
         cancelText={modalState.cancelText}
         showCancel={modalState.showCancel}
+        extraActionText={modalState.extraActionText}
+        onExtraAction={modalState.onExtraAction}
       />
     </div>
   );

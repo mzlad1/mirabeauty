@@ -120,6 +120,17 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
     loadUserData();
   }, [currentUser?.uid]);
 
+  // Handle hash navigation (e.g., /profile#orders)
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (
+      hash &&
+      ["overview", "appointments", "orders", "history"].includes(hash)
+    ) {
+      setActiveTab(hash);
+    }
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditData({ ...editData, [name]: value });
@@ -756,19 +767,19 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                               key={consultation.id}
                               className="appointment-card consultation-card"
                             >
-                              <div className="appointment-header">
-                                <h4>استشارة مجانية</h4>
-                                <span
-                                  className={`status ${
-                                    consultation.status === "مؤكد"
-                                      ? "confirmed"
-                                      : "pending"
-                                  }`}
-                                >
-                                  {consultation.status}
-                                </span>
-                              </div>
                               <div className="appointment-details">
+                                <div className="detail-row">
+                                  <i className="fas fa-info-circle"></i>
+                                  <span
+                                    className={`status ${
+                                      consultation.status === "مؤكد"
+                                        ? "confirmed"
+                                        : "pending"
+                                    }`}
+                                  >
+                                    {consultation.status}
+                                  </span>
+                                </div>
                                 <div className="detail-row">
                                   <i className="fas fa-calendar"></i>
                                   <span>{consultation.date}</span>
@@ -811,6 +822,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                                       handleCancelConsultation(consultation.id)
                                     }
                                   >
+                                    <i className="fas fa-times"></i>
                                     إلغاء
                                   </button>
                                 )}
@@ -825,6 +837,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                           className="btn-secondary"
                           onClick={() => navigate("/book")}
                         >
+                          <i className="far fa-calendar-plus"></i>
                           احجزي استشارة مجانية
                         </button>
                       </div>

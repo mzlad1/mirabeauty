@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./BookingPage.css";
 import {
   getAllServices,
@@ -48,6 +48,7 @@ const timeSlots = [
 
 const BookingPage = ({ currentUser, userData }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     modalState,
     closeModal,
@@ -159,6 +160,32 @@ const BookingPage = ({ currentUser, userData }) => {
     };
     loadData();
   }, [currentUser]);
+
+  // Handle pre-selected service from ServicesPage
+  useEffect(() => {
+    if (
+      location.state?.fromServicesPage &&
+      location.state?.selectedService &&
+      services.length > 0
+    ) {
+      const service = location.state.selectedService;
+
+      // Set the category based on the service's categoryName
+      setSelectedCategory(service.categoryName || service.category);
+
+      // Set the selected service in booking data
+      setBookingData((prev) => ({
+        ...prev,
+        serviceId: service.id,
+      }));
+
+      // Move directly to step 2 (date & time selection)
+      setStep(2);
+
+      // Clear the navigation state to prevent re-triggering
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, services]);
 
   const timeSlots = [
     "09:00",

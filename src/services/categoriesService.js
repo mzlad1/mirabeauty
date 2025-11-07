@@ -50,6 +50,26 @@ export const updateProductCategory = async (categoryId, categoryData) => {
       ...categoryData,
       updatedAt: new Date(),
     });
+
+    // Update categoryName in all products that use this category
+    if (categoryData.name) {
+      const productsQuery = query(
+        collection(db, "products"),
+        where("category", "==", categoryId)
+      );
+      const productsSnapshot = await getDocs(productsQuery);
+
+      // Update each product with the new category name
+      const updatePromises = productsSnapshot.docs.map((productDoc) => {
+        const productRef = doc(db, "products", productDoc.id);
+        return updateDoc(productRef, {
+          categoryName: categoryData.name,
+          updatedAt: new Date(),
+        });
+      });
+
+      await Promise.all(updatePromises);
+    }
   } catch (error) {
     console.error("Error updating product category:", error);
     throw error;
@@ -64,7 +84,7 @@ export const deleteProductCategory = async (categoryId) => {
       where("categoryId", "==", categoryId)
     );
     const productsSnapshot = await getDocs(productsQuery);
-    
+
     if (!productsSnapshot.empty) {
       throw new Error("لا يمكن حذف هذا التصنيف لأنه مستخدم في منتجات موجودة");
     }
@@ -115,6 +135,26 @@ export const updateServiceCategory = async (categoryId, categoryData) => {
       ...categoryData,
       updatedAt: new Date(),
     });
+
+    // Update categoryName in all services that use this category
+    if (categoryData.name) {
+      const servicesQuery = query(
+        collection(db, "services"),
+        where("category", "==", categoryId)
+      );
+      const servicesSnapshot = await getDocs(servicesQuery);
+
+      // Update each service with the new category name
+      const updatePromises = servicesSnapshot.docs.map((serviceDoc) => {
+        const serviceRef = doc(db, "services", serviceDoc.id);
+        return updateDoc(serviceRef, {
+          categoryName: categoryData.name,
+          updatedAt: new Date(),
+        });
+      });
+
+      await Promise.all(updatePromises);
+    }
   } catch (error) {
     console.error("Error updating service category:", error);
     throw error;
@@ -129,7 +169,7 @@ export const deleteServiceCategory = async (categoryId) => {
       where("categoryId", "==", categoryId)
     );
     const servicesSnapshot = await getDocs(servicesQuery);
-    
+
     if (!servicesSnapshot.empty) {
       throw new Error("لا يمكن حذف هذا التصنيف لأنه مستخدم في خدمات موجودة");
     }

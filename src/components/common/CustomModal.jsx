@@ -11,6 +11,8 @@ const CustomModal = ({
   confirmText = "موافق",
   cancelText = "إلغاء",
   showCancel = false,
+  extraActionText = null,
+  onExtraAction = null,
 }) => {
   if (!isOpen) return null;
 
@@ -59,18 +61,26 @@ const CustomModal = ({
           </div>
           {title && <h3 className="custom-modal-title">{title}</h3>}
         </div>
-        
+
         <div className="custom-modal-body">
           <p className="custom-modal-message">{message}</p>
         </div>
-        
+
         <div className="custom-modal-footer">
           {showCancel && (
-            <button
-              className="custom-modal-btn cancel"
-              onClick={onClose}
-            >
+            <button className="custom-modal-btn cancel" onClick={onClose}>
               {cancelText}
+            </button>
+          )}
+          {extraActionText && onExtraAction && (
+            <button
+              className="custom-modal-btn extra-action"
+              onClick={() => {
+                if (onExtraAction) onExtraAction();
+                onClose();
+              }}
+            >
+              {extraActionText}
             </button>
           )}
           <button

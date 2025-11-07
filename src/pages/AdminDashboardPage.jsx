@@ -55,6 +55,12 @@ import {
   deleteProductCategory,
   deleteServiceCategory,
 } from "../services/categoriesService";
+import {
+  getAllFAQs,
+  addFAQ,
+  updateFAQ,
+  deleteFAQ,
+} from "../services/faqService";
 import UserModal from "../components/dashboard/UserModal";
 import ServiceEditModal from "../components/dashboard/ServiceEditModal";
 import ProductEditModal from "../components/dashboard/ProductEditModal";
@@ -62,6 +68,7 @@ import AdminAppointmentEditModal from "../components/dashboard/AdminAppointmentE
 import AppointmentDetailsModal from "../components/dashboard/AppointmentDetailsModal";
 import ConsultationDetailsModal from "../components/dashboard/ConsultationDetailsModal";
 import CategoryModal from "../components/dashboard/CategoryModal";
+import FAQModal from "../components/admin/FAQModal";
 import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
 
 const AdminDashboardPage = ({ currentUser }) => {
@@ -155,6 +162,15 @@ const AdminDashboardPage = ({ currentUser }) => {
 
   const [editingCategory, setEditingCategory] = useState(null);
   const [categoryModalType, setCategoryModalType] = useState("product");
+
+  // FAQ states
+  const [faqs, setFaqs] = useState([]);
+  const [faqSearchFilter, setFaqSearchFilter] = useState("");
+  const [faqCategoryFilter, setFaqCategoryFilter] = useState("all");
+  const [currentFaqPage, setCurrentFaqPage] = useState(1);
+  const faqsPerPage = 10;
+  const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
+  const [editingFaq, setEditingFaq] = useState(null);
 
   // Profile editing states
   const [editMode, setEditMode] = useState(false);
@@ -360,6 +376,19 @@ const AdminDashboardPage = ({ currentUser }) => {
     } catch (err) {
       console.error("Error loading service categories:", err);
       setError("فشل في تحميل تصنيفات الخدمات");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadFAQs = async () => {
+    try {
+      setLoading(true);
+      const faqsData = await getAllFAQs();
+      setFaqs(faqsData);
+    } catch (err) {
+      console.error("Error loading FAQs:", err);
+      setError("فشل في تحميل الأسئلة الشائعة");
     } finally {
       setLoading(false);
     }
@@ -755,8 +784,15 @@ const AdminDashboardPage = ({ currentUser }) => {
     } else if (activeTab === "categories") {
       loadProductCategories();
       loadServiceCategories();
+    } else if (activeTab === "faqs") {
+      loadFAQs();
     }
   }, [activeTab]);
+
+  // Reset FAQ pagination when filters change
+  useEffect(() => {
+    setCurrentFaqPage(1);
+  }, [faqSearchFilter, faqCategoryFilter]);
 
   // Service popularity
   const serviceStats = services
@@ -911,10 +947,14 @@ const AdminDashboardPage = ({ currentUser }) => {
           await updateProductCategory(editingCategory.id, categoryData);
           showSuccess("تم تحديث تصنيف المنتج بنجاح");
           await loadProductCategories();
+          // Reload products to reflect the updated category name
+          await loadProducts();
         } else {
           await updateServiceCategory(editingCategory.id, categoryData);
           showSuccess("تم تحديث تصنيف الخدمة بنجاح");
           await loadServiceCategories();
+          // Reload services to reflect the updated category name
+          await loadServices();
         }
       } else {
         // Add new category
@@ -964,6 +1004,84 @@ const AdminDashboardPage = ({ currentUser }) => {
       "حذف",
       "إلغاء"
     );
+  };
+
+  // FAQ management functions
+  const handleAddFaq = () => {
+    setEditingFaq(null);
+    setIsFaqModalOpen(true);
+  };
+
+  const handleEditFaq = (faq) => {
+    setEditingFaq(faq);
+    setIsFaqModalOpen(true);
+  };
+
+  const handleFaqSubmit = async (faqData) => {
+    try {
+      if (editingFaq) {
+        await updateFAQ(editingFaq.id, faqData);
+        showSuccess("تم تحديث السؤال بنجاح");
+      } else {
+        await addFAQ(faqData);
+        showSuccess("تم إضافة السؤال بنجاح");
+      }
+      await loadFAQs();
+      setIsFaqModalOpen(false);
+      setEditingFaq(null);
+    } catch (error) {
+      console.error("Error submitting FAQ:", error);
+      showError("حدث خطأ أثناء حفظ السؤال");
+      throw error;
+    }
+  };
+
+  const handleDeleteFaq = async (faqId, question) => {
+    showConfirm(
+      `هل أنت متأكد من حذف السؤال "${question}"؟\n\nسيتم حذف السؤال بشكل نهائي.`,
+      async () => {
+        try {
+          await deleteFAQ(faqId);
+          await loadFAQs();
+          showSuccess("تم حذف السؤال بنجاح");
+        } catch (error) {
+          console.error("Error deleting FAQ:", error);
+          showError("حدث خطأ أثناء حذف السؤال");
+        }
+      },
+      "تأكيد حذف السؤال",
+      "حذف",
+      "إلغاء"
+    );
+  };
+
+  // Get filtered FAQs
+  const getFilteredFaqs = () => {
+    return faqs.filter((faq) => {
+      const matchesSearch =
+        !faqSearchFilter ||
+        faq.question.toLowerCase().includes(faqSearchFilter.toLowerCase()) ||
+        faq.answer.toLowerCase().includes(faqSearchFilter.toLowerCase());
+
+      const matchesCategory =
+        !faqCategoryFilter ||
+        faqCategoryFilter === "all" ||
+        faq.category === faqCategoryFilter;
+
+      return matchesSearch && matchesCategory;
+    });
+  };
+
+  // Get paginated FAQs
+  const getPaginatedFaqs = () => {
+    const filtered = getFilteredFaqs();
+    const startIndex = (currentFaqPage - 1) * faqsPerPage;
+    return filtered.slice(startIndex, startIndex + faqsPerPage);
+  };
+
+  // Get total FAQ pages
+  const getTotalFaqPages = () => {
+    return Math.ceil(getFilteredFaqs().length / faqsPerPage);
   };
 
   // User management functions
@@ -1275,13 +1393,11 @@ const AdminDashboardPage = ({ currentUser }) => {
                   التصنيفات
                 </button>
                 <button
-                  className={`nav-item ${
-                    activeTab === "reports" ? "active" : ""
-                  }`}
-                  onClick={() => setActiveTab("reports")}
+                  className={`nav-item ${activeTab === "faqs" ? "active" : ""}`}
+                  onClick={() => setActiveTab("faqs")}
                 >
-                  <i className="nav-icon fas fa-chart-line"></i>
-                  التقارير
+                  <i className="nav-icon fas fa-question-circle"></i>
+                  الأسئلة الشائعة
                 </button>
                 <button
                   className={`nav-item ${
@@ -2649,56 +2765,6 @@ const AdminDashboardPage = ({ currentUser }) => {
                 </div>
               )}
 
-              {/* Reports Tab */}
-              {activeTab === "reports" && (
-                <div className="tab-content">
-                  <h2>التقارير والإحصائيات</h2>
-
-                  <div className="reports-grid">
-                    <div className="report-card">
-                      <h3>تقرير الإيرادات</h3>
-                      <div className="report-chart">
-                        <div className="chart-placeholder">
-                          <i className="fas fa-chart-area"></i> مخطط الإيرادات
-                          الشهرية
-                        </div>
-                      </div>
-                      <button className="btn-secondary">تحميل التقرير</button>
-                    </div>
-
-                    <div className="report-card">
-                      <h3>أداء الخدمات</h3>
-                      <div className="services-performance">
-                        {serviceStats.slice(0, 5).map((service, index) => (
-                          <div key={service.id} className="service-perf-item">
-                            <span className="service-rank">#{index + 1}</span>
-                            <span className="service-name">{service.name}</span>
-                            <span className="service-bookings">
-                              {service.appointmentCount} حجز
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="report-card">
-                      <h3>أداء الموظفين</h3>
-                      <div className="staff-performance-report">
-                        {staffStats.map((staff, index) => (
-                          <div key={staff.id} className="staff-perf-item">
-                            <span className="staff-rank">#{index + 1}</span>
-                            <span className="staff-name">{staff.name}</span>
-                            <span className="staff-revenue">
-                              {staff.revenue} شيكل
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* Settings Tab */}
               {activeTab === "settings" && (
                 <div className="tab-content">
@@ -2902,6 +2968,136 @@ const AdminDashboardPage = ({ currentUser }) => {
                   <button className="btn-primary">حفظ الإعدادات</button>
                 </div>
               )}
+
+              {/* FAQs Tab */}
+              {activeTab === "faqs" && (
+                <div className="tab-content">
+                  <div className="tab-header">
+                    <h2>إدارة الأسئلة الشائعة</h2>
+                    <button className="btn-primary" onClick={handleAddFaq}>
+                      إضافة سؤال
+                    </button>
+                  </div>
+
+                  <div className="appointments-filters">
+                    <input
+                      type="text"
+                      placeholder="ابحث في الأسئلة..."
+                      className="filter-search"
+                      value={faqSearchFilter}
+                      onChange={(e) => setFaqSearchFilter(e.target.value)}
+                    />
+                    <select
+                      value={faqCategoryFilter}
+                      onChange={(e) => setFaqCategoryFilter(e.target.value)}
+                      className="filter-select"
+                    >
+                      <option value="all">جميع التصنيفات</option>
+                      <option value="general">عام</option>
+                      <option value="services">الخدمات</option>
+                      <option value="booking">الحجز</option>
+                      <option value="pricing">الأسعار</option>
+                      <option value="preparation">التحضير</option>
+                      <option value="safety">السلامة</option>
+                    </select>
+                  </div>
+
+                  <div className="appointments-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>السؤال</th>
+                          <th>التصنيف</th>
+                          <th>الإجراءات</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {getPaginatedFaqs().length === 0 ? (
+                          <tr>
+                            <td colSpan="3" className="empty-state-cell">
+                              <div className="empty-state">
+                                <i className="fas fa-question-circle"></i>
+                                <p>لا توجد أسئلة شائعة</p>
+                              </div>
+                            </td>
+                          </tr>
+                        ) : (
+                          getPaginatedFaqs().map((faq) => (
+                            <tr key={faq.id}>
+                              <td className="admin-faq-question-cell">
+                                <div className="admin-faq-question-text">
+                                  {faq.question}
+                                </div>
+                                <div className="admin-faq-answer-preview">
+                                  {faq.answer}
+                                </div>
+                              </td>
+                              <td>
+                                <span
+                                  className={`admin-faq-category-badge admin-faq-category-${faq.category}`}
+                                >
+                                  {faq.category === "general" && "عام"}
+                                  {faq.category === "services" && "الخدمات"}
+                                  {faq.category === "booking" && "الحجز"}
+                                  {faq.category === "pricing" && "الأسعار"}
+                                  {faq.category === "preparation" && "التحضير"}
+                                  {faq.category === "safety" && "السلامة"}
+                                </span>
+                              </td>
+                              <td>
+                                <div className="table-actions">
+                                  <button
+                                    className="action-btn edit"
+                                    onClick={() => handleEditFaq(faq)}
+                                    title="تعديل"
+                                  >
+                                    تعديل
+                                  </button>
+                                  <button
+                                    className="action-btn delete"
+                                    onClick={() => handleDeleteFaq(faq.id)}
+                                    title="حذف"
+                                  >
+                                    حذف
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Pagination Controls */}
+                  {getTotalFaqPages() > 1 && (
+                    <div className="pagination">
+                      <button
+                        className="pagination-btn"
+                        onClick={() => setCurrentFaqPage(currentFaqPage - 1)}
+                        disabled={currentFaqPage === 1}
+                      >
+                        السابق
+                      </button>
+                      <div className="pagination-info">
+                        <span>
+                          صفحة {currentFaqPage} من {getTotalFaqPages()}
+                        </span>
+                        <span className="results-count">
+                          ({getFilteredFaqs().length} سؤال)
+                        </span>
+                      </div>
+                      <button
+                        className="pagination-btn"
+                        onClick={() => setCurrentFaqPage(currentFaqPage + 1)}
+                        disabled={currentFaqPage === getTotalFaqPages()}
+                      >
+                        التالي
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </main>
           </div>
         </div>
@@ -2986,6 +3182,17 @@ const AdminDashboardPage = ({ currentUser }) => {
           }}
         />
       )}
+
+      {/* FAQ Modal */}
+      <FAQModal
+        isOpen={isFaqModalOpen}
+        onClose={() => {
+          setIsFaqModalOpen(false);
+          setEditingFaq(null);
+        }}
+        onSubmit={handleFaqSubmit}
+        faq={editingFaq}
+      />
 
       {/* Custom Modal */}
       <CustomModal

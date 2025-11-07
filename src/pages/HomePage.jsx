@@ -8,10 +8,21 @@ import PromotionalBanner from "../components/common/PromotionalBanner";
 import ProductCard from "../components/customer/ProductCard";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import { useNavigationLoading } from "../hooks/useNavigationLoading";
+import { useLoading } from "../hooks/useLoading";
+import {
+  createProgressTracker,
+  preloadImagesWithProgress,
+} from "../utils/loadingHelpers";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const { navigateWithLoading } = useNavigationLoading();
+  const {
+    withMultipleLoading,
+    registerTask,
+    updateTaskProgress,
+    completeTask,
+  } = useLoading();
 
   // Hero carousel images
   const heroImages = [
@@ -26,17 +37,42 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load products and services from Firebase
+  // Load products and services from Firebase with real progress tracking
   const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const [productsData, servicesData] = await Promise.all([
-        getAllProducts(),
-        getAllServices()
+
+      // Use real loading with multiple tasks
+      await withMultipleLoading([
+        {
+          taskId: "products",
+          fn: async (onProgress) => {
+            onProgress(20);
+            const data = await getAllProducts();
+            onProgress(100);
+            setProducts(data);
+            return data;
+          },
+        },
+        {
+          taskId: "services",
+          fn: async (onProgress) => {
+            onProgress(20);
+            const data = await getAllServices();
+            onProgress(100);
+            setServices(data);
+            return data;
+          },
+        },
+        {
+          taskId: "hero-images",
+          fn: async (onProgress) => {
+            await preloadImagesWithProgress(heroImages, onProgress);
+            return true;
+          },
+        },
       ]);
-      setProducts(productsData);
-      setServices(servicesData);
     } catch (err) {
       console.error("Error loading data:", err);
       setError("فشل في تحميل البيانات. يرجى المحاولة مرة أخرى.");
@@ -152,7 +188,9 @@ const HomePage = () => {
               </div>
             ) : error ? (
               <div style={{ gridColumn: "1/-1", textAlign: "center" }}>
-                <p style={{ color: "#721c24", marginBottom: "1rem" }}>{error}</p>
+                <p style={{ color: "#721c24", marginBottom: "1rem" }}>
+                  {error}
+                </p>
                 <button className="btn-primary" onClick={loadData}>
                   إعادة المحاولة
                 </button>
@@ -160,10 +198,12 @@ const HomePage = () => {
             ) : (
               services.slice(0, 3).map((service) => {
                 // Get primary image or first image - handle object-based images
-                const primaryImage = service.images && service.images.length > 0 
-                  ? (service.images[service.primaryImageIndex || 0]?.url || service.images[service.primaryImageIndex || 0])
-                  : service.icon || '/assets/default-service.jpg';
-                
+                const primaryImage =
+                  service.images && service.images.length > 0
+                    ? service.images[service.primaryImageIndex || 0]?.url ||
+                      service.images[service.primaryImageIndex || 0]
+                    : service.icon || "/assets/default-service.jpg";
+
                 return (
                   <div key={service.id} className="service-card card">
                     <div className="service-icon">
@@ -221,7 +261,9 @@ const HomePage = () => {
               </div>
             ) : error ? (
               <div style={{ gridColumn: "1/-1", textAlign: "center" }}>
-                <p style={{ color: "#721c24", marginBottom: "1rem" }}>{error}</p>
+                <p style={{ color: "#721c24", marginBottom: "1rem" }}>
+                  {error}
+                </p>
                 <button className="btn-primary" onClick={loadData}>
                   إعادة المحاولة
                 </button>
@@ -308,7 +350,10 @@ const HomePage = () => {
               بيوتي
             </p>
             <div className="cta-buttons">
-              <button className="btn-primary" onClick={() => navigateWithLoading("/book")}>
+              <button
+                className="btn-primary"
+                onClick={() => navigateWithLoading("/book")}
+              >
                 احجزي موعدك الآن
               </button>
               <button

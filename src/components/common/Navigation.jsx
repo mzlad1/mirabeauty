@@ -40,56 +40,65 @@ const Navigation = ({ currentUser, userData }) => {
     <nav className="navbar">
       <div className="nav-container">
         {/* Logo */}
-        <div className="nav-logo" onClick={() => handleNavigation("/")}>
+        <Link
+          to="/"
+          className="nav-logo"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
           <div className="logo-icon">
             <img src="/assets/logo.png" alt="ميرا بيوتي" />
           </div>
           <div className="logo-text">
             <h2>Mira Beauty Clinic</h2>
           </div>
-        </div>
+        </Link>
 
         {/* Desktop Menu */}
         <ul className={`nav-menu ${isMobileMenuOpen ? "active" : ""}`}>
           <li>
-            <button
+            <Link
+              to="/"
               className={`nav-link ${isActive("/") ? "active" : ""}`}
-              onClick={() => handleNavigation("/")}
+              onClick={() => setIsMobileMenuOpen(false)}
             >
               الرئيسية
-            </button>
+            </Link>
           </li>
           <li>
-            <button
+            <Link
+              to="/services"
               className={`nav-link ${isActive("/services") ? "active" : ""}`}
-              onClick={() => handleNavigation("/services")}
+              onClick={() => setIsMobileMenuOpen(false)}
             >
               الخدمات
-            </button>
+            </Link>
           </li>
           <li>
-            <button
+            <Link
+              to="/products"
               className={`nav-link ${isActive("/products") ? "active" : ""}`}
-              onClick={() => handleNavigation("/products")}
+              onClick={() => setIsMobileMenuOpen(false)}
             >
               المنتجات
-            </button>
+            </Link>
           </li>
           <li>
-            <button
+            <Link
+              to="/book"
               className={`nav-link ${isActive("/book") ? "active" : ""}`}
-              onClick={() => handleNavigation("/book")}
+              onClick={() => setIsMobileMenuOpen(false)}
             >
               احجز الآن
-            </button>
+            </Link>
           </li>
           <li>
-            <button
+            <Link
+              to="/faq"
               className={`nav-link ${isActive("/faq") ? "active" : ""}`}
-              onClick={() => handleNavigation("/faq")}
+              onClick={() => setIsMobileMenuOpen(false)}
             >
               الأسئلة الشائعة
-            </button>
+            </Link>
           </li>
         </ul>
 
@@ -119,37 +128,52 @@ const Navigation = ({ currentUser, userData }) => {
               </div>
               <div className="user-dropdown">
                 {userData?.role === "customer" && (
-                  <button
+                  <Link
+                    to="/profile"
                     className="dropdown-item"
-                    onClick={() => handleNavigation("/profile")}
+                    onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <span className="dropdown-icon">
                       <i className="fas fa-user"></i>
                     </span>
                     الملف الشخصي
-                  </button>
+                  </Link>
                 )}
                 {(userData?.role === "staff" || userData?.role === "admin") && (
-                  <button
+                  <Link
+                    to="/dashboard"
                     className="dropdown-item"
-                    onClick={() => handleNavigation("/dashboard")}
+                    onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <span className="dropdown-icon">
                       <i className="fas fa-tachometer-alt"></i>
                     </span>
                     لوحة التحكم
-                  </button>
+                  </Link>
                 )}
                 {userData?.role === "admin" && (
-                  <button
-                    className="dropdown-item"
-                    onClick={() => handleNavigation("/admin/orders")}
-                  >
-                    <span className="dropdown-icon">
-                      <i className="fas fa-shopping-bag"></i>
-                    </span>
-                    إدارة الطلبات
-                  </button>
+                  <>
+                    <Link
+                      to="/admin/reports"
+                      className="dropdown-item"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <span className="dropdown-icon">
+                        <i className="fas fa-chart-bar"></i>
+                      </span>
+                      التقارير
+                    </Link>
+                    <Link
+                      to="/admin/orders"
+                      className="dropdown-item"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <span className="dropdown-icon">
+                        <i className="fas fa-shopping-bag"></i>
+                      </span>
+                      إدارة الطلبات
+                    </Link>
+                  </>
                 )}
                 <button className="dropdown-item logout" onClick={handleLogout}>
                   <span className="dropdown-icon">

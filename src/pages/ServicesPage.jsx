@@ -15,7 +15,7 @@ const ServicesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([
-    { id: "all", name: "جميع الخدمات" }
+    { id: "all", name: "جميع الخدمات" },
   ]);
 
   // Fetch services from Firebase
@@ -33,7 +33,10 @@ const ServicesPage = () => {
         }
 
         console.log("ServicesPage - Loaded services data:", fetchedServices);
-        console.log("ServicesPage - First service structure:", fetchedServices[0]);
+        console.log(
+          "ServicesPage - First service structure:",
+          fetchedServices[0]
+        );
 
         setServices(fetchedServices);
       } catch (error) {
@@ -57,7 +60,7 @@ const ServicesPage = () => {
       const categoriesData = await getAllServiceCategories();
       const allCategories = [
         { id: "all", name: "جميع الخدمات" },
-        ...categoriesData
+        ...categoriesData,
       ];
       setCategories(allCategories);
     } catch (error) {
@@ -132,10 +135,12 @@ const ServicesPage = () => {
                   <div className="services-page-bookmark-items">
                     {bookmarkedServices.map((item) => {
                       // Get primary image or first image - handle object-based images
-                      const primaryImage = item.images && item.images.length > 0 
-                        ? (item.images[item.primaryImageIndex || 0]?.url || item.images[item.primaryImageIndex || 0])
-                        : item.image || '/assets/default-service.jpg';
-                      
+                      const primaryImage =
+                        item.images && item.images.length > 0
+                          ? item.images[item.primaryImageIndex || 0]?.url ||
+                            item.images[item.primaryImageIndex || 0]
+                          : item.image || "/assets/default-service.jpg";
+
                       return (
                         <div
                           key={item.id}
@@ -208,33 +213,38 @@ const ServicesPage = () => {
                       name: service.name,
                       image: service.image,
                       images: service.images,
-                      primaryImageIndex: service.primaryImageIndex
+                      primaryImageIndex: service.primaryImageIndex,
                     });
 
                     // Get primary image or first image - handle object-based images
-                    const primaryImage = service.images && service.images.length > 0 
-                      ? (service.images[service.primaryImageIndex || 0]?.url || service.images[service.primaryImageIndex || 0])
-                      : service.image || '/assets/default-service.jpg';
-                    
-                    console.log("ServicesPage - Primary image selected:", primaryImage);
-                    
+                    const primaryImage =
+                      service.images && service.images.length > 0
+                        ? service.images[service.primaryImageIndex || 0]?.url ||
+                          service.images[service.primaryImageIndex || 0]
+                        : service.image || "/assets/default-service.jpg";
+
+                    console.log(
+                      "ServicesPage - Primary image selected:",
+                      primaryImage
+                    );
+
                     return (
                       <div key={service.id} className="services-page-card">
                         <div className="services-page-image">
                           <img src={primaryImage} alt={service.name} />
-                        {service.originalPrice && (
-                          <div className="services-page-discount-badge">
-                            خصم{" "}
-                            {Math.round(
-                              (1 -
-                                parseInt(service.price) /
-                                  parseInt(service.originalPrice)) *
-                                100
-                            )}
-                            %
-                          </div>
-                        )}
-                        <button
+                          {service.originalPrice && (
+                            <div className="services-page-discount-badge">
+                              خصم{" "}
+                              {Math.round(
+                                (1 -
+                                  parseInt(service.price) /
+                                    parseInt(service.originalPrice)) *
+                                  100
+                              )}
+                              %
+                            </div>
+                          )}
+                          {/* <button
                           className="services-page-bookmark-icon"
                           onClick={(e) => {
                             e.preventDefault();
@@ -251,19 +261,19 @@ const ServicesPage = () => {
                           >
                             <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z" />
                           </svg>
-                        </button>
-                      </div>
-
-                      <div className="services-page-info">
-                        <div className="services-page-category">
-                          {service.categoryName}
+                        </button> */}
                         </div>
-                        <h3>{service.name}</h3>
-                        <p className="services-page-description">
-                          {service.description}
-                        </p>
 
-                        {/* <div className="services-page-rating">
+                        <div className="services-page-info">
+                          <div className="services-page-category">
+                            {service.categoryName}
+                          </div>
+                          <h3>{service.name}</h3>
+                          <p className="services-page-description">
+                            {service.description}
+                          </p>
+
+                          {/* <div className="services-page-rating">
                         <div className="services-page-stars">
                           {"⭐".repeat(Math.floor(service.rating || 5))}
                         </div>
@@ -284,16 +294,23 @@ const ServicesPage = () => {
                         )}
                       </div> */}
 
-                        <div className="services-page-actions">
-                          <button
-                            className="services-page-book-btn"
-                            onClick={() => navigate("/book")}
-                          >
-                            احجز الآن
-                          </button>
+                          <div className="services-page-actions">
+                            <button
+                              className="services-page-book-btn"
+                              onClick={() =>
+                                navigate("/book", {
+                                  state: {
+                                    selectedService: service,
+                                    fromServicesPage: true,
+                                  },
+                                })
+                              }
+                            >
+                              احجز الآن
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
                     );
                   })}
                 </div>

@@ -123,10 +123,10 @@
 }
 
 /* Dashboard Sidebar */
-.dashboard-sidebar {
+/* .dashboard-sidebar {
   position: sticky;
   top: 100px;
-}
+} */
 
 .dashboard-nav {
   background-color: var(--white);
@@ -1888,4 +1888,87 @@
 
 .external-link-btn .nav-icon {
   font-size: 1.1rem;
+}
+
+/* Admin FAQ Management Styles */
+.admin-faq-question-cell {
+  max-width: 600px;
+}
+
+.admin-faq-question-text {
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.admin-faq-answer-preview {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 2.8em;
+  line-height: 1.4;
+}
+
+.admin-faq-category-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.admin-faq-category-general {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.admin-faq-category-services {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.admin-faq-category-booking {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.admin-faq-category-pricing {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.admin-faq-category-preparation {
+  background-color: #fce4ec;
+  color: #c2185b;
+}
+
+.admin-faq-category-safety {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+/* Responsive Admin FAQ Styles */
+@media (max-width: 768px) {
+  .admin-faq-question-cell {
+    max-width: 100%;
+  }
+
+  .admin-faq-answer-preview {
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    max-height: 1.4em;
+  }
+
+  .admin-faq-category-badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
 }

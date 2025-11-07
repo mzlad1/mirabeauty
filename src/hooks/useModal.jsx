@@ -10,10 +10,12 @@ export const useModal = () => {
     cancelText: "إلغاء",
     showCancel: false,
     onConfirm: null,
+    extraActionText: null,
+    onExtraAction: null,
   });
 
   const closeModal = () => {
-    setModalState(prev => ({ ...prev, isOpen: false }));
+    setModalState((prev) => ({ ...prev, isOpen: false }));
   };
 
   const showAlert = (message, type = "info", title = "") => {
@@ -29,22 +31,40 @@ export const useModal = () => {
     });
   };
 
-  const showSuccess = (message, onConfirmOrTitle = "نجح العملية", title = null) => {
+  const showSuccess = (
+    message,
+    onConfirmOrTitle = "نجح العملية",
+    title = null,
+    options = {}
+  ) => {
     // If second parameter is a function, it's a callback
-    if (typeof onConfirmOrTitle === 'function') {
+    if (typeof onConfirmOrTitle === "function") {
       setModalState({
         isOpen: true,
         type: "success",
         title: title || "نجح العملية",
         message,
-        confirmText: "موافق",
+        confirmText: options.confirmText || "موافق",
         cancelText: "إلغاء",
         showCancel: false,
         onConfirm: onConfirmOrTitle,
+        extraActionText: options.extraActionText || null,
+        onExtraAction: options.onExtraAction || null,
       });
     } else {
       // If second parameter is a string, it's the title
-      showAlert(message, "success", onConfirmOrTitle);
+      setModalState({
+        isOpen: true,
+        type: "success",
+        title: onConfirmOrTitle,
+        message,
+        confirmText: options.confirmText || "موافق",
+        cancelText: "إلغاء",
+        showCancel: false,
+        onConfirm: null,
+        extraActionText: options.extraActionText || null,
+        onExtraAction: options.onExtraAction || null,
+      });
     }
   };
 
