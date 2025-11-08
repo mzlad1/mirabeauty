@@ -2,17 +2,24 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./ProductDetailsPage.css";
 import { getProductById, getAllProducts } from "../services/productsService";
+import { getApprovedProductFeedbacks } from "../services/feedbackService";
 import CartOverlay from "../components/common/CartOverlay";
 import ProductCard from "../components/customer/ProductCard";
+import FeedbackModal from "../components/common/FeedbackModal";
+import { FEEDBACK_TYPES } from "../services/feedbackService";
+import { useAuth } from "../hooks/useAuth";
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { currentUser, userData } = useAuth();
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [productFeedbacks, setProductFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
@@ -29,17 +36,18 @@ const ProductDetailsPage = () => {
 
         // Fetch the main product
         const fetchedProduct = await getProductById(id);
-        
+
         console.log("ProductDetailsPage - Raw product data:", fetchedProduct);
 
         // Process the product data with enhanced details
         const processedProduct = {
           ...fetchedProduct,
-          images: fetchedProduct.images && fetchedProduct.images.length > 0
-            ? fetchedProduct.images.map(img => img?.url || img)
-            : fetchedProduct.image
-            ? [fetchedProduct.image]
-            : [],
+          images:
+            fetchedProduct.images && fetchedProduct.images.length > 0
+              ? fetchedProduct.images.map((img) => img?.url || img)
+              : fetchedProduct.image
+              ? [fetchedProduct.image]
+              : [],
           fullDescription:
             fetchedProduct.description ||
             "هذا المنتج مصنوع من أفضل المواد الطبيعية والآمنة على البشرة. يحتوي على مكونات فعالة تساعد في تحسين ملمس البشرة ونعومتها. مناسب لجميع أنواع البشرة ومختبر علمياً للصول على أفضل النتائج.",
@@ -61,8 +69,14 @@ const ProductDetailsPage = () => {
           ],
         };
 
-        console.log("ProductDetailsPage - Processed product data:", processedProduct);
-        console.log("ProductDetailsPage - Product images array:", processedProduct.images);
+        console.log(
+          "ProductDetailsPage - Processed product data:",
+          processedProduct
+        );
+        console.log(
+          "ProductDetailsPage - Product images array:",
+          processedProduct.images
+        );
 
         setProduct(processedProduct);
 
@@ -86,6 +100,10 @@ const ProductDetailsPage = () => {
         }
 
         setRelatedProducts(filteredRelated.slice(0, 4));
+
+        // Load product feedbacks
+        const feedbacks = await getApprovedProductFeedbacks(id);
+        setProductFeedbacks(feedbacks);
       } catch (error) {
         console.error("Error fetching product:", error);
         setError("حدث خطأ في تحميل المنتج. يرجى المحاولة مرة أخرى.");
@@ -478,53 +496,112 @@ const ProductDetailsPage = () => {
 
               {activeTab === "reviews" && (
                 <div className="product-details-tab-content">
-                  <h3>آراء العملاء</h3>
-                  <div className="product-details-reviews-summary">
-                    <div className="product-details-overall-rating">
-                      <span className="product-details-rating-number">
-                        {product.rating}
-                      </span>
-                      <div className="product-details-stars">
-                        {Array.from(
-                          { length: Math.floor(product.rating) },
-                          (_, i) => (
-                            <i key={i} className="fas fa-star"></i>
-                          )
-                        )}
-                      </div>
-                      <span>({product.reviewsCount} تقييم)</span>
-                    </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "1.5rem",
+                    }}
+                  >
+                    <h3>آراء العملاء</h3>
+                    <button
+                      className="btn-primary"
+                      onClick={() => setIsFeedbackModalOpen(true)}
+                    >
+                      <i className="fas fa-star"></i>
+                      أضف تقييمك
+                    </button>
                   </div>
-                  <div className="product-details-reviews-list">
-                    <div className="product-details-review-item">
-                      <div className="product-details-reviewer-info">
-                        <strong>سارة أحمد</strong>
-                        <div className="product-details-review-stars">
-                          {Array.from({ length: 5 }, (_, i) => (
-                            <i key={i} className="fas fa-star"></i>
-                          ))}
+
+                  {productFeedbacks.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "3rem 1rem" }}>
+                      <i
+                        className="fas fa-star"
+                        style={{
+                          fontSize: "3rem",
+                          color: "var(--gold)",
+                          marginBottom: "1rem",
+                        }}
+                      ></i>
+                      <p
+                        style={{
+                          color: "var(--charcoal)",
+                          fontSize: "1.1rem",
+                          marginBottom: "1rem",
+                        }}
+                      >
+                        لا توجد تقييمات بعد
+                      </p>
+                      <p
+                        style={{
+                          color: "var(--text-secondary)",
+                          marginBottom: "1.5rem",
+                        }}
+                      >
+                        كن أول من يقيم هذا المنتج!
+                      </p>
+                      <button
+                        className="btn-primary"
+                        onClick={() => setIsFeedbackModalOpen(true)}
+                      >
+                        <i className="fas fa-star"></i>
+                        أضف تقييمك الآن
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="product-details-reviews-summary">
+                        <div className="product-details-overall-rating">
+                          <span className="product-details-rating-number">
+                            {(
+                              productFeedbacks.reduce(
+                                (sum, f) => sum + f.rating,
+                                0
+                              ) / productFeedbacks.length
+                            ).toFixed(1)}
+                          </span>
+                          <div className="product-details-stars">
+                            {Array.from(
+                              {
+                                length: Math.floor(
+                                  productFeedbacks.reduce(
+                                    (sum, f) => sum + f.rating,
+                                    0
+                                  ) / productFeedbacks.length
+                                ),
+                              },
+                              (_, i) => (
+                                <i key={i} className="fas fa-star"></i>
+                              )
+                            )}
+                          </div>
+                          <span>({productFeedbacks.length} تقييم)</span>
                         </div>
                       </div>
-                      <p>
-                        منتج ممتاز! لاحظت الفرق من أول استخدام. بشرتي أصبحت أكثر
-                        نعومة وإشراقاً.
-                      </p>
-                    </div>
-                    <div className="product-details-review-item">
-                      <div className="product-details-reviewer-info">
-                        <strong>منى خالد</strong>
-                        <div className="product-details-review-stars">
-                          {Array.from({ length: 5 }, (_, i) => (
-                            <i key={i} className="fas fa-star"></i>
-                          ))}
-                        </div>
+                      <div className="product-details-reviews-list">
+                        {productFeedbacks.map((feedback) => (
+                          <div
+                            key={feedback.id}
+                            className="product-details-review-item"
+                          >
+                            <div className="product-details-reviewer-info">
+                              <strong>{feedback.name}</strong>
+                              <div className="product-details-review-stars">
+                                {Array.from(
+                                  { length: feedback.rating },
+                                  (_, i) => (
+                                    <i key={i} className="fas fa-star"></i>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                            <p>{feedback.text}</p>
+                          </div>
+                        ))}
                       </div>
-                      <p>
-                        أنصح به بشدة! مناسب جداً للبشرة الحساسة ولا يسبب أي
-                        تهيج.
-                      </p>
-                    </div>
-                  </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -606,6 +683,22 @@ const ProductDetailsPage = () => {
           setCartOpenedFromAdd(false);
         }}
         fromAddToCart={cartOpenedFromAdd}
+      />
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => {
+          setIsFeedbackModalOpen(false);
+          // Reload feedbacks after submitting
+          if (id) {
+            getApprovedProductFeedbacks(id).then(setProductFeedbacks);
+          }
+        }}
+        type={FEEDBACK_TYPES.PRODUCT}
+        productId={product?.id}
+        productName={product?.name}
+        currentUser={currentUser}
       />
     </div>
   );

@@ -200,14 +200,14 @@ const ReportsPage = ({ currentUser, userData }) => {
   const productStats = products
     .map((product) => {
       const deliveredProductOrders = deliveredOrders.filter((order) =>
-        order.items?.some((item) => item.productId === product.id)
+        order.items?.some((item) => item.id === product.id)
       );
       const totalSold = deliveredProductOrders.reduce((sum, order) => {
-        const item = order.items.find((i) => i.productId === product.id);
+        const item = order.items.find((i) => i.id === product.id);
         return sum + (item?.quantity || 0);
       }, 0);
       const revenue = deliveredProductOrders.reduce((sum, order) => {
-        const item = order.items.find((i) => i.productId === product.id);
+        const item = order.items.find((i) => i.id === product.id);
         return sum + parsePrice(item?.price || 0) * (item?.quantity || 0);
       }, 0);
       return {
@@ -328,6 +328,363 @@ const ReportsPage = ({ currentUser, userData }) => {
 
   const monthlyRevenue = getMonthlyRevenue();
 
+  const handlePrint = () => {
+    const printDate = new Date().toLocaleDateString("ar-SA", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    // Helper function to format currency
+    const formatCurrency = (amount) => `${parseFloat(amount).toFixed(2)} ₪`;
+
+    // Create print document
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head>
+        <meta charset="UTF-8">
+        <title>تقرير شامل - مركز ميرا بيوتي</title>
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: white;
+            color: #000;
+            direction: rtl;
+          }
+          .report-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #071626;
+          }
+          .report-header h1 {
+            color: #071626;
+            font-size: 28px;
+            margin-bottom: 10px;
+          }
+          .report-header p {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+          }
+          .section {
+            margin-bottom: 40px;
+            page-break-inside: avoid;
+          }
+          .section-title {
+            background: #071626;
+            color: white;
+            padding: 12px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+          }
+          .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+          }
+          .stat-box {
+            border: 2px solid #ddd;
+            padding: 15px;
+            text-align: center;
+          }
+          .stat-box h3 {
+            color: #071626;
+            font-size: 14px;
+            margin-bottom: 8px;
+          }
+          .stat-box .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+          }
+          .stat-box .sub-value {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+          }
+          table thead {
+            background: #071626;
+          }
+          table th {
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: bold;
+            border: 1px solid #333;
+            font-size: 14px;
+          }
+          table td {
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 13px;
+          }
+          table tbody tr:nth-child(even) {
+            background: #f5f5f5;
+          }
+          .page-break {
+            page-break-after: always;
+          }
+          @media print {
+            body { padding: 10px; }
+            .page-break { page-break-after: always; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="report-header">
+          <h1>مركز ميرا بيوتي - Mira Beauty Clinic</h1>
+          <p>تقرير شامل للأعمال والإحصائيات</p>
+          <p>تاريخ الطباعة: ${printDate}</p>
+        </div>
+
+        <!-- Overview Section -->
+        <div class="section">
+          <div class="section-title">نظرة عامة - Overview</div>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <h3>إجمالي الإيرادات</h3>
+              <div class="value">${formatCurrency(totalRevenue)}</div>
+              <div class="sub-value">مواعيد: ${formatCurrency(
+                appointmentRevenue
+              )} | طلبات: ${formatCurrency(ordersRevenue)}</div>
+            </div>
+            <div class="stat-box">
+              <h3>المواعيد</h3>
+              <div class="value">${totalAppointments}</div>
+              <div class="sub-value">مكتمل: ${completedAppointments} | ملغي: ${cancelledAppointments}</div>
+            </div>
+            <div class="stat-box">
+              <h3>الطلبات المسلمة</h3>
+              <div class="value">${totalOrders}</div>
+              <div class="sub-value">من أصل ${filteredOrders.length} طلب</div>
+            </div>
+          </div>
+        </div>
+        <div class="page-break"></div>
+
+        <!-- Revenue Section -->
+        <div class="section">
+          <div class="section-title">تقرير الإيرادات - Revenue Report</div>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <h3>إجمالي الإيرادات</h3>
+              <div class="value">${formatCurrency(totalRevenue)}</div>
+            </div>
+            <div class="stat-box">
+              <h3>إيرادات المواعيد</h3>
+              <div class="value">${formatCurrency(appointmentRevenue)}</div>
+            </div>
+            <div class="stat-box">
+              <h3>إيرادات الطلبات</h3>
+              <div class="value">${formatCurrency(ordersRevenue)}</div>
+            </div>
+          </div>
+        </div>
+        <div class="page-break"></div>
+
+        <!-- Services Section -->
+        <div class="section">
+          <div class="section-title">تقرير الخدمات - Services Report</div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>اسم الخدمة</th>
+                <th>عدد الحجوزات</th>
+                <th>الحجوزات المكتملة</th>
+                <th>نسبة الإنجاز</th>
+                <th>الإيرادات</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${serviceStats
+                .map(
+                  (service, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${service.name}</td>
+                  <td>${service.appointmentCount}</td>
+                  <td>${service.completedCount}</td>
+                  <td>${
+                    service.appointmentCount > 0
+                      ? (
+                          (service.completedCount / service.appointmentCount) *
+                          100
+                        ).toFixed(1)
+                      : 0
+                  }%</td>
+                  <td>${formatCurrency(service.revenue)}</td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+        <div class="page-break"></div>
+
+        <!-- Products Section -->
+        <div class="section">
+          <div class="section-title">تقرير المنتجات - Products Report</div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>اسم المنتج</th>
+                <th>الكمية المباعة</th>
+                <th>الإيرادات</th>
+                <th>السعر</th>
+                <th>المخزون</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${productStats
+                .map(
+                  (product, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${product.name}</td>
+                  <td>${product.totalSold || 0}</td>
+                  <td>${formatCurrency(product.revenue || 0)}</td>
+                  <td>${product.price}</td>
+                  <td>${product.stock || 0}</td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+        <div class="page-break"></div>
+
+        <!-- Staff Section -->
+        <div class="section">
+          <div class="section-title">تقرير أداء الموظفين - Staff Performance Report</div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>اسم الموظف</th>
+                <th>عدد المواعيد</th>
+                <th>المواعيد المكتملة</th>
+                <th>نسبة الإنجاز</th>
+                <th>الإيرادات المحققة</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${staffStats
+                .map(
+                  (member, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${member.name}</td>
+                  <td>${member.appointmentCount}</td>
+                  <td>${member.completedCount}</td>
+                  <td>${
+                    member.appointmentCount > 0
+                      ? (
+                          (member.completedCount / member.appointmentCount) *
+                          100
+                        ).toFixed(1)
+                      : 0
+                  }%</td>
+                  <td>${formatCurrency(member.revenue)}</td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+        <div class="page-break"></div>
+
+        <!-- Customers Section -->
+        <div class="section">
+          <div class="section-title">تقرير العملاء - Customers Report</div>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <h3>إجمالي العملاء</h3>
+              <div class="value">${customers.length}</div>
+            </div>
+            <div class="stat-box">
+              <h3>عملاء نشطين</h3>
+              <div class="value">${
+                customerStats.filter(
+                  (c) => c.appointmentCount > 0 || c.orderCount > 0
+                ).length
+              }</div>
+            </div>
+            <div class="stat-box">
+              <h3>إجمالي الإنفاق</h3>
+              <div class="value">${formatCurrency(
+                customerStats.reduce((sum, c) => sum + c.totalSpent, 0)
+              )}</div>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>اسم العميل</th>
+                <th>البريد الإلكتروني</th>
+                <th>عدد المواعيد</th>
+                <th>عدد الطلبات</th>
+                <th>إجمالي الإنفاق</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${customerStats
+                .slice(0, 20)
+                .map(
+                  (customer, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${customer.name}</td>
+                  <td>${customer.email}</td>
+                  <td>${customer.appointmentCount}</td>
+                  <td>${customer.orderCount}</td>
+                  <td>${formatCurrency(customer.totalSpent)}</td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() {
+              window.close();
+            }, 100);
+          };
+        </script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   if (loading) {
     return (
       <div className="reports-page">
@@ -341,18 +698,6 @@ const ReportsPage = ({ currentUser, userData }) => {
 
   return (
     <div className="reports-page">
-      {/* Page Header */}
-      <section className="reports-header">
-        <div className="container">
-          <div className="header-content">
-            <button className="btn-primary" onClick={() => window.print()}>
-              <i className="fas fa-print"></i>
-              طباعة التقرير
-            </button>
-          </div>
-        </div>
-      </section>
-
       {/* Date Range Filter */}
       <section className="date-filter-section">
         <div className="container">
@@ -496,13 +841,22 @@ const ReportsPage = ({ currentUser, userData }) => {
       {activeReport === "overview" && (
         <section className="report-content">
           <div className="container">
-            <h2>نظرة عامة</h2>
+            <div className="report-header-with-actions">
+              <h2>نظرة عامة</h2>
+              <button className="btn-primary print-btn" onClick={handlePrint}>
+                <i className="fas fa-print"></i>
+                طباعة التقرير
+              </button>
+            </div>
 
             {/* Summary Cards */}
             <div className="summary-grid">
               <div className="summary-card revenue">
                 <div className="card-icon">
-                  <i className="fas fa-dollar-sign"></i>
+                  <i
+                    className="fas fa-dollar-sign"
+                    style={{ color: "white" }}
+                  ></i>
                 </div>
                 <div className="card-info">
                   <h3>إجمالي الإيرادات</h3>
@@ -516,7 +870,10 @@ const ReportsPage = ({ currentUser, userData }) => {
 
               <div className="summary-card appointments">
                 <div className="card-icon">
-                  <i className="fas fa-calendar-check"></i>
+                  <i
+                    className="fas fa-calendar-check"
+                    style={{ color: "white" }}
+                  ></i>
                 </div>
                 <div className="card-info">
                   <h3>المواعيد</h3>
@@ -530,7 +887,10 @@ const ReportsPage = ({ currentUser, userData }) => {
 
               <div className="summary-card orders">
                 <div className="card-icon">
-                  <i className="fas fa-shopping-cart"></i>
+                  <i
+                    className="fas fa-shopping-cart"
+                    style={{ color: "white" }}
+                  ></i>
                 </div>
                 <div className="card-info">
                   <h3>الطلبات</h3>
@@ -543,7 +903,7 @@ const ReportsPage = ({ currentUser, userData }) => {
 
               <div className="summary-card consultations">
                 <div className="card-icon">
-                  <i className="fas fa-comments"></i>
+                  <i className="fas fa-comments" style={{ color: "white" }}></i>
                 </div>
                 <div className="card-info">
                   <h3>الاستشارات</h3>
@@ -664,7 +1024,13 @@ const ReportsPage = ({ currentUser, userData }) => {
       {activeReport === "revenue" && (
         <section className="report-content">
           <div className="container">
-            <h2>تقرير الإيرادات</h2>
+            <div className="report-header-with-actions">
+              <h2>تقرير الإيرادات</h2>
+              <button className="btn-primary print-btn" onClick={handlePrint}>
+                <i className="fas fa-print"></i>
+                طباعة التقرير
+              </button>
+            </div>
 
             <div className="revenue-summary">
               <div className="revenue-card total">
@@ -734,7 +1100,13 @@ const ReportsPage = ({ currentUser, userData }) => {
       {activeReport === "services" && (
         <section className="report-content">
           <div className="container">
-            <h2>تقرير الخدمات</h2>
+            <div className="report-header-with-actions">
+              <h2>تقرير الخدمات</h2>
+              <button className="btn-primary print-btn" onClick={handlePrint}>
+                <i className="fas fa-print"></i>
+                طباعة التقرير
+              </button>
+            </div>
 
             <div className="report-table-card">
               <table className="report-table">
@@ -779,7 +1151,13 @@ const ReportsPage = ({ currentUser, userData }) => {
       {activeReport === "products" && (
         <section className="report-content">
           <div className="container">
-            <h2>تقرير المنتجات</h2>
+            <div className="report-header-with-actions">
+              <h2>تقرير المنتجات</h2>
+              <button className="btn-primary print-btn" onClick={handlePrint}>
+                <i className="fas fa-print"></i>
+                طباعة التقرير
+              </button>
+            </div>
 
             <div className="report-table-card">
               <table className="report-table">
@@ -825,7 +1203,13 @@ const ReportsPage = ({ currentUser, userData }) => {
       {activeReport === "staff" && (
         <section className="report-content">
           <div className="container">
-            <h2>تقرير أداء الموظفين</h2>
+            <div className="report-header-with-actions">
+              <h2>تقرير أداء الموظفين</h2>
+              <button className="btn-primary print-btn" onClick={handlePrint}>
+                <i className="fas fa-print"></i>
+                طباعة التقرير
+              </button>
+            </div>
 
             <div className="report-table-card">
               <table className="report-table">
@@ -872,7 +1256,13 @@ const ReportsPage = ({ currentUser, userData }) => {
       {activeReport === "customers" && (
         <section className="report-content">
           <div className="container">
-            <h2>تقرير العملاء</h2>
+            <div className="report-header-with-actions">
+              <h2>تقرير العملاء</h2>
+              <button className="btn-primary print-btn" onClick={handlePrint}>
+                <i className="fas fa-print"></i>
+                طباعة التقرير
+              </button>
+            </div>
 
             <div className="customers-summary">
               <div className="summary-stat">

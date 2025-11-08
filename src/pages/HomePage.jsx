@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
-import { sampleTestimonials } from "../data/sampleTestimonials";
 import { getAllProducts } from "../services/productsService";
 import { getAllServices } from "../services/servicesService";
+import { getApprovedGeneralFeedbacks } from "../services/feedbackService";
 import PromotionalBanner from "../components/common/PromotionalBanner";
 import ProductCard from "../components/customer/ProductCard";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+import FeedbackModal from "../components/common/FeedbackModal";
 import { useNavigationLoading } from "../hooks/useNavigationLoading";
 import { useLoading } from "../hooks/useLoading";
+import { useAuth } from "../hooks/useAuth";
+import { FEEDBACK_TYPES } from "../services/feedbackService";
 import {
   createProgressTracker,
   preloadImagesWithProgress,
@@ -17,6 +20,7 @@ import {
 const HomePage = () => {
   const navigate = useNavigate();
   const { navigateWithLoading } = useNavigationLoading();
+  const { currentUser, userData } = useAuth();
   const {
     withMultipleLoading,
     registerTask,
@@ -34,8 +38,10 @@ const HomePage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [products, setProducts] = useState([]);
   const [services, setServices] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
 
   // Load products and services from Firebase with real progress tracking
   const loadData = async () => {
@@ -62,6 +68,16 @@ const HomePage = () => {
             const data = await getAllServices();
             onProgress(100);
             setServices(data);
+            return data;
+          },
+        },
+        {
+          taskId: "testimonials",
+          fn: async (onProgress) => {
+            onProgress(20);
+            const data = await getApprovedGeneralFeedbacks();
+            onProgress(100);
+            setTestimonials(data);
             return data;
           },
         },
@@ -322,23 +338,67 @@ const HomePage = () => {
         <div className="container">
           <div className="section-header text-center mb-3">
             <h2>آراء عميلاتنا</h2>
+            <button
+              className="btn-secondary"
+              onClick={() => setIsFeedbackModalOpen(true)}
+              style={{ marginTop: "1rem" }}
+            >
+              <i className="fas fa-star"></i>
+              شاركي رأيك
+            </button>
           </div>
-          <div className="testimonials-grid grid-3">
-            {sampleTestimonials.map((testimonial) => (
-              <div key={testimonial.id} className="testimonial-card card">
-                <div className="testimonial-rating">
-                  {"⭐".repeat(testimonial.rating)}
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "2rem" }}>
+              <LoadingSpinner />
+            </div>
+          ) : testimonials.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "3rem" }}>
+              <i
+                className="fas fa-comments"
+                style={{
+                  fontSize: "3rem",
+                  color: "var(--gold)",
+                  marginBottom: "1rem",
+                }}
+              ></i>
+              <p style={{ color: "var(--charcoal)", fontSize: "1.1rem" }}>
+                كوني أول من يشارك رأيها!
+              </p>
+              <button
+                className="btn-primary"
+                onClick={() => setIsFeedbackModalOpen(true)}
+                style={{ marginTop: "1rem" }}
+              >
+                <i className="fas fa-star"></i>
+                شاركي رأيك الآن
+              </button>
+            </div>
+          ) : (
+            <div className="testimonials-grid grid-3">
+              {testimonials.slice(0, 6).map((testimonial) => (
+                <div key={testimonial.id} className="testimonial-card card">
+                  <div className="testimonial-rating">
+                    {"⭐".repeat(testimonial.rating)}
+                  </div>
+                  <p className="testimonial-text">"{testimonial.text}"</p>
+                  <div className="testimonial-author">
+                    <h4>{testimonial.name}</h4>
+                    <span>{testimonial.service}</span>
+                  </div>
                 </div>
-                <p className="testimonial-text">"{testimonial.text}"</p>
-                <div className="testimonial-author">
-                  <h4>{testimonial.name}</h4>
-                  <span>{testimonial.service}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => setIsFeedbackModalOpen(false)}
+        type={FEEDBACK_TYPES.GENERAL}
+        currentUser={currentUser}
+      />
 
       {/* Call to Action */}
       <section className="cta-section section">

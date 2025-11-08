@@ -164,6 +164,16 @@ const Navigation = ({ currentUser, userData }) => {
                       التقارير
                     </Link>
                     <Link
+                      to="/admin/feedbacks"
+                      className="dropdown-item"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <span className="dropdown-icon">
+                        <i className="fas fa-comments"></i>
+                      </span>
+                      التقييمات
+                    </Link>
+                    <Link
                       to="/admin/orders"
                       className="dropdown-item"
                       onClick={() => setIsMobileMenuOpen(false)}

@@ -1,0 +1,246 @@
+import React, { useState } from "react";
+import "./FeedbackModal.css";
+import { createFeedback, FEEDBACK_TYPES } from "../../services/feedbackService";
+
+const FeedbackModal = ({
+  isOpen,
+  onClose,
+  type,
+  productId,
+  productName,
+  currentUser,
+}) => {
+  const [formData, setFormData] = useState({
+    name: currentUser?.displayName || "",
+    email: currentUser?.email || "",
+    rating: 5,
+    text: "",
+    service: type === FEEDBACK_TYPES.GENERAL ? "" : productName || "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRatingClick = (rating) => {
+    setFormData((prev) => ({ ...prev, rating }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
+
+    try {
+      // Validate form
+      if (!formData.name.trim() || !formData.text.trim()) {
+        setError("الرجاء ملء جميع الحقول المطلوبة");
+        setSubmitting(false);
+        return;
+      }
+
+      if (type === FEEDBACK_TYPES.GENERAL && !formData.service.trim()) {
+        setError("الرجاء إدخال اسم الخدمة");
+        setSubmitting(false);
+        return;
+      }
+
+      // Create feedback object
+      const feedbackData = {
+        type: type,
+        name: formData.name.trim(),
+        email: formData.email?.trim() || null,
+        rating: formData.rating,
+        text: formData.text.trim(),
+        userId: currentUser?.uid || null,
+      };
+
+      // Add type-specific fields
+      if (type === FEEDBACK_TYPES.GENERAL) {
+        feedbackData.service = formData.service.trim();
+      } else {
+        feedbackData.productId = productId;
+        feedbackData.productName = productName;
+      }
+
+      await createFeedback(feedbackData);
+
+      setSuccess(true);
+      setTimeout(() => {
+        onClose();
+        setSuccess(false);
+        setFormData({
+          name: currentUser?.displayName || "",
+          email: currentUser?.email || "",
+          rating: 5,
+          text: "",
+          service: "",
+        });
+      }, 2000);
+    } catch (err) {
+      console.error("Error submitting feedback:", err);
+      setError("حدث خطأ أثناء إرسال التقييم. يرجى المحاولة مرة أخرى.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="feedback-modal-overlay" onClick={onClose}>
+      <div className="feedback-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="feedback-modal-close" onClick={onClose}>
+          <i className="fas fa-times"></i>
+        </button>
+
+        <div className="feedback-modal-header">
+          <h2>
+            {type === FEEDBACK_TYPES.GENERAL
+              ? "شاركنا رأيك"
+              : `تقييم ${productName}`}
+          </h2>
+          <p>
+            {type === FEEDBACK_TYPES.GENERAL
+              ? "نحن نقدر ملاحظاتك لتحسين خدماتنا"
+              : "ساعدي الآخرين باختيار أفضل المنتجات"}
+          </p>
+        </div>
+
+        {success ? (
+          <div className="feedback-success-message">
+            <i className="fas fa-check-circle"></i>
+            <h3>شكراً لك!</h3>
+            <p>تم إرسال تقييمك بنجاح. سيتم مراجعته قريباً.</p>
+          </div>
+        ) : (
+          <form className="feedback-modal-form" onSubmit={handleSubmit}>
+            {error && (
+              <div className="feedback-error-message">
+                <i className="fas fa-exclamation-circle"></i>
+                {error}
+              </div>
+            )}
+
+            <div className="feedback-form-group">
+              <label htmlFor="name">
+                الاسم <span className="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="أدخل اسمك"
+                required
+              />
+            </div>
+
+            <div className="feedback-form-group">
+              <label htmlFor="email">البريد الإلكتروني (اختياري)</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="your@email.com"
+              />
+            </div>
+
+            {type === FEEDBACK_TYPES.GENERAL && (
+              <div className="feedback-form-group">
+                <label htmlFor="service">
+                  الخدمة <span className="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="service"
+                  name="service"
+                  value={formData.service}
+                  onChange={handleChange}
+                  placeholder="مثال: إزالة الشعر بالليزر"
+                  required
+                />
+              </div>
+            )}
+
+            <div className="feedback-form-group">
+              <label>
+                التقييم <span className="required">*</span>
+              </label>
+              <div className="feedback-rating-selector">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    className={`feedback-star ${
+                      star <= formData.rating ? "active" : ""
+                    }`}
+                    onClick={() => handleRatingClick(star)}
+                  >
+                    <i
+                      className={
+                        star <= formData.rating ? "fas fa-star" : "far fa-star"
+                      }
+                    ></i>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="feedback-form-group">
+              <label htmlFor="text">
+                رأيك <span className="required">*</span>
+              </label>
+              <textarea
+                id="text"
+                name="text"
+                value={formData.text}
+                onChange={handleChange}
+                placeholder="شاركنا تجربتك..."
+                rows="4"
+                required
+              />
+            </div>
+
+            <div className="feedback-modal-actions">
+              <button
+                type="button"
+                className="feedback-btn-secondary"
+                onClick={onClose}
+                disabled={submitting}
+              >
+                إلغاء
+              </button>
+              <button
+                type="submit"
+                className="feedback-btn-primary"
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin"></i>
+                    جاري الإرسال...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-paper-plane" style={{ color: "white" }}></i>
+                    إرسال التقييم
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default FeedbackModal;

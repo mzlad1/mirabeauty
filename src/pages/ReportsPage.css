@@ -157,6 +157,7 @@
   background-color: rgba(218, 165, 32, 0.05);
 }
 
+/* if active the fa icon color should change to white */
 .report-tab.active {
   background-color: var(--navy-blue);
   border-color: var(--navy-blue);
@@ -167,9 +168,39 @@
   font-size: 1.1rem;
 }
 
+.report-tab.active i {
+  color: var(--white);
+}
 /* Report Content */
 .report-content {
   padding: 3rem 0;
+}
+
+.report-header-with-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid var(--gold);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.report-header-with-actions h2 {
+  color: var(--navy-blue);
+  font-size: 2rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.report-header-with-actions .print-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  padding: 0.75rem 1.5rem;
 }
 
 .report-content h2 {
@@ -229,9 +260,10 @@
   justify-content: center;
   font-size: 1.5rem;
   flex-shrink: 0;
+  background: linear-gradient(135deg, var(--gold), #d4af37);
 }
 
-.summary-card.revenue .card-icon {
+/* .summary-card.revenue .card-icon {
   background: linear-gradient(135deg, var(--gold), #d4af37);
   color: var(--white);
 }
@@ -249,7 +281,7 @@
 .summary-card.consultations .card-icon {
   background: linear-gradient(135deg, #17a2b8, #117a8b);
   color: var(--white);
-}
+} */
 
 .summary-card .card-info {
   flex: 1;
@@ -339,9 +371,10 @@
   height: 100%;
   transition: width 0.5s ease;
   border-radius: 12px;
+  background: linear-gradient(90deg, var(--gold), #d4af37);
 }
 
-.status-fill.completed {
+/* .status-fill.completed {
   background: linear-gradient(90deg, #28a745, #218838);
 }
 
@@ -355,7 +388,7 @@
 
 .status-fill.cancelled {
   background: linear-gradient(90deg, #dc3545, #c82333);
-}
+} */
 
 /* Top Items List */
 .top-items-list {
@@ -626,6 +659,16 @@
   margin: 0;
 }
 
+/* Print only header - hide on screen */
+.print-only-header {
+  display: none;
+}
+
+/* Print all reports container - hide on screen */
+.print-all-reports {
+  display: none;
+}
+
 /* Loading State */
 .loading-state {
   min-height: 60vh;
@@ -661,21 +704,261 @@
 
 /* Print Styles */
 @media print {
-  .reports-header .btn-primary,
+  /* Hide unnecessary elements */
+  .print-btn,
   .date-filter-section,
-  .report-navigation {
-    display: none;
+  .report-navigation,
+  .charts-grid,
+  .monthly-revenue-chart {
+    display: none !important;
+  }
+
+  /* Show print containers */
+  .print-only-header,
+  .print-all-reports {
+    display: block !important;
+  }
+
+  /* Hide main reports page when printing all */
+  .reports-page {
+    display: none !important;
+  }
+
+  /* Reset page styling */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  .reports-page {
+    background: white !important;
+  }
+
+  /* Print all reports container */
+  .print-all-reports {
+    background: white !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem !important;
+  }
+
+  .print-all-reports .report-content {
+    page-break-after: always;
+  }
+
+  .print-all-reports .report-content:last-child {
+    page-break-after: auto;
+  }
+
+  /* Print header */
+  .report-content::before {
+    content: "";
+    display: block;
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--navy-blue);
+  }
+
+  .report-header-with-actions {
+    border-bottom: 3px solid var(--navy-blue);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .report-header-with-actions h2 {
+    color: var(--navy-blue) !important;
+    font-size: 1.75rem;
+    font-weight: bold;
+    text-align: center;
   }
 
   .report-content {
-    padding: 1rem 0;
+    padding: 0;
+    page-break-after: always;
   }
 
-  .summary-card,
-  .chart-card,
-  .report-table-card {
+  .container {
+    max-width: 100% !important;
+    padding: 0 1rem !important;
+  }
+
+  /* Summary cards for print */
+  .summary-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+    margin-bottom: 2rem !important;
+    page-break-inside: avoid;
+  }
+
+  .summary-card {
+    border: 2px solid #333 !important;
+    background: white !important;
+    padding: 1rem !important;
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+
+  .summary-card .card-icon {
+    background: var(--navy-blue) !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .summary-card .card-info h3 {
+    color: var(--navy-blue) !important;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+
+  .summary-card .amount,
+  .summary-card .stat-number {
+    color: #000 !important;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  .summary-card .sub-text {
+    color: #666 !important;
+    font-size: 0.875rem;
+  }
+
+  /* Revenue summary for print */
+  .revenue-summary {
+    display: flex !important;
+    gap: 1rem !important;
+    margin-bottom: 2rem !important;
+    page-break-inside: avoid;
+  }
+
+  .revenue-card {
+    border: 2px solid #333 !important;
+    background: white !important;
+    padding: 1rem !important;
+    flex: 1;
+  }
+
+  .revenue-card h3 {
+    color: var(--navy-blue) !important;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+
+  .revenue-amount {
+    color: #000 !important;
+    font-size: 1.25rem;
+    font-weight: bold;
+  }
+
+  /* Table styles for print */
+  .report-table-card {
+    border: 2px solid #333 !important;
+    background: white !important;
+    padding: 0 !important;
+    margin-bottom: 2rem !important;
+    page-break-inside: auto;
+  }
+
+  .report-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    background: white !important;
+  }
+
+  .report-table thead {
+    background: var(--navy-blue) !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .report-table th {
+    background: var(--navy-blue) !important;
+    color: white !important;
+    padding: 0.75rem 0.5rem !important;
+    text-align: center !important;
+    font-weight: bold !important;
+    border: 1px solid #333 !important;
+    font-size: 0.875rem !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .report-table td {
+    padding: 0.75rem 0.5rem !important;
+    text-align: center !important;
+    border: 1px solid #333 !important;
+    color: #000 !important;
+    font-size: 0.875rem !important;
+    background: white !important;
+  }
+
+  .report-table tbody tr:nth-child(even) {
+    background: #f5f5f5 !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .report-table tbody tr:hover {
+    background: white !important;
+  }
+
+  /* Customers summary for print */
+  .customers-summary {
+    display: flex !important;
+    gap: 1rem !important;
+    margin-bottom: 2rem !important;
+    page-break-inside: avoid;
+  }
+
+  .summary-stat {
+    border: 2px solid #333 !important;
+    background: white !important;
+    padding: 1rem !important;
+    text-align: center;
+    flex: 1;
+  }
+
+  .summary-stat h3 {
+    color: var(--navy-blue) !important;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+
+  .summary-stat p {
+    color: #000 !important;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  /* Page breaks */
+  .summary-card,
+  .revenue-card,
+  .summary-stat {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .report-table tbody tr {
+    page-break-inside: avoid;
+  }
+
+  /* Add print date/time footer */
+  .report-content::after {
+    content: "تاريخ الطباعة: " attr(data-print-date);
+    display: block;
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ccc;
+    font-size: 0.875rem;
+    color: #666;
+  }
+
+  /* Remove any shadows and unnecessary styling */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
   }
 }
 
@@ -704,6 +987,20 @@
     font-size: 2rem;
   }
 
+  .report-header-with-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .report-header-with-actions h2 {
+    font-size: 1.75rem;
+  }
+
+  .report-header-with-actions .print-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
   .summary-grid {
     grid-template-columns: 1fr;
   }
@@ -723,7 +1020,7 @@
   }
 
   .report-tabs {
-    flex-direction: column;
+    flex-direction: row;
   }
 
   .report-tab {

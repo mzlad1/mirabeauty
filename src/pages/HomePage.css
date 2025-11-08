@@ -590,7 +590,10 @@
 }
 
 .testimonials-grid {
-  gap: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  justify-content: start;
 }
 
 /* Luxury testimonial card styling */
@@ -785,7 +788,10 @@
 
   .services-grid,
   .testimonials-grid {
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    justify-content: start;
   }
   /* Why Choose Us responsive (tablet) */
   .why-grid {
@@ -894,6 +900,11 @@
     padding: 2rem 1.5rem;
   }
 
+  .testimonials-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
   .cta-section {
     min-height: 200px;
     display: flex;
@@ -998,7 +1009,10 @@
     padding: 1.5rem 1rem;
   }
 
-  .services-grid,
+  .services-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
   .testimonials-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
