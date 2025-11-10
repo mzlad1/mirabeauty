@@ -294,6 +294,9 @@
   transition: all 0.3s cubic-bezier(0.4, 1, 0.3, 1);
   overflow: hidden;
   /* padding: 2.5rem 2rem; */
+    height: 100%;                  /* مهم: الكارد يملأ خانته */
+  display: flex;                 /* ترتيب عمودي داخل الكارد */
+  flex-direction: column;
 }
 
 .services-page-card:hover {
@@ -388,9 +391,12 @@
 /* Service Info */
 .services-page-info {
   padding: 1.5rem;
-}
+  display: flex;
+  flex-direction: column;
+  flex: 1;  }
 
 .services-page-category {
+  width: fit-content;
   background-color: var(--navy-blue);
   color: var(--white);
   padding: 4px 8px;
@@ -413,6 +419,7 @@
   margin-bottom: 1rem;
   opacity: 0.8;
   line-height: 1.5;
+  flex: 1;
 }
 
 .services-page-rating {
@@ -453,7 +460,8 @@
 .services-page-actions {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 0.5rem;
+  gap: .5rem;
+  margin-top: auto;              /* يثبتها أسفل .services-page-info */
 }
 
 .services-page-book-btn {
