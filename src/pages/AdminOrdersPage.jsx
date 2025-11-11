@@ -4,7 +4,7 @@ import "./AdminOrdersPage.css";
 import CustomModal from "../components/common/CustomModal";
 import OrderDetailsModal from "../components/dashboard/OrderDetailsModal";
 import { useModal } from "../hooks/useModal";
-import { formatFirestoreDate } from "../utils/dateHelpers";
+import { formatFirestoreDateTime } from "../utils/dateHelpers";
 import {
   getAllOrders,
   updateOrderStatus,
@@ -341,7 +341,7 @@ const AdminOrdersPage = () => {
                             {ORDER_STATUS_DISPLAY[order.status] || order.status}
                           </span>
                         </td>
-                        <td>{formatFirestoreDate(order.createdAt)}</td>
+                        <td>{formatFirestoreDateTime(order.createdAt)}</td>
                         <td>
                           <div className="action-buttons">
                             <button

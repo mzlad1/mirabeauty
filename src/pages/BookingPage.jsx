@@ -597,11 +597,7 @@ const BookingPage = ({ currentUser, userData }) => {
                   </button>
                   <h2>
                     اختاري الخدمة -{" "}
-                    {selectedCategory === "بشرة"
-                      ? "جلسات البشرة"
-                      : selectedCategory === "ليزر"
-                      ? "جلسات الليزر"
-                      : `جلسات ${selectedCategory}`}
+                    {`جلسات ${selectedCategory}`}
                   </h2>
                 </div>
                 <div className="services-selection">
@@ -672,7 +668,6 @@ const BookingPage = ({ currentUser, userData }) => {
                             <span className="duration">
                               المدة: {service.duration}
                             </span>
-                            <span className="price">{service.price}</span>
                           </div>
                         </div>
                       </div>
@@ -697,9 +692,6 @@ const BookingPage = ({ currentUser, userData }) => {
                   </div>
                   <div className="info-item">
                     <strong>المدة:</strong> {selectedService?.duration || 60}
-                  </div>
-                  <div className="info-item">
-                    <strong>السعر:</strong> {selectedService?.price}
                   </div>
                 </div>
                 <div className="datetime-selection">

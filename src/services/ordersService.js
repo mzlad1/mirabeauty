@@ -151,12 +151,11 @@ export const getOrderById = async (orderId) => {
 };
 
 // Update order status
-export const updateOrderStatus = async (orderId, status, adminNotes = "") => {
+export const updateOrderStatus = async (orderId, status = "") => {
   try {
     const orderRef = doc(db, ORDERS_COLLECTION, orderId);
     await updateDoc(orderRef, {
       status,
-      adminNotes,
       updatedAt: Timestamp.now(),
     });
 
