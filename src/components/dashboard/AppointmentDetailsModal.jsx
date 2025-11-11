@@ -6,6 +6,7 @@ const AppointmentDetailsModal = ({
   onClose,
   appointment,
   userRole = "staff", // "staff" or "admin"
+  onSaveInternalNote, // optional callback: (appointmentId, note) => Promise
 }) => {
   if (!isOpen || !appointment) return null;
 
@@ -23,6 +24,37 @@ const AppointmentDetailsModal = ({
 
   const handleClose = () => {
     onClose();
+  };
+
+  const [internalNote, setInternalNote] = React.useState(
+    appointment?.staffInternalNote || ""
+  );
+  const [savingInternal, setSavingInternal] = React.useState(false);
+
+  React.useEffect(() => {
+    setInternalNote(appointment?.staffInternalNote || "");
+  }, [appointment?.staffInternalNote]);
+
+  const saveInternalNote = async () => {
+    if (!appointment?.id) return;
+    try {
+      setSavingInternal(true);
+      if (typeof onSaveInternalNote === "function") {
+        await onSaveInternalNote(appointment.id, internalNote);
+      } else {
+        // Fallback: dispatch a window event so parent can listen
+        window.dispatchEvent(
+          new CustomEvent("saveInternalNote", {
+            detail: { appointmentId: appointment.id, note: internalNote },
+          })
+        );
+      }
+    } catch (err) {
+      console.error("Failed to save internal note:", err);
+      // swallow - parent should handle errors
+    } finally {
+      setSavingInternal(false);
+    }
   };
 
   const getStatusColor = (status) => {
@@ -121,7 +153,7 @@ const AppointmentDetailsModal = ({
 
             {appointment.notes && (
               <div className="detail-item full-width">
-                <span className="detail-label">ملاحظات العميل:</span>
+                <span className="detail-label">ملاحظات الحجز:</span>
                 <span className="detail-value">{appointment.notes}</span>
               </div>
             )}
@@ -130,12 +162,12 @@ const AppointmentDetailsModal = ({
           {/* Notes Section */}
           <div className="appointment-notes-section">
             {/* 1. Customer Note (when booking) */}
-            {appointment.customerNote && (
+            {appointment.notes && (
               <div className="note-item customer-note">
                 <h4>
-                  <i className="fas fa-comment"></i> ملاحظة العميل (عند الحجز):
+                  <i className="fas fa-comment"></i> ملاحظة العميل
                 </h4>
-                <p>{appointment.customerNote}</p>
+                <p>{appointment.notes}</p>
               </div>
             )}
 
@@ -144,14 +176,14 @@ const AppointmentDetailsModal = ({
               <div className="note-item admin-note">
                 <h4>
                   <i className="fas fa-user-shield"></i> ملاحظة الإدارة للعميل
-                  (عند القبول أو الالغاء):
+                  (عند التأكيد أو الالغاء):
                 </h4>
                 <p>{appointment.adminNote}</p>
               </div>
             )}
 
-            {/* 3. Staff Note to Customer (after completion) */}
-            {appointment.staffNoteToCustomer && (
+            {/* 3. Staff Note to Customer (after completion) - stored as staffNoteToCustomer when completed */}
+            {(appointment.staffNoteToCustomer) && (
               <div className="note-item staff-note-customer">
                 <h4>
                   <i className="fas fa-user-nurse"></i> ملاحظة الموظفة للعميل
@@ -161,7 +193,7 @@ const AppointmentDetailsModal = ({
               </div>
             )}
 
-            {/* 4. Staff Internal Note (only for admin/staff) */}
+            {/* 4. Staff Internal Note (only for admin/staff) - stored as staffInternalNote */}
             {appointment.staffInternalNote && (
               <div className="note-item staff-internal-note">
                 <h4>
@@ -172,7 +204,48 @@ const AppointmentDetailsModal = ({
               </div>
             )}
 
-            {!appointment.customerNote &&
+            {/* Editable internal note for staff/admin when appointment completed */}
+            {(userRole === "staff" || userRole === "admin") &&
+              appointment.status === "مكتمل" && (
+                <div className="note-item staff-internal-note-edit">
+                  <h4>
+                    <i className="fas fa-clipboard-list"></i> ملاحظة داخلية
+                    (قابلة للتعديل من قبل الموظف عند الإتمام)
+                  </h4>
+
+                  <textarea
+                    value={internalNote}
+                    onChange={(e) => setInternalNote(e.target.value)}
+                    rows={4}
+                    className="admin-appointment-edit-form-textarea"
+                    placeholder="أضف ملاحظة داخلية مرئية فقط للموظفين والإدارة..."
+                    style={{ width: "100%", marginTop: "0.5rem" }}
+                  />
+
+                  <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem" }}>
+                    <button
+                      className="btn-primary"
+                      onClick={saveInternalNote}
+                      disabled={savingInternal}
+                    >
+                      {savingInternal ? "جاري الحفظ..." : "حفظ الملاحظة الداخلية"}
+                    </button>
+                    <button
+                      className="btn-secondary"
+                      onClick={() => setInternalNote(appointment.staffInternalNote || "")}
+                      disabled={savingInternal}
+                    >
+                      تراجع
+                    </button>
+                  </div>
+
+                  <small style={{ color: "#666", display: "block", marginTop: "0.5rem" }}>
+                    هذه الملاحظة خاصة بالموظفين والإدارة ولن تُعرض للعميل.
+                  </small>
+                </div>
+              )}
+
+            {!appointment.note &&
               !appointment.adminNote &&
               !appointment.staffNoteToCustomer &&
               !appointment.staffInternalNote && (

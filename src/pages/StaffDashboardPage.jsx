@@ -6,6 +6,7 @@ import {
   updateAppointmentStatus,
   confirmAppointment,
   completeAppointment,
+  updateAppointment,
 } from "../services/appointmentsService";
 import {
   getCustomers,
@@ -244,11 +245,11 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
   // Handle appointment completion with notes
   const handleAppointmentCompletion = async (
     appointmentId,
-    customerNote,
-    staffNote
+    staffNoteToCustomer,
+    staffInternalNote
   ) => {
     try {
-      await completeAppointment(appointmentId, customerNote, staffNote);
+      await completeAppointment(appointmentId, staffNoteToCustomer, staffInternalNote);
       await reloadAppointments();
       showSuccess("تم إتمام الموعد بنجاح");
     } catch (error) {
@@ -268,6 +269,18 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
   const handleViewAppointmentDetails = (appointment) => {
     setAppointmentToView(appointment);
     setIsDetailsModalOpen(true);
+  };
+
+  // Save internal staff note (from AppointmentDetailsModal)
+  const handleSaveInternalNote = async (appointmentId, note) => {
+    try {
+      await updateAppointment(appointmentId, { staffInternalNote: note });
+      await reloadAppointments();
+      showSuccess("تم حفظ الملاحظة الداخلية");
+    } catch (error) {
+      console.error("Error saving internal note:", error);
+      showError("فشل في حفظ الملاحظة الداخلية");
+    }
   };
 
   // Handle book appointment for customer
@@ -818,9 +831,17 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                             </div>
                             {appointment.notes && (
                               <div className="appointment-notes">
-                                <h5>ملاحظات:</h5>
+                                <h5>ملاحظات العميل:</h5>
                                 <p>{appointment.notes}</p>
                               </div>
+                            
+                            )}
+                            {appointment.adminNote && (
+                              <div className="appointment-notes">
+                                <h5>ملاحظات المدير:</h5>
+                                <p>{appointment.adminNote}</p>
+                              </div>
+                            
                             )}
                           </div>
                           <div className="appointment-actions">
@@ -1232,6 +1253,7 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
             setIsDetailsModalOpen(false);
             setAppointmentToView(null);
           }}
+          onSaveInternalNote={handleSaveInternalNote}
         />
       )}
 

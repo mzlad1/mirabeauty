@@ -233,15 +233,22 @@ export const confirmAppointment = async (appointmentId) => {
 };
 
 // Complete appointment
-export const completeAppointment = async (appointmentId, customerNote = "", staffNote = "") => {
+// noteFromStaffToCustomer will be stored in `staffNoteToCustomer` (and kept in `customerNote` for compatibility)
+export const completeAppointment = async (
+  appointmentId,
+  staffNoteToCustomer = "",
+  staffInternalNote = ""
+) => {
   try {
     const appointmentDoc = doc(db, APPOINTMENTS_COLLECTION, appointmentId);
     await updateDoc(appointmentDoc, {
       status: "مكتمل", // completed
       completedAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-      customerNote: customerNote, // Note visible to customer
-      staffNote: staffNote, // Note visible only to staff and admin
+      // staff -> customer note: prefer new field
+      staffNoteToCustomer: noteFromStaffToCustomer,
+      // internal note visible only to staff/admin
+      staffInternalNote: staffInternalNote,
     });
 
     return appointmentId;

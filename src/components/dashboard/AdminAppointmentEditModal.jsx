@@ -235,23 +235,11 @@ const AdminAppointmentEditModal = ({
           </div>
 
           {/* Customer Note - Read Only */}
-          {appointment?.customerNote && (
+          {appointment?.notes && (
             <div className="admin-appointment-edit-form-row">
               <div className="admin-appointment-edit-form-group">
-                <label htmlFor="customerNote">ملاحظة العميل</label>
-                <textarea
-                  id="customerNote"
-                  name="customerNote"
-                  value={appointment.customerNote}
-                  readOnly
-                  className="admin-appointment-edit-form-textarea readonly"
-                  rows="3"
-                  style={{
-                    backgroundColor: "#f5f5f5",
-                    cursor: "not-allowed",
-                    border: "1px solid #ddd",
-                  }}
-                />
+                <label htmlFor="notes">ملاحظة العميل</label>
+                <span className="detail-value">{appointment.notes}</span>
                 <small style={{ color: "#666", fontSize: "0.85rem" }}>
                   <i className="fas fa-lock"></i> هذه الملاحظة من العميل ولا
                   يمكن تعديلها

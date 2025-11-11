@@ -640,13 +640,13 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                                 )}
                               </span>
                             </div>
-                            {appointment.customerNote && (
+                            {appointment.note && (
                               <div className="detail-row">
                                 <span className="label">
                                   <i className="fas fa-comment"></i> ملاحظاتك:
                                 </span>
                                 <span className="value">
-                                  {appointment.customerNote}
+                                  {appointment.note}
                                 </span>
                               </div>
                             )}
@@ -670,8 +670,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                                     fontWeight: "600",
                                   }}
                                 >
-                                  <i className="fas fa-user-shield"></i> ملاحظة
-                                  من الإدارة:
+                                  <i className="fas fa-user-shield"></i> ملاحظة من الإدارة عند الحجز:
                                 </span>
                                 <span
                                   className="value"
@@ -704,8 +703,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                                     fontWeight: "600",
                                   }}
                                 >
-                                  <i className="fas fa-user-nurse"></i> ملاحظة
-                                  من الموظفة:
+                                  <i className="fas fa-user-nurse"></i> ملاحظة من الموظفة:
                                 </span>
                                 <span
                                   className="value"
@@ -904,12 +902,12 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                                 "{appointment.feedback}"
                               </p>
                             )}
-                            {appointment.customerNote && (
+                            {appointment.notes && (
                               <div className="customer-notes">
                                 <strong>
                                   <i className="fas fa-comment"></i> ملاحظاتك:
                                 </strong>
-                                <p>{appointment.customerNote}</p>
+                                <p>{appointment.notes}</p>
                               </div>
                             )}
 
@@ -932,8 +930,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                                     marginBottom: "0.5rem",
                                   }}
                                 >
-                                  <i className="fas fa-user-shield"></i> ملاحظة
-                                  من الإدارة:
+                                  <i className="fas fa-user-shield"></i> ملاحظة من الإدارة عند الحجز:
                                 </strong>
                                 <p style={{ color: "#071626", margin: 0 }}>
                                   {appointment.adminNote}

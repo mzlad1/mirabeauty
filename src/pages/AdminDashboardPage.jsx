@@ -405,6 +405,18 @@ const AdminDashboardPage = ({ currentUser }) => {
     setIsDetailsModalOpen(true);
   };
 
+  // Save internal staff note (from AppointmentDetailsModal)
+  const handleSaveInternalNote = async (appointmentId, note) => {
+    try {
+      await updateAppointment(appointmentId, { staffInternalNote: note });
+      await loadAppointments();
+      showSuccess("تم حفظ الملاحظة الداخلية");
+    } catch (error) {
+      console.error("Error saving internal note:", error);
+      showError("فشل في حفظ الملاحظة الداخلية");
+    }
+  };
+
   const handleDeleteAppointment = async (appointmentId, customerName) => {
     showConfirm(
       `هل أنت متأكد من حذف موعد العميل "${customerName}"؟\n\nتحذير: سيتم حذف الموعد بشكل نهائي.`,
@@ -1653,14 +1665,14 @@ const AdminDashboardPage = ({ currentUser }) => {
                               </td>
                               <td>
                                 <div className="notes-cell">
-                                  {appointment.customerNote ? (
-                                    <span title={appointment.customerNote}>
-                                      {appointment.customerNote.length > 30
-                                        ? `${appointment.customerNote.substring(
+                                  {appointment.notes ? (
+                                    <span title={appointment.notes}>
+                                      {appointment.notes.length > 30
+                                        ? `${appointment.notes.substring(
                                             0,
                                             30
                                           )}...`
-                                        : appointment.customerNote}
+                                        : appointment.notes}
                                     </span>
                                   ) : (
                                     <span className="no-notes">-</span>
@@ -3169,6 +3181,7 @@ const AdminDashboardPage = ({ currentUser }) => {
             setIsDetailsModalOpen(false);
             setAppointmentToView(null);
           }}
+          onSaveInternalNote={handleSaveInternalNote}
         />
       )}
 

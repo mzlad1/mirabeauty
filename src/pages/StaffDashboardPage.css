@@ -618,6 +618,7 @@
   background-color: var(--white);
   padding: 1rem;
   border: 2px solid var(--border-color);
+  margin-top: 10px;
 }
 
 .appointment-notes h5 {
