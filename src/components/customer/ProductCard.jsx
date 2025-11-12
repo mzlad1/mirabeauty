@@ -86,7 +86,7 @@ const ProductCard = ({ product, onAddToCart }) => {
             {"⭐".repeat(Math.floor(product.rating))}
           </span>
           <span className="product-card-rating-text">
-            {product.rating} ({product.reviewsCount} تقييم)
+            {product.rating} ({product.reviewsCount} تقييمات)
           </span>
         </div>
 

@@ -323,6 +323,7 @@ const AdminOrdersPage = () => {
                               <Link
                                 to={`/admin/users/${order.userId}`}
                                 className="customer-name customer-name-link"
+                                target="_blank"
                               >
                                 {order.customerInfo.name}
                               </Link>

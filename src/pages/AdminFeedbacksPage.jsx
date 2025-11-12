@@ -408,6 +408,7 @@ const AdminFeedbacksPage = ({ currentUser, userData }) => {
                           <Link
                             to={`/admin/users/${feedback.userId}`}
                             className="feedback-user-name-link"
+                            target="_blank"
                           >
                             <h4>{feedback.name}</h4>
                           </Link>

@@ -343,7 +343,7 @@ const ProductDetailsPage = () => {
                   )}
                 </div>
                 <span className="product-details-rating-text">
-                  {product.rating} ({product.reviewsCount} تقييم)
+                  {product.rating} ({product.reviewsCount} تقييمات)
                 </span>
               </div>
 
@@ -553,14 +553,6 @@ const ProductDetailsPage = () => {
                     <>
                       <div className="product-details-reviews-summary">
                         <div className="product-details-overall-rating">
-                          <span className="product-details-rating-number">
-                            {(
-                              productFeedbacks.reduce(
-                                (sum, f) => sum + f.rating,
-                                0
-                              ) / productFeedbacks.length
-                            ).toFixed(1)}
-                          </span>
                           <div className="product-details-stars">
                             {Array.from(
                               {
@@ -576,7 +568,15 @@ const ProductDetailsPage = () => {
                               )
                             )}
                           </div>
-                          <span>({productFeedbacks.length} تقييم)</span>
+                          <span className="product-details-rating-number">
+                            {(
+                              productFeedbacks.reduce(
+                                (sum, f) => sum + f.rating,
+                                0
+                              ) / productFeedbacks.length
+                            ).toFixed(1)}
+                          </span>
+                          <span>({productFeedbacks.length} تقييمات)</span>
                         </div>
                       </div>
                       <div className="product-details-reviews-list">
