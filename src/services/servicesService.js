@@ -29,8 +29,8 @@ export const getAllServices = async () => {
       ...doc.data(),
     }));
     
-    console.log("servicesService - getAllServices data:", services);
-    console.log("servicesService - First service structure:", services[0]);
+    // console.log("servicesService - getAllServices data:", services);
+    // console.log("servicesService - First service structure:", services[0]);
     
     return services;
   } catch (error) {

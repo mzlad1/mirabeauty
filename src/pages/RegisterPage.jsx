@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./RegisterPage.css";
 import {
@@ -6,6 +6,7 @@ import {
   getFirebaseErrorMessage,
 } from "../services/authService";
 import { useAuth } from "../hooks/useAuth.jsx";
+import { getAllSkinTypes } from "../services/skinTypesService";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -23,15 +24,39 @@ const RegisterPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [skinTypes, setSkinTypes] = useState([]);
+  const [loadingSkinTypes, setLoadingSkinTypes] = useState(true);
 
-  const skinTypes = [
-    { value: "", label: "اختاري نوع بشرتك" },
-    { value: "normal", label: "عادية" },
-    { value: "dry", label: "جافة" },
-    { value: "oily", label: "دهنية" },
-    { value: "combination", label: "مختلطة" },
-    { value: "sensitive", label: "حساسة" },
-  ];
+  // Load skin types on component mount
+  useEffect(() => {
+    const loadSkinTypes = async () => {
+      setLoadingSkinTypes(true);
+      try {
+        const types = await getAllSkinTypes();
+        setSkinTypes([
+          { value: "", label: "اختاري نوع بشرتك" },
+          ...types.map((type) => ({
+            value: type.value,
+            label: type.label,
+          })),
+        ]);
+      } catch (error) {
+        console.error("Error loading skin types:", error);
+        // Fallback to default skin types
+        setSkinTypes([
+          { value: "", label: "اختاري نوع بشرتك" },
+          { value: "normal", label: "عادية" },
+          { value: "dry", label: "جافة" },
+          { value: "oily", label: "دهنية" },
+          { value: "combination", label: "مختلطة" },
+          { value: "sensitive", label: "حساسة" },
+        ]);
+      } finally {
+        setLoadingSkinTypes(false);
+      }
+    };
+    loadSkinTypes();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -65,10 +90,10 @@ const RegisterPage = () => {
       newErrors.phone = "رقم الهاتف مطلوب";
     } else {
       const cleanPhone = formData.phone.replace(/\s/g, "");
-      // Support Palestinian (+970), Israeli (+972), and local numbers (059...)
-      const phoneRegex = /^(\+970\d{9}|\+972\d{9}|05[0-9]\d{7})$/;
+      // Saudi phone format: 05XXXXXXXX (10 digits starting with 05)
+      const phoneRegex = /^05[0-9]{8}$/;
       if (!phoneRegex.test(cleanPhone)) {
-        newErrors.phone = "رقم الهاتف غير صحيح";
+        newErrors.phone = "رقم الهاتف يجب أن يبدأ بـ 05 ويتكون من 10 أرقام";
       }
     }
 
@@ -87,10 +112,27 @@ const RegisterPage = () => {
     if (!formData.birthDate) {
       newErrors.birthDate = "تاريخ الميلاد مطلوب";
     } else {
-      const age =
-        new Date().getFullYear() - new Date(formData.birthDate).getFullYear();
-      if (age < 16) {
-        newErrors.birthDate = "يجب أن يكون العمر 16 سنة على الأقل";
+      const birthDate = new Date(formData.birthDate);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+
+      // Check if date is in the future
+      if (birthDate > today) {
+        newErrors.birthDate = "تاريخ الميلاد لا يمكن أن يكون في المستقبل";
+      }
+      // Check minimum age (13 years)
+      else if (
+        age < 13 ||
+        (age === 13 &&
+          (monthDiff < 0 ||
+            (monthDiff === 0 && today.getDate() < birthDate.getDate())))
+      ) {
+        newErrors.birthDate = "يجب أن يكون العمر 13 سنة على الأقل";
+      }
+      // Check maximum age (120 years)
+      else if (age > 120) {
+        newErrors.birthDate = "تاريخ الميلاد غير صحيح";
       }
     }
 
@@ -214,14 +256,27 @@ const RegisterPage = () => {
                         id="phone"
                         name="phone"
                         value={formData.phone}
-                        onChange={handleInputChange}
+                        onChange={(e) => {
+                          // Only allow digits and limit to 10 characters
+                          const value = e.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 10);
+                          handleInputChange({
+                            target: { name: "phone", value },
+                          });
+                        }}
                         className={`form-input ${errors.phone ? "error" : ""}`}
-                        placeholder="059XXXXXXX"
+                        placeholder="05XXXXXXXX"
+                        maxLength="10"
+                        pattern="^05[0-9]{8}$"
                         disabled={loading}
                       />
                       {errors.phone && (
                         <span className="field-error">{errors.phone}</span>
                       )}
+                      <small className="field-hint">
+                        يجب أن يبدأ الرقم بـ 05 ويتكون من 10 أرقام
+                      </small>
                     </div>
                   </div>
 
@@ -235,10 +290,19 @@ const RegisterPage = () => {
                       name="birthDate"
                       value={formData.birthDate}
                       onChange={handleInputChange}
+                      max={new Date().toISOString().split("T")[0]}
+                      min={
+                        new Date(
+                          new Date().getFullYear() - 120,
+                          new Date().getMonth(),
+                          new Date().getDate()
+                        )
+                          .toISOString()
+                          .split("T")[0]
+                      }
                       className={`form-input ${
                         errors.birthDate ? "error" : ""
                       }`}
-                      max={getMaxDate()}
                       disabled={loading}
                     />
                     {errors.birthDate && (
@@ -304,13 +368,17 @@ const RegisterPage = () => {
                       className={`form-select ${
                         errors.skinType ? "error" : ""
                       }`}
-                      disabled={loading}
+                      disabled={loading || loadingSkinTypes}
                     >
-                      {skinTypes.map((type) => (
-                        <option key={type.value} value={type.value}>
-                          {type.label}
-                        </option>
-                      ))}
+                      {loadingSkinTypes ? (
+                        <option value="">جاري تحميل الأنواع...</option>
+                      ) : (
+                        skinTypes.map((type) => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        ))
+                      )}
                     </select>
                     {errors.skinType && (
                       <span className="field-error">{errors.skinType}</span>

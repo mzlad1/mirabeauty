@@ -65,6 +65,12 @@ import {
   updateFAQType,
   deleteFAQType,
 } from "../services/faqService";
+import {
+  getAllSkinTypes,
+  addSkinType,
+  updateSkinType,
+  deleteSkinType,
+} from "../services/skinTypesService";
 import UserModal from "../components/dashboard/UserModal";
 import ServiceEditModal from "../components/dashboard/ServiceEditModal";
 import ProductEditModal from "../components/dashboard/ProductEditModal";
@@ -74,6 +80,7 @@ import ConsultationDetailsModal from "../components/dashboard/ConsultationDetail
 import CategoryModal from "../components/dashboard/CategoryModal";
 import FAQModal from "../components/admin/FAQModal";
 import FAQTypeModal from "../components/admin/FAQTypeModal";
+import SkinTypeModal from "../components/dashboard/SkinTypeModal";
 import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
 
 const AdminDashboardPage = ({ currentUser }) => {
@@ -181,6 +188,11 @@ const AdminDashboardPage = ({ currentUser }) => {
   const [faqTypes, setFaqTypes] = useState([]);
   const [isFaqTypeModalOpen, setIsFaqTypeModalOpen] = useState(false);
   const [editingFaqType, setEditingFaqType] = useState(null);
+
+  // Skin Types states
+  const [skinTypes, setSkinTypes] = useState([]);
+  const [isSkinTypeModalOpen, setIsSkinTypeModalOpen] = useState(false);
+  const [editingSkinType, setEditingSkinType] = useState(null);
 
   // Profile editing states
   const [editMode, setEditMode] = useState(false);
@@ -410,6 +422,15 @@ const AdminDashboardPage = ({ currentUser }) => {
       setFaqTypes(typesData);
     } catch (err) {
       console.error("Error loading FAQ types:", err);
+    }
+  };
+
+  const loadSkinTypes = async () => {
+    try {
+      const skinTypesData = await getAllSkinTypes();
+      setSkinTypes(skinTypesData);
+    } catch (err) {
+      console.error("Error loading skin types:", err);
     }
   };
 
@@ -818,6 +839,8 @@ const AdminDashboardPage = ({ currentUser }) => {
     } else if (activeTab === "faqs") {
       loadFAQs();
       loadFAQTypes();
+    } else if (activeTab === "skinTypes") {
+      loadSkinTypes();
     }
   }, [activeTab]);
 
@@ -1136,6 +1159,55 @@ const AdminDashboardPage = ({ currentUser }) => {
     );
   };
 
+  // Skin Type management functions
+  const handleAddSkinType = () => {
+    setEditingSkinType(null);
+    setIsSkinTypeModalOpen(true);
+  };
+
+  const handleEditSkinType = (skinType) => {
+    setEditingSkinType(skinType);
+    setIsSkinTypeModalOpen(true);
+  };
+
+  const handleSkinTypeSubmit = async (typeData) => {
+    try {
+      if (editingSkinType) {
+        await updateSkinType(editingSkinType.id, typeData);
+        showSuccess("تم تحديث نوع البشرة بنجاح");
+      } else {
+        await addSkinType(typeData);
+        showSuccess("تم إضافة نوع البشرة بنجاح");
+      }
+      await loadSkinTypes();
+      setIsSkinTypeModalOpen(false);
+      setEditingSkinType(null);
+    } catch (error) {
+      console.error("Error submitting skin type:", error);
+      showError("حدث خطأ أثناء حفظ نوع البشرة");
+      throw error;
+    }
+  };
+
+  const handleDeleteSkinType = async (typeId, label) => {
+    showConfirm(
+      `هل أنت متأكد من حذف نوع البشرة "${label}"؟\n\nسيتم حذف النوع بشكل نهائي.`,
+      async () => {
+        try {
+          await deleteSkinType(typeId);
+          await loadSkinTypes();
+          showSuccess("تم حذف نوع البشرة بنجاح");
+        } catch (error) {
+          console.error("Error deleting skin type:", error);
+          showError("حدث خطأ أثناء حذف نوع البشرة");
+        }
+      },
+      "تأكيد حذف نوع البشرة",
+      "حذف",
+      "إلغاء"
+    );
+  };
+
   // Get filtered FAQs
   const getFilteredFaqs = () => {
     return faqs.filter((faq) => {
@@ -1430,24 +1502,6 @@ const AdminDashboardPage = ({ currentUser }) => {
                 </button>
                 <button
                   className={`nav-item ${
-                    activeTab === "customers" ? "active" : ""
-                  }`}
-                  onClick={() => setActiveTab("customers")}
-                >
-                  <i className="nav-icon fas fa-users"></i>
-                  العملاء
-                </button>
-                <button
-                  className={`nav-item ${
-                    activeTab === "staff" ? "active" : ""
-                  }`}
-                  onClick={() => setActiveTab("staff")}
-                >
-                  <i className="nav-icon fas fa-user-tie"></i>
-                  الموظفات
-                </button>
-                <button
-                  className={`nav-item ${
                     activeTab === "services" ? "active" : ""
                   }`}
                   onClick={() => setActiveTab("services")}
@@ -1479,6 +1533,15 @@ const AdminDashboardPage = ({ currentUser }) => {
                 >
                   <i className="nav-icon fas fa-question-circle"></i>
                   الأسئلة الشائعة
+                </button>
+                <button
+                  className={`nav-item ${
+                    activeTab === "skinTypes" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("skinTypes")}
+                >
+                  <i className="nav-icon fas fa-spa"></i>
+                  أنواع البشرة
                 </button>
                 <button
                   className={`nav-item ${
@@ -2033,333 +2096,6 @@ const AdminDashboardPage = ({ currentUser }) => {
                 </div>
               )}
 
-              {/* Customers Tab */}
-              {activeTab === "customers" && (
-                <div className="tab-content">
-                  <div className="tab-header">
-                    <h2>إدارة العملاء</h2>
-                    <button
-                      className="btn-primary"
-                      onClick={() => handleAddUser("customer")}
-                    >
-                      إضافة عميل جديد
-                    </button>
-                  </div>
-
-                  {/* Customer Filters */}
-                  <div className="customers-filters">
-                    <input
-                      type="text"
-                      placeholder="البحث بالاسم، البريد الإلكتروني، أو رقم الهاتف..."
-                      className="filter-search"
-                      value={customerSearchFilter}
-                      onChange={(e) => {
-                        setCustomerSearchFilter(e.target.value);
-                        setCurrentCustomerPage(1);
-                      }}
-                    />
-                  </div>
-
-                  {loading ? (
-                    <div className="loading-state">
-                      <div className="loading-spinner"></div>
-                      <p>جاري تحميل بيانات العملاء...</p>
-                    </div>
-                  ) : error ? (
-                    <div className="error-state">
-                      <i className="fas fa-exclamation-triangle"></i>
-                      <p>{error}</p>
-                      <button onClick={loadCustomers} className="btn-primary">
-                        إعادة المحاولة
-                      </button>
-                    </div>
-                  ) : getFilteredCustomers().length === 0 ? (
-                    <div className="empty-state">
-                      <i className="fas fa-users"></i>
-                      <p>لا يوجد عملاء مطابقين لمعايير البحث</p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="customers-grid">
-                        {getPaginatedCustomers().map((customer) => (
-                          <div key={customer.id} className="customer-card">
-                            <div className="customer-header">
-                              <img
-                                src={
-                                  customer.avatar ||
-                                  "/assets/default-avatar.jpg"
-                                }
-                                alt={customer.name}
-                                onError={(e) => {
-                                  e.target.src = "/assets/default-avatar.jpg";
-                                }}
-                              />
-                              <div className="admin-customer-info">
-                                <h4>{customer.name}</h4>
-                                <p>{customer.email}</p>
-                                <p>{customer.phone}</p>
-                              </div>
-                            </div>
-                            <div className="customer-stats">
-                              <div className="customer-stat">
-                                <span className="stat-label">المواعيد:</span>
-                                <span className="stat-value">
-                                  {customer.appointmentsCount || 0}
-                                </span>
-                              </div>
-                              <div className="customer-stat">
-                                <span className="stat-label">المصروفات:</span>
-                                <span className="stat-value">
-                                  {customer.totalSpent || 0} شيكل
-                                </span>
-                              </div>
-                              <div className="customer-stat">
-                                <span className="stat-label">النقاط:</span>
-                                <span className="stat-value">
-                                  {customer.loyaltyPoints || 0}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="customer-actions">
-                              <button
-                                className="action-btn edit"
-                                onClick={() =>
-                                  handleEditUser(customer, "customer")
-                                }
-                              >
-                                تعديل
-                              </button>
-                              <button
-                                className="action-btn delete"
-                                onClick={() =>
-                                  handleDeleteUser(customer.id, "customer")
-                                }
-                              >
-                                حذف
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Pagination Controls */}
-                      {getTotalCustomerPages() > 1 && (
-                        <div className="pagination">
-                          <button
-                            className="pagination-btn"
-                            onClick={() =>
-                              setCurrentCustomerPage(currentCustomerPage - 1)
-                            }
-                            disabled={currentCustomerPage === 1}
-                          >
-                            السابق
-                          </button>
-                          <div className="pagination-info">
-                            <span>
-                              صفحة {currentCustomerPage} من{" "}
-                              {getTotalCustomerPages()}
-                            </span>
-                            <span className="results-count">
-                              ({getFilteredCustomers().length} عميل)
-                            </span>
-                          </div>
-                          <button
-                            className="pagination-btn"
-                            onClick={() =>
-                              setCurrentCustomerPage(currentCustomerPage + 1)
-                            }
-                            disabled={
-                              currentCustomerPage === getTotalCustomerPages()
-                            }
-                          >
-                            التالي
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* Staff Tab */}
-              {activeTab === "staff" && (
-                <div className="tab-content">
-                  <div className="tab-header">
-                    <h2>إدارة الموظفين</h2>
-                    <button
-                      className="btn-primary"
-                      onClick={() => handleAddUser("staff")}
-                    >
-                      إضافة موظف جديد
-                    </button>
-                  </div>
-
-                  {/* Staff Filters */}
-                  <div className="staff-filters">
-                    <input
-                      type="text"
-                      placeholder="البحث بالاسم أو التخصص..."
-                      className="filter-search"
-                      value={staffSearchFilter}
-                      onChange={(e) => {
-                        setStaffSearchFilter(e.target.value);
-                        setCurrentStaffPage(1);
-                      }}
-                    />
-                    <select
-                      className="filter-select"
-                      value={staffStatusFilter}
-                      onChange={(e) => {
-                        setStaffStatusFilter(e.target.value);
-                        setCurrentStaffPage(1);
-                      }}
-                    >
-                      <option value="">جميع الحالات</option>
-                      <option value="active">نشط</option>
-                      <option value="inactive">غير نشط</option>
-                    </select>
-                  </div>
-
-                  {loading ? (
-                    <div className="loading-state">
-                      <div className="loading-spinner"></div>
-                      <p>جاري تحميل بيانات الموظفين...</p>
-                    </div>
-                  ) : error ? (
-                    <div className="error-state">
-                      <i className="fas fa-exclamation-triangle"></i>
-                      <p>{error}</p>
-                      <button onClick={loadStaff} className="btn-primary">
-                        إعادة المحاولة
-                      </button>
-                    </div>
-                  ) : getFilteredStaff().length === 0 ? (
-                    <div className="empty-state">
-                      <i className="fas fa-user-tie"></i>
-                      <p>لا يوجد موظفين مطابقين لمعايير البحث</p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="staff-grid">
-                        {getPaginatedStaff().map((staffMember) => {
-                          // Calculate staff performance from appointments
-                          const staffAppointments = appointments.filter(
-                            (apt) => apt.staffId === staffMember.id
-                          );
-                          const completedAppts = staffAppointments.filter(
-                            (apt) => apt.status === "مكتمل"
-                          );
-                          const revenue = completedAppts.reduce((sum, apt) => {
-                            const price = parsePrice(
-                              apt.servicePrice || apt.price
-                            );
-                            return sum + price;
-                          }, 0);
-
-                          return (
-                            <div key={staffMember.id} className="staff-card">
-                              <div className="staff-header">
-                                <img
-                                  src={
-                                    staffMember.avatar ||
-                                    "/assets/default-avatar.jpg"
-                                  }
-                                  alt={staffMember.name}
-                                  onError={(e) => {
-                                    e.target.src = "/assets/default-avatar.jpg";
-                                  }}
-                                />
-                                <div className="staff-info">
-                                  <h4>{staffMember.name}</h4>
-                                  <p>{staffMember.specialization}</p>
-                                  <span
-                                    className={`staff-status ${
-                                      staffMember.active ? "active" : "inactive"
-                                    }`}
-                                  >
-                                    {staffMember.active ? "نشط" : "غير نشط"}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="staff-performance">
-                                <div className="performance-item">
-                                  <span className="perf-label">المواعيد:</span>
-                                  <span className="perf-value">
-                                    {staffAppointments.length}
-                                  </span>
-                                </div>
-                                <div className="performance-item">
-                                  <span className="perf-label">المكتملة:</span>
-                                  <span className="perf-value">
-                                    {completedAppts.length}
-                                  </span>
-                                </div>
-                                <div className="performance-item">
-                                  <span className="perf-label">الإيرادات:</span>
-                                  <span className="perf-value">
-                                    {revenue} شيكل
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="staff-actions">
-                                <button
-                                  className="action-btn edit"
-                                  onClick={() =>
-                                    handleEditUser(staffMember, "staff")
-                                  }
-                                >
-                                  تعديل
-                                </button>
-                                <button
-                                  className="action-btn delete"
-                                  onClick={() =>
-                                    handleDeleteUser(staffMember.id, "staff")
-                                  }
-                                >
-                                  حذف
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Pagination Controls */}
-                      {getTotalStaffPages() > 1 && (
-                        <div className="pagination">
-                          <button
-                            className="pagination-btn"
-                            onClick={() =>
-                              setCurrentStaffPage(currentStaffPage - 1)
-                            }
-                            disabled={currentStaffPage === 1}
-                          >
-                            السابق
-                          </button>
-                          <div className="pagination-info">
-                            <span>
-                              صفحة {currentStaffPage} من {getTotalStaffPages()}
-                            </span>
-                            <span className="results-count">
-                              ({getFilteredStaff().length} موظف)
-                            </span>
-                          </div>
-                          <button
-                            className="pagination-btn"
-                            onClick={() =>
-                              setCurrentStaffPage(currentStaffPage + 1)
-                            }
-                            disabled={currentStaffPage === getTotalStaffPages()}
-                          >
-                            التالي
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-
               {/* Services Tab */}
               {activeTab === "services" && (
                 <div className="tab-content">
@@ -2859,6 +2595,84 @@ const AdminDashboardPage = ({ currentUser }) => {
                 </div>
               )}
 
+              {/* Skin Types Tab */}
+              {activeTab === "skinTypes" && (
+                <div className="tab-content">
+                  <div className="tab-header">
+                    <h2>
+                      <i className="fas fa-spa"></i>
+                      إدارة أنواع البشرة
+                    </h2>
+                    <button className="btn-primary" onClick={handleAddSkinType}>
+                      <i className="fas fa-plus"></i>
+                      إضافة نوع بشرة
+                    </button>
+                  </div>
+
+                  <div className="section-description-box">
+                    <i className="fas fa-info-circle"></i>
+                    <p>
+                      إدارة أنواع البشرة المتاحة للعملاء عند التسجيل. هذه
+                      الأنواع ستظهر في نموذج التسجيل ونموذج إضافة/تعديل العملاء.
+                    </p>
+                  </div>
+
+                  {loading ? (
+                    <div className="loading-state">
+                      <div className="loading-spinner"></div>
+                      <p>جاري تحميل أنواع البشرة...</p>
+                    </div>
+                  ) : skinTypes.length === 0 ? (
+                    <div className="empty-state">
+                      <i className="fas fa-spa"></i>
+                      <h3>لا توجد أنواع بشرة محددة</h3>
+                      <p>ابدأ بإضافة أنواع البشرة التي ستكون متاحة للعملاء</p>
+                      <button
+                        className="btn-primary"
+                        onClick={handleAddSkinType}
+                      >
+                        <i className="fas fa-plus"></i>
+                        إضافة نوع البشرة الأول
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="skin-types-grid">
+                      {skinTypes.map((skinType) => (
+                        <div key={skinType.id} className="skin-type-card">
+                          <div className="skin-type-content">
+                            <h3>{skinType.label}</h3>
+                            <span className="skin-type-value">
+                              {skinType.value}
+                            </span>
+                          </div>
+                          <div className="skin-type-actions">
+                            <button
+                              className="action-btn edit"
+                              onClick={() => handleEditSkinType(skinType)}
+                              title="تعديل"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button
+                              className="action-btn delete"
+                              onClick={() =>
+                                handleDeleteSkinType(
+                                  skinType.id,
+                                  skinType.label
+                                )
+                              }
+                              title="حذف"
+                            >
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Settings Tab */}
               {activeTab === "settings" && (
                 <div className="tab-content">
@@ -3350,6 +3164,17 @@ const AdminDashboardPage = ({ currentUser }) => {
         }}
         onSubmit={handleFaqTypeSubmit}
         faqType={editingFaqType}
+      />
+
+      {/* Skin Type Modal */}
+      <SkinTypeModal
+        isOpen={isSkinTypeModalOpen}
+        onClose={() => {
+          setIsSkinTypeModalOpen(false);
+          setEditingSkinType(null);
+        }}
+        onSubmit={handleSkinTypeSubmit}
+        skinType={editingSkinType}
       />
 
       {/* Custom Modal */}

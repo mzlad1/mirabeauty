@@ -11,6 +11,7 @@ import {
   FEEDBACK_TYPES,
   FEEDBACK_STATUS,
 } from "../services/feedbackService";
+import { getUserById } from "../services/usersService";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import CustomAlert from "../components/common/CustomAlert";
 
@@ -19,6 +20,7 @@ const AdminFeedbacksPage = ({ currentUser, userData }) => {
   const [feedbacks, setFeedbacks] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [feedbackUsers, setFeedbackUsers] = useState({}); // Store user data for each feedback
   const [alert, setAlert] = useState({
     isOpen: false,
     title: "",
@@ -51,6 +53,24 @@ const AdminFeedbacksPage = ({ currentUser, userData }) => {
       ]);
       setFeedbacks(feedbacksData);
       setStats(statsData);
+
+      // Fetch user data for feedbacks that have userId
+      const usersMap = {};
+      const userPromises = feedbacksData
+        .filter((feedback) => feedback.userId)
+        .map(async (feedback) => {
+          try {
+            if (!usersMap[feedback.userId]) {
+              const user = await getUserById(feedback.userId);
+              usersMap[feedback.userId] = user;
+            }
+          } catch (error) {
+            console.error(`Error fetching user ${feedback.userId}:`, error);
+          }
+        });
+
+      await Promise.all(userPromises);
+      setFeedbackUsers(usersMap);
     } catch (error) {
       console.error("Error loading feedbacks:", error);
     } finally {
@@ -364,135 +384,154 @@ const AdminFeedbacksPage = ({ currentUser, userData }) => {
               <p>لا توجد تقييمات</p>
             </div>
           ) : (
-            filteredFeedbacks.map((feedback) => (
-              <div key={feedback.id} className="feedback-card">
-                <div className="feedback-card-header">
-                  <div className="feedback-user-info">
-                    <div className="user-avatar">
-                      {userData?.avatar ? (
-                        <img
-                          src={userData.avatar}
-                          alt={`${feedback.name}'s avatar`}
-                        />
-                      ) : (
-                        <span>{feedback.name?.charAt(0) || "؟"}</span>
-                      )}
-                    </div>
-                    <div className="user-details">
-                      <h4>{feedback.name}</h4>
-                      {feedback.phone && (
-                        <p className="feedback-phone">
-                          <i className="fas fa-phone"></i>
-                          {feedback.phone}
-                        </p>
-                      )}
-                      <div className="feedback-meta">
-                        {getTypeBadge(feedback.type)}
-                        {getStatusBadge(feedback.status)}
-                        {feedback.isVisible && (
-                          <span className="visibility-badge visible">
-                            <i className="fas fa-eye"></i> ظاهر
-                          </span>
-                        )}
-                        {!feedback.isVisible && (
-                          <span className="visibility-badge hidden">
-                            <i className="fas fa-eye-slash"></i> مخفي
-                          </span>
+            filteredFeedbacks.map((feedback) => {
+              const feedbackUser = feedback.userId
+                ? feedbackUsers[feedback.userId]
+                : null;
+
+              return (
+                <div key={feedback.id} className="feedback-card">
+                  <div className="feedback-card-header">
+                    <div className="feedback-user-info">
+                      <div className="user-avatar">
+                        {feedbackUser?.avatar ? (
+                          <img
+                            src={feedbackUser.avatar}
+                            alt={`${feedback.name}'s avatar`}
+                          />
+                        ) : (
+                          <span>{feedback.name?.charAt(0) || "؟"}</span>
                         )}
                       </div>
+                      <div className="user-details">
+                        {feedback.userId ? (
+                          <Link
+                            to={`/admin/users/${feedback.userId}`}
+                            className="feedback-user-name-link"
+                          >
+                            <h4>{feedback.name}</h4>
+                          </Link>
+                        ) : (
+                          <h4>{feedback.name}</h4>
+                        )}
+                        {feedback.phone && (
+                          <p className="feedback-phone">
+                            <i className="fas fa-phone"></i>
+                            {feedback.phone}
+                          </p>
+                        )}
+                        <div className="feedback-meta">
+                          {getTypeBadge(feedback.type)}
+                          {getStatusBadge(feedback.status)}
+                          {feedback.isVisible && (
+                            <span className="visibility-badge visible">
+                              <i className="fas fa-eye"></i> ظاهر
+                            </span>
+                          )}
+                          {!feedback.isVisible && (
+                            <span className="visibility-badge hidden">
+                              <i className="fas fa-eye-slash"></i> مخفي
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="feedback-rating">
+                      {Array.from({ length: feedback.rating }).map((_, i) => (
+                        <i key={i} className="fa-solid fa-star" />
+                      ))}
                     </div>
                   </div>
-                  <div className="feedback-rating">
-                    {Array.from({ length: feedback.rating }).map((_, i) => (
-                      <i key={i} className="fa-solid fa-star" />
-                    ))}
+
+                  <div className="feedback-card-body">
+                    {feedback.type === FEEDBACK_TYPES.GENERAL && (
+                      <p className="feedback-service">
+                        <i className="fas fa-tag"></i>
+                        الخدمة: {feedback.service}
+                      </p>
+                    )}
+                    {feedback.type === FEEDBACK_TYPES.PRODUCT && (
+                      <p className="feedback-service">
+                        <i className="fas fa-box"></i>
+                        المنتج:{" "}
+                        <Link
+                          to={`/products/${feedback.productId}`}
+                          className="product-link"
+                          target="_blank"
+                        >
+                          {feedback.productName}
+                        </Link>
+                      </p>
+                    )}
+                    <p className="feedback-text">"{feedback.text}"</p>
+                    <p className="feedback-date">
+                      <i className="far fa-clock"></i>
+                      {formatDate(feedback.createdAt)}
+                    </p>
+                  </div>
+
+                  <div className="feedback-card-actions">
+                    {feedback.status === FEEDBACK_STATUS.PENDING && (
+                      <>
+                        <button
+                          className="feedback-action-btn approve"
+                          onClick={() => handleApprove(feedback.id, true)}
+                          title="موافقة وإظهار"
+                        >
+                          <i className="fas fa-check"></i>
+                          موافقة وإظهار
+                        </button>
+                        <button
+                          className="feedback-action-btn approve-hidden"
+                          onClick={() => handleApprove(feedback.id, false)}
+                          title="موافقة وإخفاء"
+                        >
+                          <i className="fas fa-check"></i>
+                          موافقة وإخفاء
+                        </button>
+                        <button
+                          className="feedback-action-btn reject"
+                          onClick={() => handleReject(feedback.id)}
+                          title="رفض"
+                        >
+                          <i className="fas fa-times"></i>
+                          رفض
+                        </button>
+                      </>
+                    )}
+
+                    {feedback.status === FEEDBACK_STATUS.APPROVED && (
+                      <button
+                        className="feedback-action-btn toggle-visibility"
+                        onClick={() =>
+                          handleToggleVisibility(
+                            feedback.id,
+                            feedback.isVisible
+                          )
+                        }
+                        title={feedback.isVisible ? "إخفاء" : "إظهار"}
+                      >
+                        <i
+                          className={`fas fa-eye${
+                            feedback.isVisible ? "-slash" : ""
+                          }`}
+                        ></i>
+                        {feedback.isVisible ? "إخفاء" : "إظهار"}
+                      </button>
+                    )}
+
+                    <button
+                      className="feedback-action-btn delete"
+                      onClick={() => handleDelete(feedback.id)}
+                      title="حذف"
+                    >
+                      <i className="fas fa-trash"></i>
+                      حذف
+                    </button>
                   </div>
                 </div>
-
-                <div className="feedback-card-body">
-                  {feedback.type === FEEDBACK_TYPES.GENERAL && (
-                    <p className="feedback-service">
-                      <i className="fas fa-tag"></i>
-                      الخدمة: {feedback.service}
-                    </p>
-                  )}
-                  {feedback.type === FEEDBACK_TYPES.PRODUCT && (
-                    <p className="feedback-service">
-                      <i className="fas fa-box"></i>
-                      المنتج:{" "}
-                      <Link
-                        to={`/products/${feedback.productId}`}
-                        className="product-link"
-                      >
-                        {feedback.productName}
-                      </Link>
-                    </p>
-                  )}
-                  <p className="feedback-text">"{feedback.text}"</p>
-                  <p className="feedback-date">
-                    <i className="far fa-clock"></i>
-                    {formatDate(feedback.createdAt)}
-                  </p>
-                </div>
-
-                <div className="feedback-card-actions">
-                  {feedback.status === FEEDBACK_STATUS.PENDING && (
-                    <>
-                      <button
-                        className="feedback-action-btn approve"
-                        onClick={() => handleApprove(feedback.id, true)}
-                        title="موافقة وإظهار"
-                      >
-                        <i className="fas fa-check"></i>
-                        موافقة وإظهار
-                      </button>
-                      <button
-                        className="feedback-action-btn approve-hidden"
-                        onClick={() => handleApprove(feedback.id, false)}
-                        title="موافقة وإخفاء"
-                      >
-                        <i className="fas fa-check"></i>
-                        موافقة وإخفاء
-                      </button>
-                      <button
-                        className="feedback-action-btn reject"
-                        onClick={() => handleReject(feedback.id)}
-                        title="رفض"
-                      >
-                        <i className="fas fa-times"></i>
-                        رفض
-                      </button>
-                    </>
-                  )}
-
-                  {feedback.status === FEEDBACK_STATUS.APPROVED && (
-                    <button
-                      className="feedback-action-btn toggle-visibility"
-                      onClick={() =>
-                        handleToggleVisibility(feedback.id, feedback.isVisible)
-                      }
-                      title={feedback.isVisible ? "إخفاء" : "إظهار"}
-                    >
-                      <i
-                        className={`fas fa-eye${
-                          feedback.isVisible ? "-slash" : ""
-                        }`}
-                      ></i>
-                      {feedback.isVisible ? "إخفاء" : "إظهار"}
-                    </button>
-                  )}
-
-                  <button
-                    className="feedback-action-btn delete"
-                    onClick={() => handleDelete(feedback.id)}
-                    title="حذف"
-                  >
-                    <i className="fas fa-trash"></i>
-                    حذف
-                  </button>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

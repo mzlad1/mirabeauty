@@ -1,8 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminUsersPage.css";
-import { getAllUsers } from "../services/usersService";
+import {
+  getAllUsers,
+  adminUpdateCustomer,
+  adminUpdateStaff,
+  adminDeleteCustomer,
+  adminDeleteStaff,
+} from "../services/usersService";
+import {
+  adminRegisterCustomer,
+  adminRegisterStaff,
+} from "../services/authService";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+import UserModal from "../components/dashboard/UserModal";
+import CustomModal from "../components/common/CustomModal";
+import { useModal } from "../hooks/useModal";
 
 const AdminUsersPage = ({ currentUser, userData }) => {
   const navigate = useNavigate();
@@ -10,6 +23,12 @@ const AdminUsersPage = ({ currentUser, userData }) => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all"); // all, customer, staff, admin
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [userModalType, setUserModalType] = useState("customer"); // customer or staff
+
+  const { modalState, closeModal, showSuccess, showError, showConfirm } =
+    useModal();
 
   // Check if user is admin
   useEffect(() => {
@@ -32,6 +51,80 @@ const AdminUsersPage = ({ currentUser, userData }) => {
       console.error("Error loading users:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // User management handlers
+  const handleAddUser = (userType) => {
+    setUserModalType(userType);
+    setEditingUser(null);
+    setIsUserModalOpen(true);
+  };
+
+  const handleEditUser = (user) => {
+    const userType = user.role === "staff" ? "staff" : "customer";
+    setUserModalType(userType);
+    setEditingUser(user);
+    setIsUserModalOpen(true);
+  };
+
+  const handleDeleteUser = async (userId, userRole) => {
+    const userType = userRole === "staff" ? "staff" : "customer";
+    showConfirm(
+      `هل أنت متأكد من حذف هذا ${
+        userType === "customer" ? "العميل" : "الموظف"
+      }؟\n\nتحذير: سيتم حذف ${
+        userType === "customer" ? "العميل" : "الموظف"
+      } بشكل نهائي.`,
+      async () => {
+        try {
+          if (userType === "customer") {
+            await adminDeleteCustomer(userId);
+          } else {
+            await adminDeleteStaff(userId);
+          }
+          await loadUsers();
+          showSuccess("تم الحذف بنجاح");
+        } catch (error) {
+          console.error("Error deleting user:", error);
+          showError("حدث خطأ أثناء الحذف");
+        }
+      },
+      `تأكيد حذف ${userType === "customer" ? "العميل" : "الموظف"}`,
+      "حذف",
+      "إلغاء"
+    );
+  };
+
+  const handleUserSubmit = async (userData) => {
+    try {
+      if (editingUser) {
+        // Update existing user
+        const updateData = { ...userData };
+        delete updateData.password; // Don't update password for existing users
+
+        if (userModalType === "customer") {
+          await adminUpdateCustomer(editingUser.id, updateData);
+        } else {
+          await adminUpdateStaff(editingUser.id, updateData);
+        }
+        showSuccess("تم التحديث بنجاح");
+      } else {
+        // Add new user
+        if (userModalType === "customer") {
+          await adminRegisterCustomer(userData);
+        } else {
+          await adminRegisterStaff(userData);
+        }
+        showSuccess("تم الإضافة بنجاح");
+      }
+      await loadUsers();
+      setIsUserModalOpen(false);
+      setEditingUser(null);
+    } catch (error) {
+      console.error("Error submitting user:", error);
+      showError(error.message || "حدث خطأ أثناء حفظ البيانات");
+      throw error;
     }
   };
 
@@ -133,7 +226,10 @@ const AdminUsersPage = ({ currentUser, userData }) => {
 
           <div className="stat-card staff">
             <div className="stat-icon">
-              <i className="fas fa-user-tie" style={{ color: "var(--white)" }}></i>
+              <i
+                className="fas fa-user-tie"
+                style={{ color: "var(--white)" }}
+              ></i>
             </div>
             <div className="stat-info">
               <h3>الموظفين</h3>
@@ -145,7 +241,10 @@ const AdminUsersPage = ({ currentUser, userData }) => {
 
           <div className="stat-card admins">
             <div className="stat-icon">
-              <i className="fas fa-user-shield" style={{ color: "var(--white)" }}></i>
+              <i
+                className="fas fa-user-shield"
+                style={{ color: "var(--white)" }}
+              ></i>
             </div>
             <div className="stat-info">
               <h3>المدراء</h3>
@@ -206,6 +305,30 @@ const AdminUsersPage = ({ currentUser, userData }) => {
           </div>
         </div>
 
+        {/* Add User Buttons */}
+        <div className="add-user-buttons">
+          <button
+            className="btn btn-primary add-user-btn"
+            onClick={() => handleAddUser("customer")}
+          >
+            <i
+              className="fas fa-user-plus"
+              style={{ color: "var(--white)" }}
+            ></i>
+            إضافة عميل جديد
+          </button>
+          <button
+            className="btn btn-primary add-user-btn"
+            onClick={() => handleAddUser("staff")}
+          >
+            <i
+              className="fas fa-user-tie"
+              style={{ color: "var(--white)" }}
+            ></i>
+            إضافة موظف جديد
+          </button>
+        </div>
+
         {/* Users List */}
         <div className="users-list">
           {filteredUsers.length === 0 ? (
@@ -251,14 +374,22 @@ const AdminUsersPage = ({ currentUser, userData }) => {
                       <td>{getRoleBadge(user.role)}</td>
                       <td>{formatDate(user.createdAt)}</td>
                       <td>
-                        <button
-                          className="users-action-btn view"
-                          onClick={() => handleViewUser(user.id)}
-                          title="عرض التفاصيل"
-                        >
-                          <i className="fas fa-eye"></i>
-                          عرض التفاصيل
-                        </button>
+                        <div className="action-buttons-group">
+                          <button
+                            className="users-action-btn edit"
+                            onClick={() => handleEditUser(user)}
+                            title="تعديل المستخدم"
+                          >
+                            <i className="fas fa-edit"></i>
+                          </button>
+                          <button
+                            className="users-action-btn view"
+                            onClick={() => handleViewUser(user.id)}
+                            title="عرض التفاصيل"
+                          >
+                            <i className="fas fa-eye"></i>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -268,6 +399,23 @@ const AdminUsersPage = ({ currentUser, userData }) => {
           )}
         </div>
       </div>
+
+      {/* User Modal */}
+      {isUserModalOpen && (
+        <UserModal
+          isOpen={isUserModalOpen}
+          onClose={() => {
+            setIsUserModalOpen(false);
+            setEditingUser(null);
+          }}
+          onSubmit={handleUserSubmit}
+          user={editingUser}
+          userType={userModalType}
+        />
+      )}
+
+      {/* Custom Modal for confirmations */}
+      <CustomModal />
     </div>
   );
 };

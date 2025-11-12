@@ -7,14 +7,14 @@ const ProductCard = ({ product, onAddToCart }) => {
   const navigate = useNavigate();
   const { navigateWithLoading } = useNavigationLoading();
 
-  // Debug logging
-  console.log("ProductCard - Product data:", {
-    id: product.id,
-    name: product.name,
-    image: product.image,
-    images: product.images,
-    primaryImageIndex: product.primaryImageIndex,
-  });
+  // // Debug logging
+  // console.log("ProductCard - Product data:", {
+  //   id: product.id,
+  //   name: product.name,
+  //   image: product.image,
+  //   images: product.images,
+  //   primaryImageIndex: product.primaryImageIndex,
+  // });
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
@@ -34,7 +34,6 @@ const ProductCard = ({ product, onAddToCart }) => {
         product.images[product.primaryImageIndex || 0]
       : product.image || "/assets/default-product.jpg";
 
-  console.log("ProductCard - Primary image selected:", primaryImage);
 
   const discountPercentage =
     product.originalPrice && product.price

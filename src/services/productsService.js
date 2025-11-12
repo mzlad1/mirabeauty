@@ -29,8 +29,8 @@ export const getAllProducts = async () => {
       ...doc.data(),
     }));
     
-    console.log("productsService - getAllProducts result:", products);
-    console.log("productsService - First product raw data:", products[0]);
+    // console.log("productsService - getAllProducts result:", products);
+    // console.log("productsService - First product raw data:", products[0]);
     
     return products;
   } catch (error) {

@@ -699,6 +699,7 @@ const ProductDetailsPage = () => {
         productId={product?.id}
         productName={product?.name}
         currentUser={currentUser}
+        userData={userData}
       />
     </div>
   );

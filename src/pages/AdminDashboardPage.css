@@ -2012,6 +2012,325 @@
   color: var(--danger);
 }
 
+/* Skin Types Management Styles */
+.skin-types-management {
+  margin-top: 1rem;
+}
+
+.skin-types-management .skin-types-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.skin-types-management .section-description {
+  color: #666;
+  font-size: 0.95rem;
+  margin: 0;
+  flex: 1;
+}
+
+.skin-types-list {
+  margin-top: 1rem;
+}
+
+.skin-types-list .empty-types {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed var(--border-color);
+}
+
+.skin-types-list .empty-types i {
+  font-size: 3rem;
+  color: var(--gold);
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.skin-types-list .empty-types p {
+  color: #666;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.types-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.type-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.type-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(218, 165, 32, 0.2);
+}
+
+.type-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.type-info h4 {
+  margin: 0;
+  color: var(--navy-blue);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.type-value {
+  font-size: 0.875rem;
+  color: #666;
+  font-family: "Courier New", monospace;
+  background: #f0f0f0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.type-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.type-actions .action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.type-actions .action-btn:hover {
+  transform: scale(1.1);
+}
+
+.type-actions .action-btn.edit:hover {
+  background: rgba(218, 165, 32, 0.1);
+  color: var(--gold);
+}
+
+.type-actions .action-btn.delete:hover {
+  background: rgba(211, 47, 47, 0.1);
+  color: #d32f2f;
+}
+
+/* Skin Types Tab - Dedicated Styles */
+.section-description-box {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border-left: 4px solid var(--gold);
+  padding: 1.25rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.section-description-box i {
+  color: var(--navy-blue);
+  font-size: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.section-description-box p {
+  margin: 0;
+  color: #333;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.skin-types-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.skin-type-card {
+  background: var(--white);
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.skin-type-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--navy-blue);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.skin-type-card:hover {
+  border-color: var(--navy-blue);
+  transform: translateY(-5px);
+}
+
+.skin-type-card:hover::before {
+  transform: scaleX(1);
+}
+
+.skin-type-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--navy-blue), var(--gold));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.skin-type-icon i {
+  font-size: 2.5rem;
+  color: var(--white);
+}
+
+.skin-type-content {
+  text-align: center;
+  flex: 1;
+  width: 100%;
+}
+
+.skin-type-content h3 {
+  margin: 0 0 0.75rem 0;
+  color: var(--navy-blue);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.skin-type-value {
+  display: inline-block;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  color: #666;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-family: "Courier New", monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+}
+
+.skin-type-actions {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  width: 100%;
+  justify-content: center;
+}
+
+.skin-type-actions .action-btn {
+  background: none;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0.75rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  color: var(--text-secondary);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.skin-type-actions .action-btn:hover {
+  transform: scale(1.15) rotate(5deg);
+}
+
+.skin-type-actions .action-btn.edit {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.skin-type-actions .action-btn.edit:hover {
+  background: var(--gold);
+  color: var(--white);
+  box-shadow: 0 4px 12px rgba(218, 165, 32, 0.4);
+}
+
+.skin-type-actions .action-btn.delete {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.skin-type-actions .action-btn.delete:hover {
+  background: #dc3545;
+  color: var(--white);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+  border-radius: 16px;
+  border: 2px dashed var(--border-color);
+  margin-top: 2rem;
+}
+
+.empty-state i {
+  font-size: 5rem;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+  opacity: 0.3;
+}
+
+.empty-state h3 {
+  color: var(--navy-blue);
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.empty-state p {
+  color: #666;
+  margin-bottom: 2rem;
+  font-size: 1.05rem;
+}
+
+.empty-state .btn-primary {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+}
+
 .admin-faq-question-cell {
   max-width: 600px;
 }

@@ -213,6 +213,39 @@
   border-color: var(--gold);
 }
 
+/* Add User Buttons */
+.add-user-buttons {
+  display: flex;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+.add-user-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--navy-blue);
+  color: var(--white);
+}
+
+.add-user-btn:hover {
+  background: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(218, 165, 32, 0.3);
+}
+
+.add-user-btn i {
+  font-size: 1.1rem;
+}
+
 /* Users List */
 .users-list {
   margin-bottom: 2rem;
@@ -242,7 +275,7 @@
   background: var(--white);
   border-radius: 12px;
   border: 2px solid var(--border-color);
-  overflow: hidden;
+  overflow: scroll;
 }
 
 .users-table {
@@ -330,18 +363,29 @@
 }
 
 /* Action Buttons */
+.action-buttons-group {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 .users-action-btn {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem;
   border: none;
   border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  white-space: nowrap;
+  justify-content: center;
+  min-width: 38px;
+  min-height: 38px;
+}
+
+.users-action-btn i {
+  color: var(--white);
 }
 
 .users-action-btn.view {
@@ -352,6 +396,16 @@
 .users-action-btn.view:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(7, 22, 38, 0.3);
+}
+
+.users-action-btn.edit {
+  background: linear-gradient(135deg, var(--gold), #d4af37);
+  color: var(--white);
+}
+
+.users-action-btn.edit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(218, 165, 32, 0.3);
 }
 
 /* Responsive Design */

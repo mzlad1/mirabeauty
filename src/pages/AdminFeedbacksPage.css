@@ -267,12 +267,41 @@
   font-size: 1.5rem;
   font-weight: 700;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-avatar span {
+  text-transform: uppercase;
 }
 
 .user-details h4 {
   color: var(--navy-blue);
   margin-bottom: 0.25rem;
   font-size: 1.1rem;
+}
+
+.feedback-user-name-link {
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.feedback-user-name-link h4 {
+  color: var(--primary);
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.feedback-user-name-link:hover h4 {
+  color: var(--navy-blue);
+  text-decoration: underline;
+  transform: translateX(-2px);
 }
 
 .feedback-phone {

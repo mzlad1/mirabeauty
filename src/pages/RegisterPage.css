@@ -129,6 +129,14 @@
   font-weight: 600;
 }
 
+.register-form .field-hint {
+  display: block;
+  color: #6c757d;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
 /* Terms Checkbox */
 .terms-checkbox {
   display: flex;

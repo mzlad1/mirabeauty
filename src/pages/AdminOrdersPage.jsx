@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./AdminOrdersPage.css";
 import CustomModal from "../components/common/CustomModal";
 import OrderDetailsModal from "../components/dashboard/OrderDetailsModal";
@@ -319,9 +319,18 @@ const AdminOrdersPage = () => {
                         <td className="order-number">{order.orderNumber}</td>
                         <td>
                           <div className="ord-customer-info">
-                            <span className="customer-name">
-                              {order.customerInfo.name}
-                            </span>
+                            {order.userId ? (
+                              <Link
+                                to={`/admin/users/${order.userId}`}
+                                className="customer-name customer-name-link"
+                              >
+                                {order.customerInfo.name}
+                              </Link>
+                            ) : (
+                              <span className="customer-name">
+                                {order.customerInfo.name}
+                              </span>
+                            )}
                             <span className="customer-phone">
                               {order.customerInfo.phone}
                             </span>

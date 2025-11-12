@@ -66,6 +66,15 @@ const FeedbackModal = ({
         return;
       }
 
+      // Validate phone number format if provided
+      if (formData.phone && formData.phone.trim() !== "") {
+        if (!/^05[0-9]{8}$/.test(formData.phone.trim())) {
+          setError("رقم الهاتف غير صحيح. يجب أن يبدأ بـ 05 ويتكون من 10 أرقام");
+          setSubmitting(false);
+          return;
+        }
+      }
+
       if (type === FEEDBACK_TYPES.GENERAL && !formData.service.trim()) {
         setError("الرجاء إدخال اسم الخدمة");
         setSubmitting(false);
@@ -161,6 +170,12 @@ const FeedbackModal = ({
                 onChange={handleChange}
                 placeholder="أدخل اسمك"
                 required
+                disabled={!!currentUser}
+                style={
+                  currentUser
+                    ? { backgroundColor: "#f5f5f5", cursor: "not-allowed" }
+                    : {}
+                }
               />
             </div>
 
@@ -171,13 +186,41 @@ const FeedbackModal = ({
                 id="phone"
                 name="phone"
                 value={formData.phone}
-                onChange={handleChange}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Only allow numbers and limit to 10 digits
+                  if (/^\d{0,10}$/.test(value)) {
+                    handleChange(e);
+                  }
+                }}
                 placeholder="05xxxxxxxx"
+                maxLength="10"
+                pattern="^05[0-9]{8}$"
+                disabled={!!currentUser && !!userData?.phone}
+                style={
+                  currentUser && userData?.phone
+                    ? { backgroundColor: "#f5f5f5", cursor: "not-allowed" }
+                    : {}
+                }
               />
               <small className="field-note">
                 <i className="fas fa-info-circle"></i>
                 رقم هاتفك لن يظهر للعامة، فقط للتواصل معك عند الحاجة
               </small>
+              {formData.phone &&
+                formData.phone.length > 0 &&
+                !/^05[0-9]{8}$/.test(formData.phone) && (
+                  <small
+                    style={{
+                      color: "var(--danger)",
+                      display: "block",
+                      marginTop: "0.25rem",
+                    }}
+                  >
+                    <i className="fas fa-exclamation-circle"></i> رقم الهاتف يجب
+                    أن يبدأ بـ 05 ويتكون من 10 أرقام
+                  </small>
+                )}
             </div>
 
             {type === FEEDBACK_TYPES.GENERAL && (

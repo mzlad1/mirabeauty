@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./UserModal.css";
 import useModal from "../../hooks/useModal";
 import CustomModal from "../common/CustomModal";
+import { getAllSkinTypes } from "../../services/skinTypesService";
 
 const UserModal = ({
   isOpen,
@@ -30,16 +31,9 @@ const UserModal = ({
     ...user,
   });
 
-  const skinTypes = [
-    { value: "", label: "اختاري نوع البشرة" },
-    { value: "normal", label: "عادية" },
-    { value: "dry", label: "جافة" },
-    { value: "oily", label: "دهنية" },
-    { value: "combination", label: "مختلطة" },
-    { value: "sensitive", label: "حساسة" },
-  ];
-
+  const [skinTypes, setSkinTypes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingSkinTypes, setLoadingSkinTypes] = useState(false);
 
   // Reset form data when user or modal opens
   useEffect(() => {
@@ -63,8 +57,84 @@ const UserModal = ({
     });
   }, [user, isOpen]);
 
+  // Load skin types when modal opens for customers
+  useEffect(() => {
+    const loadSkinTypes = async () => {
+      if (isOpen && userType === "customer") {
+        setLoadingSkinTypes(true);
+        try {
+          const types = await getAllSkinTypes();
+          setSkinTypes([
+            { value: "", label: "اختاري نوع البشرة" },
+            ...types.map((type) => ({
+              value: type.value,
+              label: type.label,
+            })),
+          ]);
+        } catch (error) {
+          console.error("Error loading skin types:", error);
+          // Fallback to default skin types
+          setSkinTypes([
+            { value: "", label: "اختاري نوع البشرة" },
+            { value: "normal", label: "عادية" },
+            { value: "dry", label: "جافة" },
+            { value: "oily", label: "دهنية" },
+            { value: "combination", label: "مختلطة" },
+            { value: "sensitive", label: "حساسة" },
+          ]);
+        } finally {
+          setLoadingSkinTypes(false);
+        }
+      }
+    };
+    loadSkinTypes();
+  }, [isOpen, userType]);
+
+  const validate = () => {
+    // Phone validation - Saudi format: 05XXXXXXXX
+    const phoneRegex = /^05[0-9]{8}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      alert("رقم الهاتف غير صحيح. يجب أن يبدأ بـ 05 ويتكون من 10 أرقام");
+      return false;
+    }
+
+    // Birth date validation for customers
+    if (userType === "customer" && formData.birthDate) {
+      const birthDate = new Date(formData.birthDate);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+
+      // Check if date is in the future
+      if (birthDate > today) {
+        alert("تاريخ الميلاد لا يمكن أن يكون في المستقبل");
+        return false;
+      }
+
+      // Check minimum age (must be at least 13 years old)
+      if (age < 13 || (age === 13 && monthDiff < 0)) {
+        alert("يجب أن يكون عمر العميل 13 عاماً على الأقل");
+        return false;
+      }
+
+      // Check maximum age (reasonable limit - 120 years)
+      if (age > 120) {
+        alert("الرجاء التحقق من تاريخ الميلاد");
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate before submitting
+    if (!validate()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -169,11 +239,32 @@ const UserModal = ({
                 id="phone"
                 name="phone"
                 value={formData.phone}
-                onChange={handleChange}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Only allow numbers and limit to 10 digits
+                  if (/^\d{0,10}$/.test(value)) {
+                    handleChange(e);
+                  }
+                }}
                 required
+                maxLength="10"
                 className="admin-user-form-input"
-                placeholder="+970XXXXXXXXX أو 059XXXXXXX"
+                placeholder="05xxxxxxxx"
               />
+              {formData.phone &&
+                formData.phone.length > 0 &&
+                !/^05[0-9]{8}$/.test(formData.phone) && (
+                  <small
+                    style={{
+                      color: "var(--danger)",
+                      display: "block",
+                      marginTop: "0.25rem",
+                    }}
+                  >
+                    <i className="fas fa-exclamation-circle"></i> رقم الهاتف يجب
+                    أن يبدأ بـ 05 ويتكون من 10 أرقام
+                  </small>
+                )}
             </div>
           </div>
 
@@ -210,8 +301,27 @@ const UserModal = ({
                     value={formData.birthDate}
                     onChange={handleChange}
                     required
+                    max={new Date().toISOString().split("T")[0]}
+                    min={
+                      new Date(
+                        new Date().setFullYear(new Date().getFullYear() - 120)
+                      )
+                        .toISOString()
+                        .split("T")[0]
+                    }
                     className="admin-user-form-input"
                   />
+                  <small
+                    style={{
+                      color: "#666",
+                      fontSize: "0.85rem",
+                      display: "block",
+                      marginTop: "0.25rem",
+                    }}
+                  >
+                    <i className="fas fa-info-circle"></i> يجب أن يكون عمر
+                    العميل 13 عاماً على الأقل
+                  </small>
                 </div>
               </div>
 
