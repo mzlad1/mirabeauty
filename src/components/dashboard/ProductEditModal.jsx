@@ -26,11 +26,9 @@ const ProductEditModal = ({
     originalPrice: product?.originalPrice || "",
     category: product?.category || "",
     categoryName: product?.categoryName || "",
-    brand: product?.brand || "",
     images: product?.images || [],
     primaryImageIndex: product?.primaryImageIndex || 0,
     inStock: product?.inStock !== undefined ? product.inStock : true,
-    rating: product?.rating || 4.5,
     reviewsCount: product?.reviewsCount || 0,
     benefits: product?.benefits || [],
     ingredients: product?.ingredients || [],
@@ -51,11 +49,9 @@ const ProductEditModal = ({
         originalPrice: product.originalPrice || "",
         category: product.category || "",
         categoryName: product.categoryName || "",
-        brand: product.brand || "",
         images: product.images || [],
         primaryImageIndex: product.primaryImageIndex || 0,
         inStock: product.inStock !== undefined ? product.inStock : true,
-        rating: product.rating || 4.5,
         reviewsCount: product.reviewsCount || 0,
         benefits: product.benefits || [],
         ingredients: product.ingredients || [],
@@ -70,11 +66,9 @@ const ProductEditModal = ({
         originalPrice: "",
         category: "",
         categoryName: "",
-        brand: "",
         images: [],
         primaryImageIndex: 0,
         inStock: true,
-        rating: 4.5,
         reviewsCount: 0,
         benefits: [],
         ingredients: [],
@@ -282,7 +276,7 @@ const ProductEditModal = ({
 
           <div className="product-edit-form-row-2">
             <div className="product-edit-form-group">
-              <label htmlFor="price">السعر *</label>
+              <label htmlFor="price">السعر الظاهر</label>
               <input
                 type="text"
                 id="price"
@@ -296,7 +290,7 @@ const ProductEditModal = ({
             </div>
 
             <div className="product-edit-form-group">
-              <label htmlFor="originalPrice">السعر الأصلي (اختياري)</label>
+              <label htmlFor="originalPrice">السعر الأصلي (اختياري في حال وجود خصم)</label>
               <input
                 type="text"
                 id="originalPrice"
@@ -327,37 +321,6 @@ const ProductEditModal = ({
                   </option>
                 ))}
               </select>
-            </div>
-
-            <div className="product-edit-form-group">
-              <label htmlFor="brand">العلامة التجارية *</label>
-              <input
-                type="text"
-                id="brand"
-                name="brand"
-                value={formData.brand}
-                onChange={handleChange}
-                required
-                className="product-edit-form-input"
-                placeholder="مثال: ميرا بيوتي"
-              />
-            </div>
-          </div>
-
-          <div className="product-edit-form-row-2">
-            <div className="product-edit-form-group">
-              <label htmlFor="rating">التقييم (1-5)</label>
-              <input
-                type="number"
-                id="rating"
-                name="rating"
-                value={formData.rating}
-                onChange={handleChange}
-                min="0"
-                max="5"
-                step="0.1"
-                className="product-edit-form-input"
-              />
             </div>
           </div>
 
