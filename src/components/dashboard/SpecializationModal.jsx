@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from "react";
 import "./SkinTypeModal.css";
 
-const SkinTypeModal = ({ isOpen, onClose, onSubmit, skinType = null }) => {
+const SpecializationModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  specialization = null,
+}) => {
   const [formData, setFormData] = useState({
-    name: skinType?.name || "",
+    name: specialization?.name || "",
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (skinType) {
+    if (specialization) {
       setFormData({
-        name: skinType.name || "",
+        name: specialization.name || "",
       });
     } else {
       setFormData({
@@ -19,7 +24,7 @@ const SkinTypeModal = ({ isOpen, onClose, onSubmit, skinType = null }) => {
       });
     }
     setErrors({});
-  }, [skinType, isOpen]);
+  }, [specialization, isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,7 +45,7 @@ const SkinTypeModal = ({ isOpen, onClose, onSubmit, skinType = null }) => {
     const newErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "اسم نوع البشرة مطلوب";
+      newErrors.name = "اسم التخصص مطلوب";
     }
 
     setErrors(newErrors);
@@ -61,8 +66,8 @@ const SkinTypeModal = ({ isOpen, onClose, onSubmit, skinType = null }) => {
       });
       onClose();
     } catch (error) {
-      console.error("Error submitting skin type:", error);
-      setErrors({ submit: "حدث خطأ أثناء حفظ نوع البشرة" });
+      console.error("Error submitting specialization:", error);
+      setErrors({ submit: "حدث خطأ أثناء حفظ التخصص" });
     } finally {
       setLoading(false);
     }
@@ -77,7 +82,7 @@ const SkinTypeModal = ({ isOpen, onClose, onSubmit, skinType = null }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
-          <h2>{skinType ? "تعديل نوع البشرة" : "إضافة نوع بشرة جديد"}</h2>
+          <h2>{specialization ? "تعديل التخصص" : "إضافة تخصص جديد"}</h2>
           <button className="modal-close" onClick={onClose}>
             <i className="fas fa-times"></i>
           </button>
@@ -85,7 +90,7 @@ const SkinTypeModal = ({ isOpen, onClose, onSubmit, skinType = null }) => {
 
         <form onSubmit={handleSubmit} className="skin-type-form">
           <div className="form-group">
-            <label htmlFor="name">اسم نوع البشرة *</label>
+            <label htmlFor="name">اسم التخصص *</label>
             <input
               type="text"
               id="name"
@@ -93,12 +98,12 @@ const SkinTypeModal = ({ isOpen, onClose, onSubmit, skinType = null }) => {
               value={formData.name}
               onChange={handleChange}
               disabled={loading}
-              placeholder="مثال: بشرة دهنية"
+              placeholder="مثال: أخصائية ليزر"
               className={errors.name ? "error" : ""}
             />
             {errors.name && <span className="field-error">{errors.name}</span>}
             <small className="field-hint">
-              أدخل اسم نوع البشرة (سيتم استخدام معرف فريد تلقائياً)
+              أدخل اسم التخصص (سيتم استخدام معرف فريد تلقائياً)
             </small>
           </div>
 
@@ -130,7 +135,7 @@ const SkinTypeModal = ({ isOpen, onClose, onSubmit, skinType = null }) => {
                     className="fas fa-save"
                     style={{ color: "var(--white)" }}
                   ></i>
-                  {skinType ? "حفظ التعديلات" : "إضافة"}
+                  {specialization ? "حفظ التعديلات" : "إضافة"}
                 </>
               )}
             </button>
@@ -141,4 +146,4 @@ const SkinTypeModal = ({ isOpen, onClose, onSubmit, skinType = null }) => {
   );
 };
 
-export default SkinTypeModal;
+export default SpecializationModal;

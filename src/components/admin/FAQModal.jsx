@@ -46,13 +46,13 @@ const FAQModal = ({ isOpen, onClose, onSubmit, faq }) => {
       setFormData({
         question: faq.question || "",
         answer: faq.answer || "",
-        category: faq.category || "general",
+        category: faq.category || (faqTypes.length > 0 ? faqTypes[0].id : ""),
       });
     } else {
       setFormData({
         question: "",
         answer: "",
-        category: faqTypes.length > 0 ? faqTypes[0].value : "general",
+        category: faqTypes.length > 0 ? faqTypes[0].id : "",
       });
     }
     setErrors({});
@@ -175,8 +175,8 @@ const FAQModal = ({ isOpen, onClose, onSubmit, faq }) => {
                 <option value="">لا توجد أنواع متاحة</option>
               ) : (
                 faqTypes.map((type) => (
-                  <option key={type.id || type.value} value={type.value}>
-                    {type.label}
+                  <option key={type.id} value={type.id}>
+                    {type.name}
                   </option>
                 ))
               )}

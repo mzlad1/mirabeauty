@@ -225,3 +225,24 @@ export const deleteFAQType = async (typeId) => {
     throw error;
   }
 };
+
+// Reorder FAQ types
+export const reorderFAQTypes = async (faqTypes) => {
+  try {
+    const batch = [];
+    for (let i = 0; i < faqTypes.length; i++) {
+      const typeRef = doc(db, FAQ_TYPES_COLLECTION, faqTypes[i].id);
+      batch.push(
+        updateDoc(typeRef, {
+          order: i,
+          updatedAt: serverTimestamp(),
+        })
+      );
+    }
+    await Promise.all(batch);
+    return faqTypes;
+  } catch (error) {
+    console.error("Error reordering FAQ types:", error);
+    throw error;
+  }
+};

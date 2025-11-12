@@ -329,7 +329,16 @@ const ProductsPage = ({ setCurrentPage }) => {
 
                         <div className="product-rating">
                           <div className="stars">
-                            {"⭐".repeat(Math.floor(product.rating))}
+                            {Array.from(
+                              { length: product.rating },
+                              (_, i) => (
+                                <i
+                                  key={i}
+                                  className="fas fa-star"
+                                  style={{ color: "var(--gold)" }}
+                                ></i>
+                              )
+                            )}
                           </div>
                           <span className="rating-text">
                             {product.rating} ({product.reviewsCount} تقييمات)

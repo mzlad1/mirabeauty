@@ -25,6 +25,17 @@ const FeedbackModal = ({
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
+  // Update form data when modal opens or userData changes
+  useEffect(() => {
+    if (isOpen) {
+      setFormData((prev) => ({
+        ...prev,
+        name: userData?.name || currentUser?.displayName || "",
+        phone: userData?.phone || "",
+      }));
+    }
+  }, [isOpen, currentUser, userData]);
+
   // Load services for dropdown
   useEffect(() => {
     if (isOpen && type === FEEDBACK_TYPES.GENERAL) {

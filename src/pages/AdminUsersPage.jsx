@@ -62,14 +62,18 @@ const AdminUsersPage = ({ currentUser, userData }) => {
   };
 
   const handleEditUser = (user) => {
-    const userType = user.role === "staff" ? "staff" : "customer";
+    // Admin and staff should both be treated as "staff" type (no skin type or allergies)
+    const userType =
+      user.role === "staff" || user.role === "admin" ? "staff" : "customer";
     setUserModalType(userType);
     setEditingUser(user);
     setIsUserModalOpen(true);
   };
 
   const handleDeleteUser = async (userId, userRole) => {
-    const userType = userRole === "staff" ? "staff" : "customer";
+    // Admin and staff should both be treated as "staff" type
+    const userType =
+      userRole === "staff" || userRole === "admin" ? "staff" : "customer";
     showConfirm(
       `هل أنت متأكد من حذف هذا ${
         userType === "customer" ? "العميل" : "الموظف"
@@ -357,13 +361,10 @@ const AdminUsersPage = ({ currentUser, userData }) => {
                       <td>{index + 1}</td>
                       <td>
                         <div className="user-avatar">
-                          {user.avatar ? (
-                            <img src={user.avatar} alt={user.name} />
-                          ) : (
-                            <div className="avatar-placeholder">
-                              {user.name?.charAt(0) || "U"}
-                            </div>
-                          )}
+                          <img
+                            src={user.avatar || "/assets/default-avatar.jpg"}
+                            alt={user.name}
+                          />
                         </div>
                       </td>
                       <td>

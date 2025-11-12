@@ -3,22 +3,20 @@ import "./FAQTypeModal.css";
 
 const FAQTypeModal = ({ isOpen, onClose, onSubmit, faqType }) => {
   const [formData, setFormData] = useState({
-    value: "",
-    label: "",
+    name: "",
   });
 
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (faqType) {
       setFormData({
-        value: faqType.value || "",
-        label: faqType.label || "",
+        name: faqType.name || "",
       });
     } else {
       setFormData({
-        value: "",
-        label: "",
+        name: "",
       });
     }
     setErrors({});
@@ -42,24 +40,29 @@ const FAQTypeModal = ({ isOpen, onClose, onSubmit, faqType }) => {
   const validate = () => {
     const newErrors = {};
 
-    if (!formData.value.trim()) {
-      newErrors.value = "القيمة مطلوبة (بالإنجليزية)";
-    } else if (!/^[a-z0-9-_]+$/i.test(formData.value)) {
-      newErrors.value = "القيمة يجب أن تحتوي على حروف إنجليزية وأرقام فقط";
-    }
-
-    if (!formData.label.trim()) {
-      newErrors.label = "الاسم مطلوب (بالعربية)";
+    if (!formData.name.trim()) {
+      newErrors.name = "اسم التصنيف مطلوب";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validate()) {
-      onSubmit(formData);
+    if (!validate()) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await onSubmit({ name: formData.name.trim() });
+      onClose();
+    } catch (error) {
+      console.error("Error submitting FAQ type:", error);
+      setErrors({ submit: "حدث خطأ أثناء حفظ التصنيف" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -78,62 +81,58 @@ const FAQTypeModal = ({ isOpen, onClose, onSubmit, faqType }) => {
         <form onSubmit={handleSubmit} className="faq-type-modal-form">
           <div className="faq-type-form-group">
             <label className="faq-type-form-label">
-              القيمة (بالإنجليزية) <span className="faq-type-required">*</span>
+              اسم التصنيف <span className="faq-type-required">*</span>
             </label>
             <input
               type="text"
-              name="value"
-              value={formData.value}
+              name="name"
+              value={formData.name}
               onChange={handleChange}
-              placeholder="مثال: general"
-              disabled={!!faqType} // Disable editing value for existing types
+              placeholder="مثال: الحجز والمواعيد"
+              disabled={loading}
               className={
-                errors.value
-                  ? "faq-type-input faq-type-error"
-                  : "faq-type-input"
-              }
-              style={
-                faqType
-                  ? { backgroundColor: "#f5f5f5", cursor: "not-allowed" }
-                  : {}
+                errors.name ? "faq-type-input faq-type-error" : "faq-type-input"
               }
             />
-            {errors.value && (
-              <span className="faq-type-error-message">{errors.value}</span>
+            {errors.name && (
+              <span className="faq-type-error-message">{errors.name}</span>
             )}
             <small className="faq-type-hint">
-              القيمة المستخدمة في قاعدة البيانات (حروف إنجليزية وأرقام فقط)
+              أدخل اسم التصنيف (سيتم استخدام معرف فريد تلقائياً)
             </small>
           </div>
 
-          <div className="faq-type-form-group">
-            <label className="faq-type-form-label">
-              الاسم (بالعربية) <span className="faq-type-required">*</span>
-            </label>
-            <input
-              type="text"
-              name="label"
-              value={formData.label}
-              onChange={handleChange}
-              placeholder="مثال: عام"
-              className={
-                errors.label
-                  ? "faq-type-input faq-type-error"
-                  : "faq-type-input"
-              }
-            />
-            {errors.label && (
-              <span className="faq-type-error-message">{errors.label}</span>
-            )}
-            <small className="faq-type-hint">الاسم الذي سيظهر للمستخدمين</small>
-          </div>
+          {errors.submit && (
+            <div className="error-message">
+              <i className="fas fa-exclamation-circle"></i>
+              {errors.submit}
+            </div>
+          )}
 
           <div className="faq-type-modal-actions">
-            <button type="button" className="btn-secondary" onClick={onClose}>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={onClose}
+              disabled={loading}
+            >
               إلغاء
             </button>
-            <button type="submit" className="faq-btn-primary">
-              {faqType ? "تحديث" : "إضافة"}
+            <button
+              type="submit"
+              className="faq-btn-primary"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <i className="fas fa-spinner fa-spin"></i>
+                  جاري الحفظ...
+                </>
+              ) : faqType ? (
+                "تحديث"
+              ) : (
+                "إضافة"
+              )}
             </button>
           </div>
         </form>

@@ -33,24 +33,11 @@ const RegisterPage = () => {
       setLoadingSkinTypes(true);
       try {
         const types = await getAllSkinTypes();
-        setSkinTypes([
-          { value: "", label: "اختاري نوع بشرتك" },
-          ...types.map((type) => ({
-            value: type.value,
-            label: type.label,
-          })),
-        ]);
+        setSkinTypes([{ id: "", name: "اختاري نوع بشرتك" }, ...types]);
       } catch (error) {
         console.error("Error loading skin types:", error);
-        // Fallback to default skin types
-        setSkinTypes([
-          { value: "", label: "اختاري نوع بشرتك" },
-          { value: "normal", label: "عادية" },
-          { value: "dry", label: "جافة" },
-          { value: "oily", label: "دهنية" },
-          { value: "combination", label: "مختلطة" },
-          { value: "sensitive", label: "حساسة" },
-        ]);
+        // If loading fails, leave empty
+        setSkinTypes([{ id: "", name: "اختاري نوع بشرتك" }]);
       } finally {
         setLoadingSkinTypes(false);
       }
@@ -374,8 +361,8 @@ const RegisterPage = () => {
                         <option value="">جاري تحميل الأنواع...</option>
                       ) : (
                         skinTypes.map((type) => (
-                          <option key={type.value} value={type.value}>
-                            {type.label}
+                          <option key={type.id} value={type.id}>
+                            {type.name}
                           </option>
                         ))
                       )}

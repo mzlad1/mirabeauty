@@ -394,21 +394,18 @@ const AdminFeedbacksPage = ({ currentUser, userData }) => {
                   <div className="feedback-card-header">
                     <div className="feedback-user-info">
                       <div className="user-avatar">
-                        {feedbackUser?.avatar ? (
-                          <img
-                            src={feedbackUser.avatar}
-                            alt={`${feedback.name}'s avatar`}
-                          />
-                        ) : (
-                          <span>{feedback.name?.charAt(0) || "؟"}</span>
-                        )}
+                        <img
+                          src={
+                            feedbackUser?.avatar || "/assets/default-avatar.jpg"
+                          }
+                          alt={`${feedback.name}'s avatar`}
+                        />
                       </div>
                       <div className="user-details">
                         {feedback.userId ? (
                           <Link
                             to={`/admin/users/${feedback.userId}`}
                             className="feedback-user-name-link"
-                            target="_blank"
                           >
                             <h4>{feedback.name}</h4>
                           </Link>

@@ -183,13 +183,10 @@ const UserDetailsPage = ({ currentUser, userData }) => {
         {/* User Header */}
         <div className="user-header">
           <div className="user-avatar-large">
-            {user.avatar ? (
-              <img src={user.avatar} alt={user.name} />
-            ) : (
-              <div className="avatar-placeholder-large">
-                {user.name?.charAt(0) || "U"}
-              </div>
-            )}
+            <img
+              src={user.avatar || "/assets/default-avatar.jpg"}
+              alt={user.name}
+            />
           </div>
           <div className="user-header-info">
             <h1>{user.name || "غير متوفر"}</h1>
@@ -222,7 +219,10 @@ const UserDetailsPage = ({ currentUser, userData }) => {
           {!isStaff && (
             <div className="stat-card">
               <div className="stat-icon orders">
-                <i className="fas fa-shopping-cart" style={{ color: "var(--white)" }}></i>
+                <i
+                  className="fas fa-shopping-cart"
+                  style={{ color: "var(--white)" }}
+                ></i>
               </div>
               <div className="stat-info">
                 <h3>الطلبات</h3>

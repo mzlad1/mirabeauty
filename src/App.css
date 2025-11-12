@@ -1,5 +1,14 @@
 /* App.css - Main Application Styles */
 
+/* Import Brando Font */
+@font-face {
+  font-family: "Brando";
+  src: url("/Brando_Regular.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* CSS Variables */
 :root {
   --navy-blue: #0a1f44;
@@ -21,7 +30,7 @@
 /* i want to change the font of the website to Brando.otf from public fie */
 
 body {
-  font-family: 'Brando', sans-serif;
+  font-family: "Brando", sans-serif;
   background-color: var(--white);
   color: var(--charcoal);
   line-height: 1.6;

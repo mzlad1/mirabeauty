@@ -3,6 +3,7 @@ import "./UserModal.css";
 import useModal from "../../hooks/useModal";
 import CustomModal from "../common/CustomModal";
 import { getAllSkinTypes } from "../../services/skinTypesService";
+import { getAllSpecializations } from "../../services/specializationsService";
 
 const UserModal = ({
   isOpen,
@@ -32,8 +33,10 @@ const UserModal = ({
   });
 
   const [skinTypes, setSkinTypes] = useState([]);
+  const [specializations, setSpecializations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingSkinTypes, setLoadingSkinTypes] = useState(false);
+  const [loadingSpecializations, setLoadingSpecializations] = useState(false);
 
   // Reset form data when user or modal opens
   useEffect(() => {
@@ -64,30 +67,37 @@ const UserModal = ({
         setLoadingSkinTypes(true);
         try {
           const types = await getAllSkinTypes();
-          setSkinTypes([
-            { value: "", label: "اختاري نوع البشرة" },
-            ...types.map((type) => ({
-              value: type.value,
-              label: type.label,
-            })),
-          ]);
+          setSkinTypes([{ id: "", name: "اختاري نوع البشرة" }, ...types]);
         } catch (error) {
           console.error("Error loading skin types:", error);
-          // Fallback to default skin types
-          setSkinTypes([
-            { value: "", label: "اختاري نوع البشرة" },
-            { value: "normal", label: "عادية" },
-            { value: "dry", label: "جافة" },
-            { value: "oily", label: "دهنية" },
-            { value: "combination", label: "مختلطة" },
-            { value: "sensitive", label: "حساسة" },
-          ]);
+          // If loading fails, leave empty
+          setSkinTypes([{ id: "", name: "اختاري نوع البشرة" }]);
         } finally {
           setLoadingSkinTypes(false);
         }
       }
     };
     loadSkinTypes();
+  }, [isOpen, userType]);
+
+  // Load specializations when modal opens for staff
+  useEffect(() => {
+    const loadSpecializations = async () => {
+      if (isOpen && userType === "staff") {
+        setLoadingSpecializations(true);
+        try {
+          const specs = await getAllSpecializations();
+          setSpecializations([{ id: "", name: "اختر التخصص" }, ...specs]);
+        } catch (error) {
+          console.error("Error loading specializations:", error);
+          // If loading fails, leave empty
+          setSpecializations([{ id: "", name: "اختر التخصص" }]);
+        } finally {
+          setLoadingSpecializations(false);
+        }
+      }
+    };
+    loadSpecializations();
   }, [isOpen, userType]);
 
   const validate = () => {
@@ -146,12 +156,20 @@ const UserModal = ({
 
       // For customers, handle allergies array
       if (userType === "customer") {
-        submitData.allergies = formData.allergies
-          ? formData.allergies
-              .split(",")
-              .map((item) => item.trim())
-              .filter((item) => item)
-          : ["لا توجد"];
+        // Check if allergies is already an array or a string
+        if (Array.isArray(formData.allergies)) {
+          submitData.allergies =
+            formData.allergies.length > 0 ? formData.allergies : ["لا توجد"];
+        } else if (typeof formData.allergies === "string") {
+          submitData.allergies = formData.allergies
+            ? formData.allergies
+                .split(",")
+                .map((item) => item.trim())
+                .filter((item) => item)
+            : ["لا توجد"];
+        } else {
+          submitData.allergies = ["لا توجد"];
+        }
       }
 
       // Only include password for new users
@@ -337,8 +355,8 @@ const UserModal = ({
                     className="admin-user-form-input"
                   >
                     {skinTypes.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
+                      <option key={type.id} value={type.id}>
+                        {type.name}
                       </option>
                     ))}
                   </select>
@@ -362,20 +380,29 @@ const UserModal = ({
             </>
           )}
 
-          {userType === "staff" && (
+          {userType === "staff" && user?.role !== "admin" && (
             <div className="admin-user-form-row">
               <div className="admin-user-form-group">
                 <label htmlFor="specialization">التخصص *</label>
-                <input
-                  type="text"
+                <select
                   id="specialization"
                   name="specialization"
                   value={formData.specialization}
                   onChange={handleChange}
                   required
+                  disabled={loadingSpecializations}
                   className="admin-user-form-input"
-                  placeholder="مثل: أخصائية ليزر، أخصائية بشرة"
-                />
+                >
+                  {loadingSpecializations ? (
+                    <option value="">جاري تحميل التخصصات...</option>
+                  ) : (
+                    specializations.map((spec) => (
+                      <option key={spec.id} value={spec.id}>
+                        {spec.name}
+                      </option>
+                    ))
+                  )}
+                </select>
               </div>
             </div>
           )}

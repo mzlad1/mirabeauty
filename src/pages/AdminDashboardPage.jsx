@@ -64,6 +64,7 @@ import {
   addFAQType,
   updateFAQType,
   deleteFAQType,
+  reorderFAQTypes,
 } from "../services/faqService";
 import {
   getAllSkinTypes,
@@ -71,6 +72,13 @@ import {
   updateSkinType,
   deleteSkinType,
 } from "../services/skinTypesService";
+import {
+  getAllSpecializations,
+  addSpecialization,
+  updateSpecialization,
+  deleteSpecialization,
+  reorderSpecializations,
+} from "../services/specializationsService";
 import UserModal from "../components/dashboard/UserModal";
 import ServiceEditModal from "../components/dashboard/ServiceEditModal";
 import ProductEditModal from "../components/dashboard/ProductEditModal";
@@ -81,6 +89,7 @@ import CategoryModal from "../components/dashboard/CategoryModal";
 import FAQModal from "../components/admin/FAQModal";
 import FAQTypeModal from "../components/admin/FAQTypeModal";
 import SkinTypeModal from "../components/dashboard/SkinTypeModal";
+import SpecializationModal from "../components/dashboard/SpecializationModal";
 import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
 
 const AdminDashboardPage = ({ currentUser }) => {
@@ -193,6 +202,12 @@ const AdminDashboardPage = ({ currentUser }) => {
   const [skinTypes, setSkinTypes] = useState([]);
   const [isSkinTypeModalOpen, setIsSkinTypeModalOpen] = useState(false);
   const [editingSkinType, setEditingSkinType] = useState(null);
+
+  // Specializations states
+  const [specializations, setSpecializations] = useState([]);
+  const [isSpecializationModalOpen, setIsSpecializationModalOpen] =
+    useState(false);
+  const [editingSpecialization, setEditingSpecialization] = useState(null);
 
   // Profile editing states
   const [editMode, setEditMode] = useState(false);
@@ -419,6 +434,7 @@ const AdminDashboardPage = ({ currentUser }) => {
   const loadFAQTypes = async () => {
     try {
       const typesData = await getAllFAQTypes();
+      console.log("Loaded FAQ types:", typesData);
       setFaqTypes(typesData);
     } catch (err) {
       console.error("Error loading FAQ types:", err);
@@ -431,6 +447,15 @@ const AdminDashboardPage = ({ currentUser }) => {
       setSkinTypes(skinTypesData);
     } catch (err) {
       console.error("Error loading skin types:", err);
+    }
+  };
+
+  const loadSpecializations = async () => {
+    try {
+      const specializationsData = await getAllSpecializations();
+      setSpecializations(specializationsData);
+    } catch (err) {
+      console.error("Error loading specializations:", err);
     }
   };
 
@@ -841,6 +866,8 @@ const AdminDashboardPage = ({ currentUser }) => {
       loadFAQTypes();
     } else if (activeTab === "skinTypes") {
       loadSkinTypes();
+    } else if (activeTab === "specializations") {
+      loadSpecializations();
     }
   }, [activeTab]);
 
@@ -1074,6 +1101,7 @@ const AdminDashboardPage = ({ currentUser }) => {
 
   const handleFaqSubmit = async (faqData) => {
     try {
+      console.log("Submitting FAQ with data:", faqData);
       if (editingFaq) {
         await updateFAQ(editingFaq.id, faqData);
         showSuccess("تم تحديث السؤال بنجاح");
@@ -1203,6 +1231,58 @@ const AdminDashboardPage = ({ currentUser }) => {
         }
       },
       "تأكيد حذف نوع البشرة",
+      "حذف",
+      "إلغاء"
+    );
+  };
+
+  // Specialization handlers
+  const handleAddSpecialization = () => {
+    setEditingSpecialization(null);
+    setIsSpecializationModalOpen(true);
+  };
+
+  const handleEditSpecialization = (specialization) => {
+    setEditingSpecialization(specialization);
+    setIsSpecializationModalOpen(true);
+  };
+
+  const handleSpecializationSubmit = async (specializationData) => {
+    try {
+      if (editingSpecialization) {
+        await updateSpecialization(
+          editingSpecialization.id,
+          specializationData
+        );
+        showSuccess("تم تحديث التخصص بنجاح");
+      } else {
+        await addSpecialization(specializationData);
+        showSuccess("تم إضافة التخصص بنجاح");
+      }
+      await loadSpecializations();
+      setIsSpecializationModalOpen(false);
+      setEditingSpecialization(null);
+    } catch (error) {
+      console.error("Error submitting specialization:", error);
+      showError("حدث خطأ أثناء حفظ التخصص");
+      throw error;
+    }
+  };
+
+  const handleDeleteSpecialization = async (specializationId, name) => {
+    showConfirm(
+      `هل أنت متأكد من حذف التخصص "${name}"؟\n\nسيتم حذف التخصص بشكل نهائي.`,
+      async () => {
+        try {
+          await deleteSpecialization(specializationId);
+          await loadSpecializations();
+          showSuccess("تم حذف التخصص بنجاح");
+        } catch (error) {
+          console.error("Error deleting specialization:", error);
+          showError("حدث خطأ أثناء حذف التخصص");
+        }
+      },
+      "تأكيد حذف التخصص",
       "حذف",
       "إلغاء"
     );
@@ -1545,6 +1625,15 @@ const AdminDashboardPage = ({ currentUser }) => {
                 </button>
                 <button
                   className={`nav-item ${
+                    activeTab === "specializations" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("specializations")}
+                >
+                  <i className="nav-icon fas fa-user-md"></i>
+                  التخصصات
+                </button>
+                <button
+                  className={`nav-item ${
                     activeTab === "settings" ? "active" : ""
                   }`}
                   onClick={() => setActiveTab("settings")}
@@ -1578,7 +1667,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                   </div>
 
                   {/* Statistics Cards */}
-                  <div className="stats-grid">
+                  {/* <div className="stats-grid">
                     <div className="stat-card revenue">
                       <i
                         className="stat-icon fas fa-dollar-sign"
@@ -1636,7 +1725,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                         </span>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Today's Overview */}
                   <div className="today-overview">
@@ -2640,10 +2729,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                       {skinTypes.map((skinType) => (
                         <div key={skinType.id} className="skin-type-card">
                           <div className="skin-type-content">
-                            <h3>{skinType.label}</h3>
-                            <span className="skin-type-value">
-                              {skinType.value}
-                            </span>
+                            <h3>{skinType.name}</h3>
                           </div>
                           <div className="skin-type-actions">
                             <button
@@ -2656,9 +2742,86 @@ const AdminDashboardPage = ({ currentUser }) => {
                             <button
                               className="action-btn delete"
                               onClick={() =>
-                                handleDeleteSkinType(
-                                  skinType.id,
-                                  skinType.label
+                                handleDeleteSkinType(skinType.id, skinType.name)
+                              }
+                              title="حذف"
+                            >
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Specializations Tab */}
+              {activeTab === "specializations" && (
+                <div className="tab-content">
+                  <div className="tab-header">
+                    <h2>
+                      <i className="fas fa-user-md"></i>
+                      إدارة التخصصات
+                    </h2>
+                    <button
+                      className="btn-primary"
+                      onClick={handleAddSpecialization}
+                    >
+                      <i className="fas fa-plus"></i>
+                      إضافة تخصص
+                    </button>
+                  </div>
+
+                  <div className="section-description-box">
+                    <i className="fas fa-info-circle"></i>
+                    <p>
+                      إدارة التخصصات المتاحة للموظفين. هذه التخصصات ستظهر في
+                      نموذج إضافة/تعديل الموظفين. لا تظهر للمدراء عند التعديل.
+                    </p>
+                  </div>
+
+                  {loading ? (
+                    <div className="loading-state">
+                      <div className="loading-spinner"></div>
+                      <p>جاري تحميل التخصصات...</p>
+                    </div>
+                  ) : specializations.length === 0 ? (
+                    <div className="empty-state">
+                      <i className="fas fa-user-md"></i>
+                      <h3>لا توجد تخصصات محددة</h3>
+                      <p>ابدأ بإضافة التخصصات التي ستكون متاحة للموظفين</p>
+                      <button
+                        className="btn-primary"
+                        onClick={handleAddSpecialization}
+                      >
+                        <i className="fas fa-plus"></i>
+                        إضافة التخصص الأول
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="skin-types-grid">
+                      {specializations.map((specialization) => (
+                        <div key={specialization.id} className="skin-type-card">
+                          <div className="skin-type-content">
+                            <h3>{specialization.name}</h3>
+                          </div>
+                          <div className="skin-type-actions">
+                            <button
+                              className="action-btn edit"
+                              onClick={() =>
+                                handleEditSpecialization(specialization)
+                              }
+                              title="تعديل"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button
+                              className="action-btn delete"
+                              onClick={() =>
+                                handleDeleteSpecialization(
+                                  specialization.id,
+                                  specialization.name
                                 )
                               }
                               title="حذف"
@@ -2909,14 +3072,53 @@ const AdminDashboardPage = ({ currentUser }) => {
                           <p>لا توجد أنواع أسئلة. قم بإضافة نوع جديد</p>
                         </div>
                       ) : (
-                        faqTypes.map((type) => (
-                          <div key={type.id} className="faq-type-item">
+                        faqTypes.map((type, index) => (
+                          <div
+                            key={type.id}
+                            className="faq-type-item"
+                            draggable
+                            onDragStart={(e) => {
+                              e.dataTransfer.effectAllowed = "move";
+                              e.dataTransfer.setData("text/html", index);
+                            }}
+                            onDragOver={(e) => {
+                              if (e.preventDefault) e.preventDefault();
+                              e.dataTransfer.dropEffect = "move";
+                              return false;
+                            }}
+                            onDrop={(e) => {
+                              e.stopPropagation();
+                              const dragIndex = parseInt(
+                                e.dataTransfer.getData("text/html")
+                              );
+                              if (dragIndex !== index) {
+                                const newTypes = [...faqTypes];
+                                const draggedItem = newTypes[dragIndex];
+                                newTypes.splice(dragIndex, 1);
+                                newTypes.splice(index, 0, draggedItem);
+                                setFaqTypes(newTypes);
+                                // Save new order
+                                reorderFAQTypes(newTypes).catch((err) =>
+                                  console.error(
+                                    "Error reordering FAQ types:",
+                                    err
+                                  )
+                                );
+                              }
+                              return false;
+                            }}
+                          >
                             <div className="faq-type-info">
+                              <i
+                                className="fas fa-grip-vertical"
+                                style={{
+                                  marginLeft: "10px",
+                                  cursor: "grab",
+                                  color: "#999",
+                                }}
+                              ></i>
                               <span className="faq-type-label">
-                                {type.label}
-                              </span>
-                              <span className="faq-type-value">
-                                ({type.value})
+                                {type.name}
                               </span>
                             </div>
                             <div className="faq-type-actions">
@@ -2930,7 +3132,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                               <button
                                 className="btn-icon btn-delete"
                                 onClick={() =>
-                                  handleDeleteFaqType(type.id, type.label)
+                                  handleDeleteFaqType(type.id, type.name)
                                 }
                                 title="حذف"
                               >
@@ -2958,8 +3160,8 @@ const AdminDashboardPage = ({ currentUser }) => {
                     >
                       <option value="all">جميع التصنيفات</option>
                       {faqTypes.map((type) => (
-                        <option key={type.id} value={type.value}>
-                          {type.label}
+                        <option key={type.id} value={type.id}>
+                          {type.name}
                         </option>
                       ))}
                     </select>
@@ -2998,10 +3200,26 @@ const AdminDashboardPage = ({ currentUser }) => {
                               <td>
                                 <span
                                   className={`admin-faq-category-badge admin-faq-category-${faq.category}`}
+                                  title={`Category ID: ${faq.category}`}
                                 >
-                                  {faqTypes.find(
-                                    (t) => t.value === faq.category
-                                  )?.label || faq.category}
+                                  {(() => {
+                                    const foundType = faqTypes.find(
+                                      (t) => t.id === faq.category
+                                    );
+                                    if (!foundType) {
+                                      console.warn(
+                                        "FAQ category not found:",
+                                        faq.category,
+                                        "Available types:",
+                                        faqTypes
+                                      );
+                                      // Show the raw category value for debugging
+                                      return `غير محدد (${
+                                        faq.category || "فارغ"
+                                      })`;
+                                    }
+                                    return foundType.name;
+                                  })()}
                                 </span>
                               </td>
                               <td>
@@ -3175,6 +3393,17 @@ const AdminDashboardPage = ({ currentUser }) => {
         }}
         onSubmit={handleSkinTypeSubmit}
         skinType={editingSkinType}
+      />
+
+      {/* Specialization Modal */}
+      <SpecializationModal
+        isOpen={isSpecializationModalOpen}
+        onClose={() => {
+          setIsSpecializationModalOpen(false);
+          setEditingSpecialization(null);
+        }}
+        onSubmit={handleSpecializationSubmit}
+        specialization={editingSpecialization}
       />
 
       {/* Custom Modal */}

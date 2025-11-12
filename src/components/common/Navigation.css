@@ -440,12 +440,34 @@
     transform: none;
     border: none;
     border-top: 1px solid var(--border-color);
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* Scrollbar styling for user dropdown in mobile */
+  .user-dropdown::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .user-dropdown::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  .user-dropdown::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 3px;
+  }
+
+  .user-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #b8921f;
   }
 
   .dropdown-item {
     padding: 16px 20px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
+    width: 100%;
   }
 }
 
