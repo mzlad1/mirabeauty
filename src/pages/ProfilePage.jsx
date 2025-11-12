@@ -505,14 +505,20 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                   {/* Quick Stats */}
                   <div className="stats-grid">
                     <div className="stat-card">
-                      <i className="stat-icon fas fa-calendar-check"></i>
+                      <i
+                        className="stat-icon fas fa-calendar-check"
+                        style={{ color: "var(--white)" }}
+                      ></i>
                       <div className="stat-info">
                         <h3>{upcomingAppointments.length}</h3>
                         <p>مواعيد قادمة</p>
                       </div>
                     </div>
                     <div className="stat-card">
-                      <i className="stat-icon fas fa-check-circle"></i>
+                      <i
+                        className="stat-icon fas fa-check-circle"
+                        style={{ color: "var(--white)" }}
+                      ></i>
                       <div className="stat-info">
                         <h3>{pastAppointments.length}</h3>
                         <p>جلسات مكتملة</p>
@@ -526,7 +532,10 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                       </div>
                     </div> */}
                     <div className="stat-card">
-                      <i className="stat-icon fas fa-wallet"></i>
+                      <i
+                        className="stat-icon fas fa-wallet"
+                        style={{ color: "var(--white)" }}
+                      ></i>
                       <div className="stat-info">
                         <h3>{totalSpent} شيكل</h3>
                         <p>إجمالي المصروفات</p>
@@ -670,7 +679,8 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                                     fontWeight: "600",
                                   }}
                                 >
-                                  <i className="fas fa-user-shield"></i> ملاحظة من الإدارة عند الحجز:
+                                  <i className="fas fa-user-shield"></i> ملاحظة
+                                  من الإدارة عند الحجز:
                                 </span>
                                 <span
                                   className="value"
@@ -703,7 +713,8 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                                     fontWeight: "600",
                                   }}
                                 >
-                                  <i className="fas fa-user-nurse"></i> ملاحظة من الموظفة:
+                                  <i className="fas fa-user-nurse"></i> ملاحظة
+                                  من الموظفة:
                                 </span>
                                 <span
                                   className="value"
@@ -930,7 +941,8 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                                     marginBottom: "0.5rem",
                                   }}
                                 >
-                                  <i className="fas fa-user-shield"></i> ملاحظة من الإدارة عند الحجز:
+                                  <i className="fas fa-user-shield"></i> ملاحظة
+                                  من الإدارة عند الحجز:
                                 </strong>
                                 <p style={{ color: "#071626", margin: 0 }}>
                                   {appointment.adminNote}

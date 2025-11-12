@@ -55,10 +55,142 @@
 
 .category-cards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  max-width: 1000px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
   margin: 0 auto;
+}
+
+/* New Category Card Styles */
+.category-card {
+  position: relative;
+  height: 350px;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  box-shadow: 0 4px 12px rgba(7, 22, 38, 0.1);
+}
+
+.category-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 28px rgba(7, 22, 38, 0.2);
+}
+
+.category-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.category-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.category-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--navy-blue), #0f2a5a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  color: var(--white);
+}
+
+.category-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    to top,
+    rgba(7, 22, 38, 0.95),
+    rgba(7, 22, 38, 0.7),
+    transparent
+  );
+  padding: 2rem 1.5rem;
+  color: var(--white);
+  transition: all 0.4s ease;
+}
+
+.category-overlay h3 {
+  font-size: 1.75rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--white);
+}
+
+.category-desc {
+  font-size: 0.95rem;
+  margin: 0;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+.services-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(7, 22, 38, 0.97);
+  color: var(--white);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s ease;
+  pointer-events: none;
+}
+
+.category-card:hover .services-preview {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.services-preview h4 {
+  color: var(--gold);
+  font-size: 1.25rem;
+  margin: 0 0 1rem 0;
+  text-align: center;
+  border-bottom: 2px solid var(--gold);
+  padding-bottom: 0.75rem;
+}
+
+.services-preview ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.services-preview li {
+  padding: 0.75rem 0;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.services-preview li:last-child {
+  border-bottom: none;
+}
+
+.services-preview li i {
+  color: var(--gold);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.services-preview li.more-services {
+  color: var(--gold);
+  font-weight: 600;
+  margin-top: 0.5rem;
 }
 
 /* Flip Card Styles */
@@ -159,7 +291,7 @@
 }
 
 /* Category Overlay */
-.category-overlay {
+/* .category-overlay {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -175,7 +307,7 @@
   font-weight: 700;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   margin: 0;
-}
+} */
 
 /* Back Card Content */
 .flip-card-back h3 {
@@ -1091,7 +1223,7 @@
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap : 10px
+  gap: 10px;
 }
 
 .checkbox-group {
@@ -1335,4 +1467,59 @@ button:disabled {
 button:disabled:hover {
   background-color: var(--navy-blue);
   transform: none;
+}
+
+/* Responsive styles for category cards */
+@media (max-width: 768px) {
+  .category-cards {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .category-card {
+    height: 300px;
+  }
+
+  .category-overlay h3 {
+    font-size: 1.5rem;
+  }
+
+  .services-preview {
+    padding: 1.5rem 1rem;
+  }
+
+  .services-preview h4 {
+    font-size: 1.1rem;
+  }
+
+  .services-preview li {
+    font-size: 0.9rem;
+    padding: 0.5rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-card {
+    height: 250px;
+  }
+
+  .category-overlay {
+    padding: 1.5rem 1rem;
+  }
+
+  .category-overlay h3 {
+    font-size: 1.25rem;
+  }
+
+  .category-desc {
+    font-size: 0.85rem;
+  }
+
+  .services-preview h4 {
+    font-size: 1rem;
+  }
+
+  .services-preview li {
+    font-size: 0.85rem;
+  }
 }

@@ -16,6 +16,7 @@ import {
   createConsultation,
   getConsultationsByCustomer,
 } from "../services/consultationsService";
+import { getAllServiceCategories } from "../services/categoriesService";
 import CustomModal from "../components/common/CustomModal";
 import { useModal } from "../hooks/useModal";
 
@@ -87,6 +88,9 @@ const BookingPage = ({ currentUser, userData }) => {
 
   // Firebase data states
   const [services, setServices] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [hoveredCategory, setHoveredCategory] = useState(null);
+  const [categoryServices, setCategoryServices] = useState({});
   const [staffMembers, setStaffMembers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -122,13 +126,15 @@ const BookingPage = ({ currentUser, userData }) => {
     const loadData = async () => {
       setLoading(true);
       try {
-        const [servicesData, staffData] = await Promise.all([
+        const [servicesData, staffData, categoriesData] = await Promise.all([
           getAllServices(),
           getUsersByRole("staff"),
+          getAllServiceCategories(),
         ]);
 
         // Debug: Log services data
         console.log("BookingPage - All services loaded:", servicesData);
+        console.log("BookingPage - Categories loaded:", categoriesData);
         console.log(
           "BookingPage - Service categories:",
           servicesData.map((s) => ({
@@ -141,6 +147,18 @@ const BookingPage = ({ currentUser, userData }) => {
 
         setServices(servicesData);
         setStaffMembers(staffData);
+        setCategories(categoriesData);
+
+        // Group services by category for quick lookup
+        const servicesByCategory = {};
+        servicesData.forEach((service) => {
+          const catId = service.categoryId || service.category;
+          if (!servicesByCategory[catId]) {
+            servicesByCategory[catId] = [];
+          }
+          servicesByCategory[catId].push(service);
+        });
+        setCategoryServices(servicesByCategory);
 
         // Load user appointments and consultations if user is logged in
         if (currentUser) {
@@ -507,52 +525,71 @@ const BookingPage = ({ currentUser, userData }) => {
         <section className="category-selection section">
           <div className="container">
             <h2>اختاري نوع الجلسة</h2>
-            <div className="category-cards">
-              <div
-                className="category-card flip-card"
-                onClick={() => setSelectedCategory("بشرة")}
-              >
-                <div className="flip-card-inner">
-                  <div className="flip-card-front skincare-bg">
-                    <div className="category-overlay">
-                      <h3>جلسة بشرة</h3>
+            {loading ? (
+              <div className="loading">جاري تحميل التصنيفات...</div>
+            ) : (
+              <div className="category-cards">
+                {categories.map((category) => {
+                  const services = categoryServices[category.id] || [];
+                  const displayServices = services.slice(0, 4);
+                  const hasMore = services.length > 5;
+
+                  return (
+                    <div
+                      key={category.id}
+                      className="category-card"
+                      onClick={() => setSelectedCategory(category.id)}
+                      onMouseEnter={() => setHoveredCategory(category.id)}
+                      onMouseLeave={() => setHoveredCategory(null)}
+                    >
+                      <div className="category-card-inner">
+                        {category.image ? (
+                          <img
+                            src={category.image}
+                            alt={category.name}
+                            className="category-image"
+                          />
+                        ) : (
+                          <div className="category-placeholder">
+                            <i className="fas fa-spa"></i>
+                          </div>
+                        )}
+                        <div className="category-overlay">
+                          <h3>{category.name}</h3>
+                          {category.description && (
+                            <p className="category-desc">
+                              {category.description}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Services Preview on Hover */}
+                        {hoveredCategory === category.id &&
+                          services.length > 0 && (
+                            <div className="services-preview">
+                              <h4>الخدمات المتاحة:</h4>
+                              <ul>
+                                {displayServices.map((service) => (
+                                  <li key={service.id}>
+                                    <i className="fas fa-check-circle"></i>
+                                    {service.name}
+                                  </li>
+                                ))}
+                                {hasMore && (
+                                  <li className="more-services">
+                                    <i className="fas fa-plus-circle"></i>و{" "}
+                                    {services.length - 4} خدمات أخرى
+                                  </li>
+                                )}
+                              </ul>
+                            </div>
+                          )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flip-card-back">
-                    <h3>جلسة بشرة</h3>
-                    <p>علاجات العناية بالبشرة والتجميل</p>
-                    <ul>
-                      <li>تجديد البشرة</li>
-                      <li>تنظيف عميق</li>
-                      <li>علاج التصبغات</li>
-                      <li>مكافحة الشيخوخة</li>
-                    </ul>
-                  </div>
-                </div>
+                  );
+                })}
               </div>
-              <div
-                className="category-card flip-card"
-                onClick={() => setSelectedCategory("ليزر")}
-              >
-                <div className="flip-card-inner">
-                  <div className="flip-card-front laser-bg">
-                    <div className="category-overlay">
-                      <h3>جلسة ليزر</h3>
-                    </div>
-                  </div>
-                  <div className="flip-card-back">
-                    <h3>جلسة ليزر</h3>
-                    <p>إزالة الشعر وعلاجات الليزر</p>
-                    <ul>
-                      <li>إزالة الشعر بالليزر</li>
-                      <li>تقشير الليزر</li>
-                      <li>علاج الندوب</li>
-                      <li>شد البشرة</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </section>
       )}
@@ -597,7 +634,8 @@ const BookingPage = ({ currentUser, userData }) => {
                   </button>
                   <h2>
                     اختاري الخدمة -{" "}
-                    {`جلسات ${selectedCategory}`}
+                    {categories.find((c) => c.id === selectedCategory)?.name ||
+                      selectedCategory}
                   </h2>
                 </div>
                 <div className="services-selection">
@@ -613,11 +651,11 @@ const BookingPage = ({ currentUser, userData }) => {
                     );
 
                     const filtered = services.filter((service) => {
-                      // Check if category matches in different ways
+                      // Check if category matches using ID
                       const matches =
+                        service.categoryId === selectedCategory ||
                         service.category === selectedCategory ||
                         service.categoryName === selectedCategory ||
-                        service.categoryId === selectedCategory ||
                         (service.categoryName &&
                           service.categoryName
                             .toLowerCase()

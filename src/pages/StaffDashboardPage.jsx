@@ -572,28 +572,28 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                   {/* Statistics Cards */}
                   <div className="stats-grid">
                     <div className="stat-card total">
-                      <i className="stat-icon fas fa-calendar-check"></i>
+                      <i className="stat-icon fas fa-calendar-check" style={{color: "var(--white)"}}></i>
                       <div className="stat-info">
                         <h3>{myAppointments.length}</h3>
                         <p>إجمالي المواعيد</p>
                       </div>
                     </div>
                     <div className="stat-card completed">
-                      <i className="stat-icon fas fa-check-circle"></i>
+                      <i className="stat-icon fas fa-check-circle" style={{color: "var(--white)"}}></i>
                       <div className="stat-info">
                         <h3>{completedAppointments.length}</h3>
                         <p>مواعيد مكتملة</p>
                       </div>
                     </div>
                     <div className="stat-card revenue">
-                      <i className="stat-icon fas fa-dollar-sign"></i>
+                      <i className="stat-icon fas fa-dollar-sign" style={{color: "var(--white)"}}></i>
                       <div className="stat-info">
                         <h3>{myRevenue.toLocaleString()}</h3>
                         <p>إجمالي الإيرادات</p>
                       </div>
                     </div>
                     <div className="stat-card rate">
-                      <i className="stat-icon fas fa-percentage"></i>
+                      <i className="stat-icon fas fa-percentage" style={{color: "var(--white)"}}></i>
                       <div className="stat-info">
                         <h3>{completionRate}%</h3>
                         <p>معدل الإتمام</p>

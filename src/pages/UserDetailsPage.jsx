@@ -1,0 +1,508 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import "./UserDetailsPage.css";
+import { getUserById } from "../services/usersService";
+import { getUserOrders } from "../services/ordersService";
+import {
+  getUserAppointments,
+  getAppointmentsByStaff,
+} from "../services/appointmentsService";
+import LoadingSpinner from "../components/common/LoadingSpinner";
+
+const UserDetailsPage = ({ currentUser, userData }) => {
+  const navigate = useNavigate();
+  const { userId } = useParams();
+  const [user, setUser] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview"); // overview, orders, appointments
+
+  // Check if user is admin
+  useEffect(() => {
+    if (!currentUser || !userData || userData.role !== "admin") {
+      navigate("/");
+    }
+  }, [currentUser, userData, navigate]);
+
+  // Load user data
+  useEffect(() => {
+    if (userId) {
+      loadUserData();
+    }
+  }, [userId]);
+
+  const loadUserData = async () => {
+    setLoading(true);
+    try {
+      // First, get the user data to check their role
+      const userDataResult = await getUserById(userId);
+      setUser(userDataResult);
+
+      // Load data based on user role
+      if (userDataResult.role === "staff") {
+        // For staff: no orders, appointments assigned to them (by staffId)
+        const appointmentsResult = await getAppointmentsByStaff(userId);
+        setOrders([]);
+        setAppointments(appointmentsResult || []);
+      } else {
+        // For customers/admins: load orders and appointments by customerId
+        const [ordersResult, appointmentsResult] = await Promise.all([
+          getUserOrders(userId),
+          getUserAppointments(userId),
+        ]);
+        setOrders(ordersResult || []);
+        setAppointments(appointmentsResult || []);
+      }
+    } catch (error) {
+      console.error("Error loading user data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (timestamp) => {
+    if (!timestamp) return "غير متوفر";
+    const date = timestamp.seconds
+      ? new Date(timestamp.seconds * 1000)
+      : new Date(timestamp);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const parsePrice = (priceStr) => {
+    if (typeof priceStr === "number") return priceStr;
+    if (!priceStr) return 0;
+    const numericValue = priceStr.toString().replace(/[^\d.]/g, "");
+    return parseFloat(numericValue) || 0;
+  };
+
+  const getOrderStatusBadge = (status) => {
+    const statusMap = {
+      pending: { text: "في الانتظار", class: "pending" },
+      confirmed: { text: "مؤكد", class: "confirmed" },
+      processing: { text: "قيد المعالجة", class: "processing" },
+      shipped: { text: "تم الشحن", class: "shipped" },
+      delivered: { text: "تم التسليم", class: "delivered" },
+      cancelled: { text: "ملغي", class: "cancelled" },
+      rejected: { text: "مرفوض", class: "rejected" },
+    };
+    const statusInfo = statusMap[status] || { text: status, class: "pending" };
+    return (
+      <span className={`status-badge ${statusInfo.class}`}>
+        {statusInfo.text}
+      </span>
+    );
+  };
+
+  const getAppointmentStatusBadge = (status) => {
+    const statusMap = {
+      "في الانتظار": "pending",
+      مؤكد: "confirmed",
+      مكتمل: "completed",
+      ملغي: "cancelled",
+    };
+    const statusClass = statusMap[status] || "pending";
+    return <span className={`status-badge ${statusClass}`}>{status}</span>;
+  };
+
+  const getRoleBadge = (role) => {
+    switch (role) {
+      case "admin":
+        return <span className="role-badge admin">مدير</span>;
+      case "staff":
+        return <span className="role-badge staff">موظف</span>;
+      case "customer":
+        return <span className="role-badge customer">عميل</span>;
+      default:
+        return <span className="role-badge customer">عميل</span>;
+    }
+  };
+
+  // Calculate statistics based on user role
+  const isStaff = user?.role === "staff";
+
+  const totalOrders = orders.length;
+  const deliveredOrders = orders.filter((o) => o.status === "delivered").length;
+  const totalOrdersAmount = orders
+    .filter((o) => o.status === "delivered")
+    .reduce((sum, order) => sum + parsePrice(order.total), 0);
+
+  const totalAppointments = appointments.length;
+  const completedAppointments = appointments.filter(
+    (a) => a.status === "مكتمل"
+  ).length;
+  const totalAppointmentsAmount = appointments
+    .filter((a) => a.status === "مكتمل")
+    .reduce((sum, apt) => sum + parsePrice(apt.servicePrice || apt.price), 0);
+
+  const totalSpent = totalOrdersAmount + totalAppointmentsAmount;
+
+  if (loading) {
+    return (
+      <div className="user-details-page">
+        <div className="user-details-loading">
+          <LoadingSpinner />
+          <p>جاري تحميل بيانات المستخدم...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="user-details-page">
+        <div className="user-not-found">
+          <i className="fas fa-user-slash"></i>
+          <h2>المستخدم غير موجود</h2>
+          <button
+            className="btn-primary"
+            onClick={() => navigate("/admin/users")}
+          >
+            العودة للمستخدمين
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="user-details-page">
+      <div className="user-details-container">
+        {/* Back Button */}
+        <button className="back-btn" onClick={() => navigate("/admin/users")}>
+          <i className="fas fa-arrow-right"></i>
+          العودة للمستخدمين
+        </button>
+
+        {/* User Header */}
+        <div className="user-header">
+          <div className="user-avatar-large">
+            {user.avatar ? (
+              <img src={user.avatar} alt={user.name} />
+            ) : (
+              <div className="avatar-placeholder-large">
+                {user.name?.charAt(0) || "U"}
+              </div>
+            )}
+          </div>
+          <div className="user-header-info">
+            <h1>{user.name || "غير متوفر"}</h1>
+            <p className="user-email">
+              <i
+                className="fas fa-envelope"
+                style={{ color: "var(--white)" }}
+              ></i>
+              {user.email}
+            </p>
+            <p className="user-phone">
+              <i className="fas fa-phone" style={{ color: "var(--white)" }}></i>
+              {user.phone || "غير متوفر"}
+            </p>
+            <div className="user-meta">
+              <span className="join-date">
+                <i
+                  className="fas fa-calendar"
+                  style={{ color: "var(--white)" }}
+                ></i>
+                انضم في {formatDate(user.createdAt)}
+              </span>
+              {getRoleBadge(user.role)}
+            </div>
+          </div>
+        </div>
+
+        {/* Statistics */}
+        <div className="user-stats-grid">
+          {!isStaff && (
+            <div className="stat-card">
+              <div className="stat-icon orders">
+                <i className="fas fa-shopping-cart" style={{ color: "var(--white)" }}></i>
+              </div>
+              <div className="stat-info">
+                <h3>الطلبات</h3>
+                <p className="stat-number">{totalOrders}</p>
+                <span className="stat-sub">تم التسليم: {deliveredOrders}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="stat-card">
+            <div className="stat-icon appointments">
+              <i
+                className="fas fa-calendar-check"
+                style={{ color: "var(--white)" }}
+              ></i>
+            </div>
+            <div className="stat-info">
+              <h3>{isStaff ? "المواعيد المعالجة" : "المواعيد"}</h3>
+              <p className="stat-number">{totalAppointments}</p>
+              <span className="stat-sub">مكتمل: {completedAppointments}</span>
+            </div>
+          </div>
+
+          {!isStaff && (
+            <div className="stat-card">
+              <div className="stat-icon revenue">
+                <i
+                  className="fas fa-dollar-sign"
+                  style={{ color: "var(--white)" }}
+                ></i>
+              </div>
+              <div className="stat-info">
+                <h3>إجمالي الإنفاق</h3>
+                <p className="stat-number">{totalSpent.toFixed(2)} ₪</p>
+                <span className="stat-sub">
+                  طلبات: {totalOrdersAmount.toFixed(2)} | مواعيد:{" "}
+                  {totalAppointmentsAmount.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {isStaff && (
+            <div className="stat-card">
+              <div className="stat-icon revenue">
+                <i
+                  className="fas fa-chart-line"
+                  style={{ color: "var(--white)" }}
+                ></i>
+              </div>
+              <div className="stat-info">
+                <h3>إجمالي الإيرادات</h3>
+                <p className="stat-number">
+                  {totalAppointmentsAmount.toFixed(2)} ₪
+                </p>
+                <span className="stat-sub">من المواعيد المكتملة</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Tabs */}
+        <div className="details-tabs">
+          <button
+            className={`tab-btn ${activeTab === "overview" ? "active" : ""}`}
+            onClick={() => setActiveTab("overview")}
+          >
+            <i className="fas fa-info-circle"></i>
+            نظرة عامة
+          </button>
+          {!isStaff && (
+            <button
+              className={`tab-btn ${activeTab === "orders" ? "active" : ""}`}
+              onClick={() => setActiveTab("orders")}
+            >
+              <i className="fas fa-shopping-bag"></i>
+              الطلبات ({totalOrders})
+            </button>
+          )}
+          <button
+            className={`tab-btn ${
+              activeTab === "appointments" ? "active" : ""
+            }`}
+            onClick={() => setActiveTab("appointments")}
+          >
+            <i className="fas fa-calendar"></i>
+            {isStaff ? "المواعيد المعالجة" : "المواعيد"} ({totalAppointments})
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        <div className="tab-content">
+          {/* Overview Tab */}
+          {activeTab === "overview" && (
+            <div className="overview-content">
+              <div className="info-card">
+                <h3>
+                  <i className="fas fa-user"></i>
+                  المعلومات الشخصية
+                </h3>
+                <div className="info-grid">
+                  <div className="info-item">
+                    <label>الاسم الكامل:</label>
+                    <span>{user.name || "غير متوفر"}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>البريد الإلكتروني:</label>
+                    <span>{user.email}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>رقم الهاتف:</label>
+                    <span>{user.phone || "غير متوفر"}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>الدور:</label>
+                    <span>{getRoleBadge(user.role)}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>تاريخ التسجيل:</label>
+                    <span>{formatDate(user.createdAt)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="info-card">
+                <h3>
+                  <i className="fas fa-chart-bar"></i>
+                  إحصائيات النشاط
+                </h3>
+                <div className="activity-stats">
+                  {!isStaff && (
+                    <>
+                      <div className="activity-item">
+                        <i className="fas fa-shopping-cart"></i>
+                        <div>
+                          <strong>إجمالي الطلبات:</strong>
+                          <span>{totalOrders} طلب</span>
+                        </div>
+                      </div>
+                      <div className="activity-item">
+                        <i className="fas fa-check-circle"></i>
+                        <div>
+                          <strong>الطلبات المسلمة:</strong>
+                          <span>{deliveredOrders} طلب</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  <div className="activity-item">
+                    <i className="fas fa-calendar-check"></i>
+                    <div>
+                      <strong>
+                        {isStaff ? "المواعيد المعالجة:" : "إجمالي المواعيد:"}
+                      </strong>
+                      <span>{totalAppointments} موعد</span>
+                    </div>
+                  </div>
+                  <div className="activity-item">
+                    <i className="fas fa-star"></i>
+                    <div>
+                      <strong>المواعيد المكتملة:</strong>
+                      <span>{completedAppointments} موعد</span>
+                    </div>
+                  </div>
+                  <div className="activity-item">
+                    <i className="fas fa-wallet"></i>
+                    <div>
+                      <strong>
+                        {isStaff ? "إجمالي الإيرادات:" : "إجمالي الإنفاق:"}
+                      </strong>
+                      <span>
+                        {isStaff
+                          ? totalAppointmentsAmount.toFixed(2)
+                          : totalSpent.toFixed(2)}{" "}
+                        ₪
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Orders Tab */}
+          {activeTab === "orders" && !isStaff && (
+            <div className="orders-content">
+              {orders.length === 0 ? (
+                <div className="no-data">
+                  <i className="fas fa-shopping-cart"></i>
+                  <p>لا توجد طلبات لهذا المستخدم</p>
+                </div>
+              ) : (
+                <div className="table-card">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>رقم الطلب</th>
+                        <th>التاريخ</th>
+                        <th>المبلغ</th>
+                        <th>الحالة</th>
+                        <th>عدد المنتجات</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.map((order, index) => (
+                        <tr key={order.id}>
+                          <td>{index + 1}</td>
+                          <td>
+                            <strong>
+                              #{order.orderNumber || order.id.slice(0, 8)}
+                            </strong>
+                          </td>
+                          <td>{formatDate(order.createdAt)}</td>
+                          <td>
+                            <strong>{order.total}</strong>
+                          </td>
+                          <td>{getOrderStatusBadge(order.status)}</td>
+                          <td>{order.items?.length || 0} منتج</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Appointments Tab */}
+          {activeTab === "appointments" && (
+            <div className="appointments-content">
+              {appointments.length === 0 ? (
+                <div className="no-data">
+                  <i className="fas fa-calendar"></i>
+                  <p>
+                    {isStaff
+                      ? "لا توجد مواعيد معالجة لهذا الموظف"
+                      : "لا توجد مواعيد لهذا المستخدم"}
+                  </p>
+                </div>
+              ) : (
+                <div className="table-card">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>الخدمة</th>
+                        <th>التاريخ</th>
+                        <th>الوقت</th>
+                        <th>السعر</th>
+                        <th>الحالة</th>
+                        <th>الموظف</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {appointments.map((apt, index) => (
+                        <tr key={apt.id}>
+                          <td>{index + 1}</td>
+                          <td>
+                            <strong>{apt.serviceName}</strong>
+                          </td>
+                          <td>{apt.date}</td>
+                          <td>{apt.time}</td>
+                          <td>
+                            <strong>{apt.servicePrice || apt.price}</strong>
+                          </td>
+                          <td>{getAppointmentStatusBadge(apt.status)}</td>
+                          <td>{apt.staffName || "غير محدد"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default UserDetailsPage;

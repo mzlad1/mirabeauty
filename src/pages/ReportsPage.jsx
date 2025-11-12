@@ -329,7 +329,7 @@ const ReportsPage = ({ currentUser, userData }) => {
   const monthlyRevenue = getMonthlyRevenue();
 
   const handlePrint = () => {
-    const printDate = new Date().toLocaleDateString("ar-SA", {
+    const printDate = new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",

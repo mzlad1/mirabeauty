@@ -336,3 +336,29 @@ export const getAppointmentsByDate = async (date) => {
     throw error;
   }
 };
+
+// Get appointments for a specific user (for UserDetailsPage)
+export const getUserAppointments = async (userId) => {
+  try {
+    const appointmentsCollection = collection(db, APPOINTMENTS_COLLECTION);
+    const appointmentsQuery = query(
+      appointmentsCollection,
+      where("customerId", "==", userId),
+      orderBy("createdAt", "desc")
+    );
+    const snapshot = await getDocs(appointmentsQuery);
+
+    const appointments = [];
+    snapshot.forEach((doc) => {
+      appointments.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+
+    return appointments;
+  } catch (error) {
+    console.error("Error fetching user appointments:", error);
+    throw error;
+  }
+};

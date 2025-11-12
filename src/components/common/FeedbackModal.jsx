@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./FeedbackModal.css";
 import { createFeedback, FEEDBACK_TYPES } from "../../services/feedbackService";
+import { getAllServices } from "../../services/servicesService";
 
 const FeedbackModal = ({
   isOpen,
@@ -9,17 +10,39 @@ const FeedbackModal = ({
   productId,
   productName,
   currentUser,
+  userData,
 }) => {
   const [formData, setFormData] = useState({
     name: currentUser?.displayName || "",
-    email: currentUser?.email || "",
+    phone: userData?.phone || "",
     rating: 5,
     text: "",
     service: type === FEEDBACK_TYPES.GENERAL ? "" : productName || "",
   });
+  const [services, setServices] = useState([]);
+  const [loadingServices, setLoadingServices] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  // Load services for dropdown
+  useEffect(() => {
+    if (isOpen && type === FEEDBACK_TYPES.GENERAL) {
+      loadServices();
+    }
+  }, [isOpen, type]);
+
+  const loadServices = async () => {
+    try {
+      setLoadingServices(true);
+      const servicesData = await getAllServices();
+      setServices(servicesData);
+    } catch (err) {
+      console.error("Error loading services:", err);
+    } finally {
+      setLoadingServices(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,7 +76,7 @@ const FeedbackModal = ({
       const feedbackData = {
         type: type,
         name: formData.name.trim(),
-        email: formData.email?.trim() || null,
+        phone: formData.phone?.trim() || null,
         rating: formData.rating,
         text: formData.text.trim(),
         userId: currentUser?.uid || null,
@@ -75,7 +98,7 @@ const FeedbackModal = ({
         setSuccess(false);
         setFormData({
           name: currentUser?.displayName || "",
-          email: currentUser?.email || "",
+          phone: userData?.phone || "",
           rating: 5,
           text: "",
           service: "",
@@ -95,7 +118,7 @@ const FeedbackModal = ({
     <div className="feedback-modal-overlay" onClick={onClose}>
       <div className="feedback-modal" onClick={(e) => e.stopPropagation()}>
         <button className="feedback-modal-close" onClick={onClose}>
-          <i className="fas fa-times"></i>
+          <i className="fas fa-times" style={{ color: "var(--white)" }}></i>
         </button>
 
         <div className="feedback-modal-header">
@@ -142,15 +165,19 @@ const FeedbackModal = ({
             </div>
 
             <div className="feedback-form-group">
-              <label htmlFor="email">البريد الإلكتروني (اختياري)</label>
+              <label htmlFor="phone">رقم الهاتف (اختياري)</label>
               <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone}
                 onChange={handleChange}
-                placeholder="your@email.com"
+                placeholder="05xxxxxxxx"
               />
+              <small className="field-note">
+                <i className="fas fa-info-circle"></i>
+                رقم هاتفك لن يظهر للعامة، فقط للتواصل معك عند الحاجة
+              </small>
             </div>
 
             {type === FEEDBACK_TYPES.GENERAL && (
@@ -158,15 +185,26 @@ const FeedbackModal = ({
                 <label htmlFor="service">
                   الخدمة <span className="required">*</span>
                 </label>
-                <input
-                  type="text"
-                  id="service"
-                  name="service"
-                  value={formData.service}
-                  onChange={handleChange}
-                  placeholder="مثال: إزالة الشعر بالليزر"
-                  required
-                />
+                {loadingServices ? (
+                  <select disabled>
+                    <option>جاري التحميل...</option>
+                  </select>
+                ) : (
+                  <select
+                    id="service"
+                    name="service"
+                    value={formData.service}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">اختر الخدمة</option>
+                    {services.map((service) => (
+                      <option key={service.id} value={service.name}>
+                        {service.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             )}
 
@@ -230,7 +268,10 @@ const FeedbackModal = ({
                   </>
                 ) : (
                   <>
-                    <i className="fas fa-paper-plane" style={{ color: "white" }}></i>
+                    <i
+                      className="fas fa-paper-plane"
+                      style={{ color: "white" }}
+                    ></i>
                     إرسال التقييم
                   </>
                 )}

@@ -1,5 +1,12 @@
 /* Global styles */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Playfair+Display:wght@400;700&display=swap');
+/* import font brando.otf from public file */
+@font-face {
+  font-family: 'Brando';
+  src: url('/brando.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
 
 * {
 	box-sizing: border-box;
@@ -10,7 +17,7 @@ html, body, #root {
 }
 
 body {
-	font-family: var(--font-sans);
+	font-family: 'Brando', var(--font-sans);
 	background-color: var(--bg);
 	color: var(--charcoal);
 	-webkit-font-smoothing: antialiased;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./AdminFeedbacksPage.css";
 import {
   getAllFeedbacks,
@@ -369,10 +369,23 @@ const AdminFeedbacksPage = ({ currentUser, userData }) => {
                 <div className="feedback-card-header">
                   <div className="feedback-user-info">
                     <div className="user-avatar">
-                      {feedback.name?.charAt(0) || "؟"}
+                      {userData?.avatar ? (
+                        <img
+                          src={userData.avatar}
+                          alt={`${feedback.name}'s avatar`}
+                        />
+                      ) : (
+                        <span>{feedback.name?.charAt(0) || "؟"}</span>
+                      )}
                     </div>
                     <div className="user-details">
                       <h4>{feedback.name}</h4>
+                      {feedback.phone && (
+                        <p className="feedback-phone">
+                          <i className="fas fa-phone"></i>
+                          {feedback.phone}
+                        </p>
+                      )}
                       <div className="feedback-meta">
                         {getTypeBadge(feedback.type)}
                         {getStatusBadge(feedback.status)}
@@ -406,7 +419,13 @@ const AdminFeedbacksPage = ({ currentUser, userData }) => {
                   {feedback.type === FEEDBACK_TYPES.PRODUCT && (
                     <p className="feedback-service">
                       <i className="fas fa-box"></i>
-                      المنتج: {feedback.productName}
+                      المنتج:{" "}
+                      <Link
+                        to={`/products/${feedback.productId}`}
+                        className="product-link"
+                      >
+                        {feedback.productName}
+                      </Link>
                     </p>
                   )}
                   <p className="feedback-text">"{feedback.text}"</p>
@@ -420,7 +439,7 @@ const AdminFeedbacksPage = ({ currentUser, userData }) => {
                   {feedback.status === FEEDBACK_STATUS.PENDING && (
                     <>
                       <button
-                        className="action-btn approve"
+                        className="feedback-action-btn approve"
                         onClick={() => handleApprove(feedback.id, true)}
                         title="موافقة وإظهار"
                       >
@@ -428,7 +447,7 @@ const AdminFeedbacksPage = ({ currentUser, userData }) => {
                         موافقة وإظهار
                       </button>
                       <button
-                        className="action-btn approve-hidden"
+                        className="feedback-action-btn approve-hidden"
                         onClick={() => handleApprove(feedback.id, false)}
                         title="موافقة وإخفاء"
                       >
@@ -436,7 +455,7 @@ const AdminFeedbacksPage = ({ currentUser, userData }) => {
                         موافقة وإخفاء
                       </button>
                       <button
-                        className="action-btn reject"
+                        className="feedback-action-btn reject"
                         onClick={() => handleReject(feedback.id)}
                         title="رفض"
                       >
@@ -448,7 +467,7 @@ const AdminFeedbacksPage = ({ currentUser, userData }) => {
 
                   {feedback.status === FEEDBACK_STATUS.APPROVED && (
                     <button
-                      className="action-btn toggle-visibility"
+                      className="feedback-action-btn toggle-visibility"
                       onClick={() =>
                         handleToggleVisibility(feedback.id, feedback.isVisible)
                       }
@@ -464,7 +483,7 @@ const AdminFeedbacksPage = ({ currentUser, userData }) => {
                   )}
 
                   <button
-                    className="action-btn delete"
+                    className="feedback-action-btn delete"
                     onClick={() => handleDelete(feedback.id)}
                     title="حذف"
                   >

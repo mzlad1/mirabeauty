@@ -18,8 +18,10 @@
   box-sizing: border-box;
 }
 
+/* i want to change the font of the website to Brando.otf from public fie */
+
 body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Brando', sans-serif;
   background-color: var(--white);
   color: var(--charcoal);
   line-height: 1.6;

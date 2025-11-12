@@ -15,8 +15,9 @@ import {
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 
-// Collection name
+// Collection names
 const FAQ_COLLECTION = "faqs";
+const FAQ_TYPES_COLLECTION = "faqTypes";
 
 // Get all FAQs
 export const getAllFAQs = async () => {
@@ -145,6 +146,82 @@ export const deleteFAQ = async (faqId) => {
     return faqId;
   } catch (error) {
     console.error("Error deleting FAQ:", error);
+    throw error;
+  }
+};
+
+// ============= FAQ TYPES/CATEGORIES MANAGEMENT =============
+
+// Get all FAQ types
+export const getAllFAQTypes = async () => {
+  try {
+    const typesRef = collection(db, FAQ_TYPES_COLLECTION);
+    const q = query(typesRef, orderBy("order", "asc"));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  } catch (error) {
+    console.error("Error getting FAQ types:", error);
+    throw error;
+  }
+};
+
+// Add new FAQ type (admin only)
+export const addFAQType = async (typeData) => {
+  try {
+    const typesRef = collection(db, FAQ_TYPES_COLLECTION);
+
+    // Get current count to set order
+    const snapshot = await getDocs(typesRef);
+    const order = snapshot.size;
+
+    const docRef = await addDoc(typesRef, {
+      ...typeData,
+      order,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    return {
+      id: docRef.id,
+      ...typeData,
+      order,
+    };
+  } catch (error) {
+    console.error("Error adding FAQ type:", error);
+    throw error;
+  }
+};
+
+// Update FAQ type (admin only)
+export const updateFAQType = async (typeId, updateData) => {
+  try {
+    const typeRef = doc(db, FAQ_TYPES_COLLECTION, typeId);
+    await updateDoc(typeRef, {
+      ...updateData,
+      updatedAt: serverTimestamp(),
+    });
+
+    return {
+      id: typeId,
+      ...updateData,
+    };
+  } catch (error) {
+    console.error("Error updating FAQ type:", error);
+    throw error;
+  }
+};
+
+// Delete FAQ type (admin only)
+export const deleteFAQType = async (typeId) => {
+  try {
+    const typeRef = doc(db, FAQ_TYPES_COLLECTION, typeId);
+    await deleteDoc(typeRef);
+    return typeId;
+  } catch (error) {
+    console.error("Error deleting FAQ type:", error);
     throw error;
   }
 };

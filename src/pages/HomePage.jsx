@@ -378,7 +378,13 @@ const HomePage = () => {
               {testimonials.slice(0, 6).map((testimonial) => (
                 <div key={testimonial.id} className="testimonial-card card">
                   <div className="testimonial-rating">
-                    {"⭐".repeat(testimonial.rating)}
+                    {Array.from({ length: testimonial.rating }, (_, i) => (
+                      <i
+                        key={i}
+                        className="fas fa-star"
+                        style={{ color: "var(--gold)" }}
+                      ></i>
+                    ))}
                   </div>
                   <p className="testimonial-text">"{testimonial.text}"</p>
                   <div className="testimonial-author">
@@ -398,6 +404,7 @@ const HomePage = () => {
         onClose={() => setIsFeedbackModalOpen(false)}
         type={FEEDBACK_TYPES.GENERAL}
         currentUser={currentUser}
+        userData={userData}
       />
 
       {/* Call to Action */}

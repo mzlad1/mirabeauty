@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./FAQModal.css";
+import { getAllFAQTypes } from "../../services/faqService";
 
 const FAQModal = ({ isOpen, onClose, onSubmit, faq }) => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,36 @@ const FAQModal = ({ isOpen, onClose, onSubmit, faq }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const [faqTypes, setFaqTypes] = useState([]);
+  const [loadingTypes, setLoadingTypes] = useState(true);
+
+  // Load FAQ types from Firestore
+  useEffect(() => {
+    const loadFAQTypes = async () => {
+      try {
+        setLoadingTypes(true);
+        const types = await getAllFAQTypes();
+        setFaqTypes(types);
+      } catch (error) {
+        console.error("Error loading FAQ types:", error);
+        // Fallback to default types
+        setFaqTypes([
+          { value: "general", label: "عام" },
+          { value: "services", label: "الخدمات" },
+          { value: "booking", label: "الحجز" },
+          { value: "pricing", label: "الأسعار" },
+          { value: "preparation", label: "التحضير" },
+          { value: "safety", label: "السلامة" },
+        ]);
+      } finally {
+        setLoadingTypes(false);
+      }
+    };
+
+    if (isOpen) {
+      loadFAQTypes();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (faq) {
@@ -21,11 +52,11 @@ const FAQModal = ({ isOpen, onClose, onSubmit, faq }) => {
       setFormData({
         question: "",
         answer: "",
-        category: "general",
+        category: faqTypes.length > 0 ? faqTypes[0].value : "general",
       });
     }
     setErrors({});
-  }, [faq, isOpen]);
+  }, [faq, isOpen, faqTypes]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -131,18 +162,24 @@ const FAQModal = ({ isOpen, onClose, onSubmit, faq }) => {
               name="category"
               value={formData.category}
               onChange={handleChange}
+              disabled={loadingTypes}
               className={
                 errors.category
                   ? "admin-faq-select admin-faq-error"
                   : "admin-faq-select"
               }
             >
-              <option value="general">عام</option>
-              <option value="services">الخدمات</option>
-              <option value="booking">الحجز</option>
-              <option value="pricing">الأسعار</option>
-              <option value="preparation">التحضير</option>
-              <option value="safety">السلامة</option>
+              {loadingTypes ? (
+                <option value="">جاري التحميل...</option>
+              ) : faqTypes.length === 0 ? (
+                <option value="">لا توجد أنواع متاحة</option>
+              ) : (
+                faqTypes.map((type) => (
+                  <option key={type.id || type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))
+              )}
             </select>
             {errors.category && (
               <span className="admin-faq-error-message">{errors.category}</span>

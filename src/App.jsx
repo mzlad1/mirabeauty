@@ -21,6 +21,8 @@ import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminOrdersPage from "./pages/AdminOrdersPage";
 import ReportsPage from "./pages/ReportsPage";
 import AdminFeedbacksPage from "./pages/AdminFeedbacksPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
+import UserDetailsPage from "./pages/UserDetailsPage";
 import StaffDashboardPage from "./pages/StaffDashboardPage";
 import CartPage from "./pages/CartPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -28,6 +30,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 // Import Components
 import Navigation from "./components/common/Navigation";
 import Footer from "./components/common/Footer";
+import ScrollToTop from "./components/common/ScrollToTop";
 
 // Import Auth Hook and Provider
 import { useAuth, AuthProvider } from "./hooks/useAuth.jsx";
@@ -120,16 +123,57 @@ const AppContent = () => {
     }
   };
 
-  // Protected route component for profile
+  // Protected route component for admin users
+  const ProtectedAdminUsers = () => {
+    if (!currentUser || !userData) {
+      return <Navigate to="/login" replace />;
+    }
+
+    if (userData.role === "admin") {
+      return <AdminUsersPage currentUser={currentUser} userData={userData} />;
+    } else {
+      return <Navigate to="/" replace />;
+    }
+  };
+
+  // Protected route component for user details
+  const ProtectedUserDetails = () => {
+    if (!currentUser || !userData) {
+      return <Navigate to="/login" replace />;
+    }
+
+    if (userData.role === "admin") {
+      return <UserDetailsPage currentUser={currentUser} userData={userData} />;
+    } else {
+      return <Navigate to="/" replace />;
+    }
+  };
+
+  // Protected route component for profile (only for customers)
   const ProtectedProfile = () => {
     if (!currentUser || !userData) {
       return <Navigate to="/login" replace />;
     }
+
+    // Admin and staff cannot access profile page
+    if (userData.role === "admin" || userData.role === "staff") {
+      return <Navigate to="/dashboard" replace />;
+    }
+
     return <ProfilePage currentUser={currentUser} userData={userData} />;
+  };
+
+  // Auth route component for login/register (redirect if already logged in)
+  const AuthRoute = ({ children }) => {
+    if (currentUser && userData) {
+      return <Navigate to="/" replace />;
+    }
+    return children;
   };
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="App" dir="rtl">
         {/* Show loading page when isLoading is true */}
         {isLoading && <LoadingPage progress={progress} />}
@@ -150,13 +194,32 @@ const AppContent = () => {
             />
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/profile" element={<ProtectedProfile />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/login"
+              element={
+                <AuthRoute>
+                  <LoginPage />
+                </AuthRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <AuthRoute>
+                  <RegisterPage />
+                </AuthRoute>
+              }
+            />
             <Route path="/dashboard" element={<ProtectedDashboard />} />
             <Route path="/admin/reports" element={<ProtectedAdminReports />} />
             <Route
               path="/admin/feedbacks"
               element={<ProtectedAdminFeedbacks />}
+            />
+            <Route path="/admin/users" element={<ProtectedAdminUsers />} />
+            <Route
+              path="/admin/users/:userId"
+              element={<ProtectedUserDetails />}
             />
             <Route path="/admin/orders" element={<ProtectedAdminOrders />} />
             {/* Catch-all route for 404 Not Found */}

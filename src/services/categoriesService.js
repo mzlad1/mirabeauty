@@ -118,6 +118,7 @@ export const addServiceCategory = async (categoryData) => {
   try {
     const docRef = await addDoc(collection(db, "serviceCategories"), {
       ...categoryData,
+      image: categoryData.image || "", // Add image field
       createdAt: new Date(),
       updatedAt: new Date(),
     });

@@ -60,6 +60,10 @@ import {
   addFAQ,
   updateFAQ,
   deleteFAQ,
+  getAllFAQTypes,
+  addFAQType,
+  updateFAQType,
+  deleteFAQType,
 } from "../services/faqService";
 import UserModal from "../components/dashboard/UserModal";
 import ServiceEditModal from "../components/dashboard/ServiceEditModal";
@@ -69,6 +73,7 @@ import AppointmentDetailsModal from "../components/dashboard/AppointmentDetailsM
 import ConsultationDetailsModal from "../components/dashboard/ConsultationDetailsModal";
 import CategoryModal from "../components/dashboard/CategoryModal";
 import FAQModal from "../components/admin/FAQModal";
+import FAQTypeModal from "../components/admin/FAQTypeModal";
 import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
 
 const AdminDashboardPage = ({ currentUser }) => {
@@ -171,6 +176,11 @@ const AdminDashboardPage = ({ currentUser }) => {
   const faqsPerPage = 10;
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState(null);
+
+  // FAQ Types states
+  const [faqTypes, setFaqTypes] = useState([]);
+  const [isFaqTypeModalOpen, setIsFaqTypeModalOpen] = useState(false);
+  const [editingFaqType, setEditingFaqType] = useState(null);
 
   // Profile editing states
   const [editMode, setEditMode] = useState(false);
@@ -391,6 +401,15 @@ const AdminDashboardPage = ({ currentUser }) => {
       setError("فشل في تحميل الأسئلة الشائعة");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadFAQTypes = async () => {
+    try {
+      const typesData = await getAllFAQTypes();
+      setFaqTypes(typesData);
+    } catch (err) {
+      console.error("Error loading FAQ types:", err);
     }
   };
 
@@ -798,6 +817,7 @@ const AdminDashboardPage = ({ currentUser }) => {
       loadServiceCategories();
     } else if (activeTab === "faqs") {
       loadFAQs();
+      loadFAQTypes();
     }
   }, [activeTab]);
 
@@ -1062,6 +1082,55 @@ const AdminDashboardPage = ({ currentUser }) => {
         }
       },
       "تأكيد حذف السؤال",
+      "حذف",
+      "إلغاء"
+    );
+  };
+
+  // FAQ Type management functions
+  const handleAddFaqType = () => {
+    setEditingFaqType(null);
+    setIsFaqTypeModalOpen(true);
+  };
+
+  const handleEditFaqType = (faqType) => {
+    setEditingFaqType(faqType);
+    setIsFaqTypeModalOpen(true);
+  };
+
+  const handleFaqTypeSubmit = async (typeData) => {
+    try {
+      if (editingFaqType) {
+        await updateFAQType(editingFaqType.id, typeData);
+        showSuccess("تم تحديث نوع الأسئلة بنجاح");
+      } else {
+        await addFAQType(typeData);
+        showSuccess("تم إضافة نوع الأسئلة بنجاح");
+      }
+      await loadFAQTypes();
+      setIsFaqTypeModalOpen(false);
+      setEditingFaqType(null);
+    } catch (error) {
+      console.error("Error submitting FAQ type:", error);
+      showError("حدث خطأ أثناء حفظ نوع الأسئلة");
+      throw error;
+    }
+  };
+
+  const handleDeleteFaqType = async (typeId, label) => {
+    showConfirm(
+      `هل أنت متأكد من حذف نوع "${label}"؟\n\nسيتم حذف النوع بشكل نهائي.`,
+      async () => {
+        try {
+          await deleteFAQType(typeId);
+          await loadFAQTypes();
+          showSuccess("تم حذف نوع الأسئلة بنجاح");
+        } catch (error) {
+          console.error("Error deleting FAQ type:", error);
+          showError("حدث خطأ أثناء حذف نوع الأسئلة");
+        }
+      },
+      "تأكيد حذف نوع الأسئلة",
       "حذف",
       "إلغاء"
     );
@@ -1430,7 +1499,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                 <div className="tab-content">
                   <div className="tab-header">
                     <h2>نظرة عامة</h2>
-                    <div className="overview-actions">
+                    {/* <div className="overview-actions">
                       <select
                         value={selectedTimeframe}
                         onChange={(e) => setSelectedTimeframe(e.target.value)}
@@ -1442,13 +1511,16 @@ const AdminDashboardPage = ({ currentUser }) => {
                         <option value="thisYear">هذا العام</option>
                       </select>
                       <button className="btn-primary">تقرير جديد</button>
-                    </div>
+                    </div> */}
                   </div>
 
                   {/* Statistics Cards */}
                   <div className="stats-grid">
                     <div className="stat-card revenue">
-                      <i className="stat-icon fas fa-dollar-sign"></i>
+                      <i
+                        className="stat-icon fas fa-dollar-sign"
+                        style={{ color: "var(--white)" }}
+                      ></i>
                       <div className="stat-info">
                         <h3>{totalRevenue.toLocaleString()} شيكل</h3>
                         <p>إجمالي الإيرادات</p>
@@ -1458,7 +1530,10 @@ const AdminDashboardPage = ({ currentUser }) => {
                       </div>
                     </div>
                     <div className="stat-card appointments">
-                      <i className="stat-icon fas fa-calendar-check"></i>
+                      <i
+                        className="stat-icon fas fa-calendar-check"
+                        style={{ color: "var(--white)" }}
+                      ></i>
                       <div className="stat-info">
                         <h3>{totalAppointments}</h3>
                         <p>إجمالي المواعيد</p>
@@ -1468,7 +1543,10 @@ const AdminDashboardPage = ({ currentUser }) => {
                       </div>
                     </div>
                     <div className="stat-card customers">
-                      <i className="stat-icon fas fa-user-friends"></i>
+                      <i
+                        className="stat-icon fas fa-user-friends"
+                        style={{ color: "var(--white)" }}
+                      ></i>
                       <div className="stat-info">
                         <h3>{totalCustomers}</h3>
                         <p>إجمالي العملاء</p>
@@ -1478,7 +1556,10 @@ const AdminDashboardPage = ({ currentUser }) => {
                       </div>
                     </div>
                     <div className="stat-card completion">
-                      <i className="stat-icon fas fa-check-circle"></i>
+                      <i
+                        className="stat-icon fas fa-check-circle"
+                        style={{ color: "var(--white)" }}
+                      ></i>
                       <div className="stat-info">
                         <h3>
                           {Math.round(
@@ -1562,6 +1643,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                             className={`activity-status ${getStatusColor(
                               appointment.status
                             )}`}
+                            style={{ color: "var(--white)" }}
                           >
                             {appointment.status}
                           </span>
@@ -2991,6 +3073,62 @@ const AdminDashboardPage = ({ currentUser }) => {
                     </button>
                   </div>
 
+                  {/* FAQ Types Management Section */}
+                  <div className="faq-types-section">
+                    <div className="faq-types-header">
+                      <h3>
+                        <i className="fas fa-tags"></i>
+                        أنواع الأسئلة
+                      </h3>
+                      <button
+                        className="btn-small btn-primary"
+                        onClick={handleAddFaqType}
+                      >
+                        <i className="fas fa-plus"></i>
+                        إضافة نوع
+                      </button>
+                    </div>
+                    <div className="faq-types-list">
+                      {faqTypes.length === 0 ? (
+                        <div className="empty-types">
+                          <i className="fas fa-info-circle"></i>
+                          <p>لا توجد أنواع أسئلة. قم بإضافة نوع جديد</p>
+                        </div>
+                      ) : (
+                        faqTypes.map((type) => (
+                          <div key={type.id} className="faq-type-item">
+                            <div className="faq-type-info">
+                              <span className="faq-type-label">
+                                {type.label}
+                              </span>
+                              <span className="faq-type-value">
+                                ({type.value})
+                              </span>
+                            </div>
+                            <div className="faq-type-actions">
+                              <button
+                                className="btn-icon btn-edit"
+                                onClick={() => handleEditFaqType(type)}
+                                title="تعديل"
+                              >
+                                <i className="fas fa-edit"></i>
+                              </button>
+                              <button
+                                className="btn-icon btn-delete"
+                                onClick={() =>
+                                  handleDeleteFaqType(type.id, type.label)
+                                }
+                                title="حذف"
+                              >
+                                <i className="fas fa-trash"></i>
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
                   <div className="appointments-filters">
                     <input
                       type="text"
@@ -3005,12 +3143,11 @@ const AdminDashboardPage = ({ currentUser }) => {
                       className="filter-select"
                     >
                       <option value="all">جميع التصنيفات</option>
-                      <option value="general">عام</option>
-                      <option value="services">الخدمات</option>
-                      <option value="booking">الحجز</option>
-                      <option value="pricing">الأسعار</option>
-                      <option value="preparation">التحضير</option>
-                      <option value="safety">السلامة</option>
+                      {faqTypes.map((type) => (
+                        <option key={type.id} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -3048,12 +3185,9 @@ const AdminDashboardPage = ({ currentUser }) => {
                                 <span
                                   className={`admin-faq-category-badge admin-faq-category-${faq.category}`}
                                 >
-                                  {faq.category === "general" && "عام"}
-                                  {faq.category === "services" && "الخدمات"}
-                                  {faq.category === "booking" && "الحجز"}
-                                  {faq.category === "pricing" && "الأسعار"}
-                                  {faq.category === "preparation" && "التحضير"}
-                                  {faq.category === "safety" && "السلامة"}
+                                  {faqTypes.find(
+                                    (t) => t.value === faq.category
+                                  )?.label || faq.category}
                                 </span>
                               </td>
                               <td>
@@ -3205,6 +3339,17 @@ const AdminDashboardPage = ({ currentUser }) => {
         }}
         onSubmit={handleFaqSubmit}
         faq={editingFaq}
+      />
+
+      {/* FAQ Type Modal */}
+      <FAQTypeModal
+        isOpen={isFaqTypeModalOpen}
+        onClose={() => {
+          setIsFaqTypeModalOpen(false);
+          setEditingFaqType(null);
+        }}
+        onSubmit={handleFaqTypeSubmit}
+        faqType={editingFaqType}
       />
 
       {/* Custom Modal */}
