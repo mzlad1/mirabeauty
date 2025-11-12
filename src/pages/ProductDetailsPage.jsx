@@ -328,9 +328,6 @@ const ProductDetailsPage = () => {
 
             {/* Product Info */}
             <div className="product-details-info">
-              <div className="product-details-category">
-                {product.categoryName}
-              </div>
               <h1 className="product-details-title">{product.name}</h1>
 
               <div className="product-details-rating">
@@ -343,7 +340,7 @@ const ProductDetailsPage = () => {
                   )}
                 </div>
                 <span className="product-details-rating-text">
-                  {product.rating} ({product.reviewsCount} تقييمات)
+                  {product.rating}&nbsp;({product.reviewsCount} تقييمات)
                 </span>
               </div>
 
@@ -361,6 +358,9 @@ const ProductDetailsPage = () => {
               <p className="product-details-short-description">
                 {product.description}
               </p>
+              <div className="product-details-category">
+                الفئة: {product.categoryName}
+              </div>
 
               {/* Quantity and Add to Cart */}
               <div className="product-details-actions">
@@ -552,32 +552,20 @@ const ProductDetailsPage = () => {
                   ) : (
                     <>
                       <div className="product-details-reviews-summary">
-                        <div className="product-details-overall-rating">
-                          <div className="product-details-stars">
+                        <div className="product-details-rating-summary">
+                          <div className="product-details-stars-summary">
                             {Array.from(
-                              {
-                                length: Math.floor(
-                                  productFeedbacks.reduce(
-                                    (sum, f) => sum + f.rating,
-                                    0
-                                  ) / productFeedbacks.length
-                                ),
-                              },
+                              { length: Math.floor(product.rating) },
                               (_, i) => (
                                 <i key={i} className="fas fa-star"></i>
                               )
                             )}
                           </div>
-                          <span className="product-details-rating-number">
-                            {(
-                              productFeedbacks.reduce(
-                                (sum, f) => sum + f.rating,
-                                0
-                              ) / productFeedbacks.length
-                            ).toFixed(1)}
+                          <span className="product-details-rating-text-summary">
+                            {product.rating}&nbsp;&nbsp;({product.reviewsCount} تقييمات)
                           </span>
-                          <span>({productFeedbacks.length} تقييمات)</span>
                         </div>
+
                       </div>
                       <div className="product-details-reviews-list">
                         {productFeedbacks.map((feedback) => (

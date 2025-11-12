@@ -351,7 +351,6 @@
 .product-details-rating {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   margin-bottom: 1.5rem;
 }
 
@@ -368,7 +367,7 @@
 
 .product-details-rating-text {
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 1.1rem;
 }
 
 .product-details-price {
@@ -645,17 +644,27 @@
   text-align: center;
 }
 
-.product-details-overall-rating {
+.product-details-rating-summary {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
 }
 
-.product-details-rating-number {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--navy-blue);
+.product-details-stars-summary {
+  font-size: 1.3rem;
+  color: var(--gold);
+  display: flex;
+  gap: 3px;
+}
+
+.product-details-stars-summary i {
+  color: var(--gold);
+}
+
+.product-details-rating-text-summary {
+  color: var(--text-secondary);
+  font-size: 1.3rem;
+  font-weight: 500;
 }
 
 .product-details-reviews-list {
@@ -1006,10 +1015,5 @@
 
   .product-details-ingredients-list {
     grid-template-columns: 1fr;
-  }
-
-  .product-details-overall-rating {
-    flex-direction: column;
-    gap: 0.5rem;
   }
 }
