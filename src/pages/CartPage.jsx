@@ -153,6 +153,13 @@ const CartPage = () => {
       return;
     }
 
+    // Validate phone number (must be 10 digits and start with 05)
+    const phoneRegex = /^05\d{8}$/;
+    if (!phoneRegex.test(userInfo.phone.trim())) {
+      showWarning("رقم الهاتف يجب أن يبدأ بـ 05 ويتكون من 10 أرقام");
+      return;
+    }
+
     setIsSubmittingOrder(true);
 
     try {
@@ -429,11 +436,16 @@ const CartPage = () => {
                 />
                 <input
                   type="tel"
-                  placeholder="رقم الهاتف *"
+                  placeholder="رقم الهاتف * (مثال: 0599123456)"
                   value={userInfo.phone}
-                  onChange={(e) =>
-                    handleUserInfoChange("phone", e.target.value)
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^\d]/g, "");
+                    if (value.length <= 10) {
+                      handleUserInfoChange("phone", value);
+                    }
+                  }}
+                  pattern="05[0-9]{8}"
+                  maxLength="10"
                   required
                 />
                 <textarea

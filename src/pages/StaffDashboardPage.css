@@ -1180,13 +1180,19 @@
 .staff-dashboard .profile-info {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
 .staff-dashboard .profile-edit-form {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.staff-dashboard .profile-edit-form .staff-form-actions {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 10px;
 }
 
 .staff-dashboard .info-item {
@@ -1263,6 +1269,18 @@
   margin-top: 1.5rem;
   padding-top: 1.5rem;
   border-top: 1px solid var(--border-color);
+}
+
+.btn-secondary {
+  padding: 10px 24px;
+  border: 1px solid #071626;
+  background: white;
+  color: #071626;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s;
 }
 
 .staff-dashboard .btn-save,

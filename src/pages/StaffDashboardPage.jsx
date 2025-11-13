@@ -16,6 +16,7 @@ import {
 import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
 import AppointmentCompletionModal from "../components/dashboard/AppointmentCompletionModal";
 import AppointmentDetailsModal from "../components/dashboard/AppointmentDetailsModal";
+import CustomerHistoryModal from "../components/dashboard/CustomerHistoryModal";
 import CustomModal from "../components/common/CustomModal";
 import useModal from "../hooks/useModal";
 
@@ -45,6 +46,10 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
   // Details modal states
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [appointmentToView, setAppointmentToView] = useState(null);
+
+  // Customer history modal states
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   // Profile editing states
   const [editMode, setEditMode] = useState(false);
@@ -249,7 +254,11 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
     staffInternalNote
   ) => {
     try {
-      await completeAppointment(appointmentId, staffNoteToCustomer, staffInternalNote);
+      await completeAppointment(
+        appointmentId,
+        staffNoteToCustomer,
+        staffInternalNote
+      );
       await reloadAppointments();
       showSuccess("تم إتمام الموعد بنجاح");
     } catch (error) {
@@ -290,16 +299,8 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
 
   // Handle view customer history
   const handleViewCustomerHistory = (customer) => {
-    const customerAppts = myAppointments.filter(
-      (apt) => apt.customerId === customer.id
-    );
-    const history = customerAppts
-      .map((apt) => `${apt.date} - ${apt.serviceName} - ${apt.status}`)
-      .join("\n");
-
-    showWarning(
-      `تاريخ جلسات ${customer.name}:\n\n${history || "لا توجد جلسات سابقة"}`
-    );
+    setSelectedCustomer(customer);
+    setIsHistoryModalOpen(true);
   };
 
   // Profile editing functions
@@ -572,28 +573,40 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                   {/* Statistics Cards */}
                   <div className="stats-grid">
                     <div className="stat-card total">
-                      <i className="stat-icon fas fa-calendar-check" style={{color: "var(--white)"}}></i>
+                      <i
+                        className="stat-icon fas fa-calendar-check"
+                        style={{ color: "var(--white)" }}
+                      ></i>
                       <div className="stat-info">
                         <h3>{myAppointments.length}</h3>
                         <p>إجمالي المواعيد</p>
                       </div>
                     </div>
                     <div className="stat-card completed">
-                      <i className="stat-icon fas fa-check-circle" style={{color: "var(--white)"}}></i>
+                      <i
+                        className="stat-icon fas fa-check-circle"
+                        style={{ color: "var(--white)" }}
+                      ></i>
                       <div className="stat-info">
                         <h3>{completedAppointments.length}</h3>
                         <p>مواعيد مكتملة</p>
                       </div>
                     </div>
-                    <div className="stat-card revenue">
-                      <i className="stat-icon fas fa-dollar-sign" style={{color: "var(--white)"}}></i>
+                    {/* <div className="stat-card revenue">
+                      <i
+                        className="stat-icon fas fa-dollar-sign"
+                        style={{ color: "var(--white)" }}
+                      ></i>
                       <div className="stat-info">
                         <h3>{myRevenue.toLocaleString()}</h3>
                         <p>إجمالي الإيرادات</p>
                       </div>
-                    </div>
+                    </div> */}
                     <div className="stat-card rate">
-                      <i className="stat-icon fas fa-percentage" style={{color: "var(--white)"}}></i>
+                      <i
+                        className="stat-icon fas fa-percentage"
+                        style={{ color: "var(--white)" }}
+                      ></i>
                       <div className="stat-info">
                         <h3>{completionRate}%</h3>
                         <p>معدل الإتمام</p>
@@ -834,14 +847,12 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                                 <h5>ملاحظات العميل:</h5>
                                 <p>{appointment.notes}</p>
                               </div>
-                            
                             )}
                             {appointment.adminNote && (
                               <div className="appointment-notes">
                                 <h5>ملاحظات المدير:</h5>
                                 <p>{appointment.adminNote}</p>
                               </div>
-                            
                             )}
                           </div>
                           <div className="appointment-actions">
@@ -865,12 +876,12 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                                 إتمام
                               </button>
                             )}
-                            <button
+                            {/* <button
                               className="action-btn edit"
                               onClick={() => handleEditAppointment(appointment)}
                             >
                               تعديل
-                            </button>
+                            </button> */}
                             <button
                               className="action-btn view"
                               onClick={() =>
@@ -1028,26 +1039,18 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                         <span className="perf-number">{completionRate}%</span>
                         <span className="perf-label">معدل الإتمام</span>
                       </div>
-                      <div className="perf-stat">
-                        <span className="perf-number">
-                          {myRevenue.toLocaleString()}
-                        </span>
-                        <span className="perf-label">
-                          إجمالي الإيرادات (شيكل)
-                        </span>
-                      </div>
                     </div>
                   </div>
 
-                  <div className="performance-chart">
+                  {/* <div className="performance-chart">
                     <h3>الأداء الشهري</h3>
                     <div className="chart-placeholder">
                       <i className="fas fa-chart-area"></i> مخطط الأداء الشهري
-                      <p>عدد المواعيد والإيرادات لكل شهر</p>
+                      <p>عدد المواعيد </p>
                     </div>
-                  </div>
+                  </div> */}
 
-                  <div className="recent-feedback">
+                  {/* <div className="recent-feedback">
                     <h3>آراء العملاء الأخيرة</h3>
                     <div className="feedback-list">
                       {myAppointments
@@ -1072,7 +1075,7 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                           </div>
                         ))}
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               )}
 
@@ -1201,7 +1204,7 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                                   className="form-input"
                                 />
                               </div>
-                              <div className="form-actions">
+                              <div className="staff-form-actions">
                                 <button
                                   className="btn-primary"
                                   onClick={handleSaveProfile}
@@ -1254,6 +1257,20 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
             setAppointmentToView(null);
           }}
           onSaveInternalNote={handleSaveInternalNote}
+        />
+      )}
+
+      {isHistoryModalOpen && selectedCustomer && (
+        <CustomerHistoryModal
+          isOpen={isHistoryModalOpen}
+          customer={selectedCustomer}
+          appointments={myAppointments.filter(
+            (apt) => apt.customerId === selectedCustomer.id
+          )}
+          onClose={() => {
+            setIsHistoryModalOpen(false);
+            setSelectedCustomer(null);
+          }}
         />
       )}
 

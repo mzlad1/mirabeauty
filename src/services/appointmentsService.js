@@ -246,7 +246,7 @@ export const completeAppointment = async (
       completedAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       // staff -> customer note: prefer new field
-      staffNoteToCustomer: noteFromStaffToCustomer,
+      staffNoteToCustomer: staffNoteToCustomer,
       // internal note visible only to staff/admin
       staffInternalNote: staffInternalNote,
     });

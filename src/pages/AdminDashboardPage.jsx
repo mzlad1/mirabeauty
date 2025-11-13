@@ -2720,7 +2720,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                         className="btn-primary"
                         onClick={handleAddSkinType}
                       >
-                        <i className="fas fa-plus"></i>
+                        
                         إضافة نوع البشرة الأول
                       </button>
                     </div>

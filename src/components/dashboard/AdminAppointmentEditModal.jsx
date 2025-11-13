@@ -170,7 +170,7 @@ const AdminAppointmentEditModal = ({
                 <option value="">اختر الأخصائية</option>
                 {staff.map((staffMember) => (
                   <option key={staffMember.id} value={staffMember.id}>
-                    {staffMember.name} - {staffMember.specialization || "عام"}
+                    {staffMember.name}
                   </option>
                 ))}
               </select>
