@@ -1558,6 +1558,13 @@
   padding: 2rem 0;
 }
 
+.admin-form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+  margin-top: auto;
+}
+
 /* Sub-tabs for Categories */
 .sub-tabs {
   display: flex;
@@ -1929,6 +1936,24 @@
   gap: 0.5rem;
 }
 
+.faq-drag-info {
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #1565c0;
+  font-size: 0.9rem;
+}
+
+.faq-drag-info i {
+  color: #1976d2;
+  flex-shrink: 0;
+}
+
 .faq-types-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -1957,12 +1982,79 @@
   justify-content: space-between;
   align-items: center;
   transition: all 0.3s ease;
+  cursor: move;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  touch-action: none;
+  position: relative;
 }
 
 .faq-type-item:hover {
   border-color: var(--primary);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(43, 89, 195, 0.15);
+}
+
+.faq-type-item:active {
+  cursor: grabbing;
+}
+
+.faq-type-item.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+.faq-type-item.drag-over {
+  border-color: var(--primary);
+  border-style: dashed;
+  background: rgba(43, 89, 195, 0.05);
+}
+
+/* Disable drag on touch devices to prevent issues */
+@media (hover: none) and (pointer: coarse) {
+  .faq-type-item {
+    cursor: default !important;
+    touch-action: auto !important;
+  }
+
+  .faq-type-item[draggable="false"] {
+    -webkit-user-drag: none;
+    cursor: default !important;
+  }
+
+  .faq-type-item .fa-grip-vertical {
+    display: none !important;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .faq-type-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    touch-action: auto;
+    cursor: default;
+  }
+
+  .faq-type-item .fa-grip-vertical {
+    display: none;
+  }
+
+  .faq-type-info {
+    width: 100%;
+  }
+
+  .faq-type-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .faq-drag-info span {
+    font-size: 0.85rem;
+  }
 }
 
 .faq-type-info {

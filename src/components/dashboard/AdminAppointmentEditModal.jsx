@@ -9,8 +9,18 @@ const AdminAppointmentEditModal = ({
   onSubmit,
   appointment,
   staff = [],
+  specializations = [],
 }) => {
   const { modalState, closeModal, showError } = useModal();
+
+  // Helper function to get specialization name by ID
+  const getSpecializationName = (specializationId) => {
+    if (!specializationId) return "غير محدد";
+    const specialization = specializations.find(
+      (s) => s.id === specializationId
+    );
+    return specialization ? specialization.name : "غير محدد";
+  };
   // Helper function to format price display (avoid duplicate currency)
   const formatPrice = (priceString) => {
     if (!priceString) return "0 شيكل";
@@ -170,7 +180,8 @@ const AdminAppointmentEditModal = ({
                 <option value="">اختر الأخصائية</option>
                 {staff.map((staffMember) => (
                   <option key={staffMember.id} value={staffMember.id}>
-                    {staffMember.name}
+                    {staffMember.name} -{" "}
+                    {getSpecializationName(staffMember.specialization)}
                   </option>
                 ))}
               </select>

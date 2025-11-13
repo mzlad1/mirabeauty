@@ -90,6 +90,7 @@ import FAQModal from "../components/admin/FAQModal";
 import FAQTypeModal from "../components/admin/FAQTypeModal";
 import SkinTypeModal from "../components/dashboard/SkinTypeModal";
 import SpecializationModal from "../components/dashboard/SpecializationModal";
+import SortableList from "../components/common/SortableList";
 import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
 
 const AdminDashboardPage = ({ currentUser }) => {
@@ -798,12 +799,15 @@ const AdminDashboardPage = ({ currentUser }) => {
     const loadInitialData = async () => {
       try {
         setLoading(true);
-        const [appointmentsData, servicesData] = await Promise.all([
-          getAllAppointments(),
-          getAllServices(),
-        ]);
+        const [appointmentsData, servicesData, specializationsData] =
+          await Promise.all([
+            getAllAppointments(),
+            getAllServices(),
+            getAllSpecializations(),
+          ]);
         setAppointments(appointmentsData);
         setServices(servicesData);
+        setSpecializations(specializationsData);
       } catch (err) {
         console.error("Error loading initial data:", err);
         setError("فشل في تحميل البيانات");
@@ -2720,7 +2724,6 @@ const AdminDashboardPage = ({ currentUser }) => {
                         className="btn-primary"
                         onClick={handleAddSkinType}
                       >
-                        
                         إضافة نوع البشرة الأول
                       </button>
                     </div>
@@ -2960,7 +2963,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                                   className="form-input"
                                 />
                               </div>
-                              <div className="form-actions">
+                              <div className="admin-form-actions">
                                 <button
                                   className="btn-primary"
                                   onClick={handleSaveProfile}
@@ -3065,58 +3068,30 @@ const AdminDashboardPage = ({ currentUser }) => {
                         إضافة نوع
                       </button>
                     </div>
-                    <div className="faq-types-list">
-                      {faqTypes.length === 0 ? (
-                        <div className="empty-types">
-                          <i className="fas fa-info-circle"></i>
-                          <p>لا توجد أنواع أسئلة. قم بإضافة نوع جديد</p>
-                        </div>
-                      ) : (
-                        faqTypes.map((type, index) => (
-                          <div
-                            key={type.id}
-                            className="faq-type-item"
-                            draggable
-                            onDragStart={(e) => {
-                              e.dataTransfer.effectAllowed = "move";
-                              e.dataTransfer.setData("text/html", index);
-                            }}
-                            onDragOver={(e) => {
-                              if (e.preventDefault) e.preventDefault();
-                              e.dataTransfer.dropEffect = "move";
-                              return false;
-                            }}
-                            onDrop={(e) => {
-                              e.stopPropagation();
-                              const dragIndex = parseInt(
-                                e.dataTransfer.getData("text/html")
-                              );
-                              if (dragIndex !== index) {
-                                const newTypes = [...faqTypes];
-                                const draggedItem = newTypes[dragIndex];
-                                newTypes.splice(dragIndex, 1);
-                                newTypes.splice(index, 0, draggedItem);
-                                setFaqTypes(newTypes);
-                                // Save new order
-                                reorderFAQTypes(newTypes).catch((err) =>
-                                  console.error(
-                                    "Error reordering FAQ types:",
-                                    err
-                                  )
-                                );
-                              }
-                              return false;
-                            }}
-                          >
+                    <div className="faq-drag-info">
+                      <i className="fas fa-info-circle"></i>
+                      <span>
+                        يمكنك سحب وإفلات الأنواع لإعادة ترتيبها الأجهزة
+                      </span>
+                    </div>
+                    {faqTypes.length === 0 ? (
+                      <div className="empty-types">
+                        <i className="fas fa-info-circle"></i>
+                        <p>لا توجد أنواع أسئلة. قم بإضافة نوع جديد</p>
+                      </div>
+                    ) : (
+                      <SortableList
+                        items={faqTypes}
+                        onReorder={(reorderedTypes) => {
+                          setFaqTypes(reorderedTypes);
+                          reorderFAQTypes(reorderedTypes).catch((err) =>
+                            console.error("Error reordering FAQ types:", err)
+                          );
+                        }}
+                        keyExtractor={(type) => type.id}
+                        renderItem={(type) => (
+                          <>
                             <div className="faq-type-info">
-                              <i
-                                className="fas fa-grip-vertical"
-                                style={{
-                                  marginLeft: "10px",
-                                  cursor: "grab",
-                                  color: "#999",
-                                }}
-                              ></i>
                               <span className="faq-type-label">
                                 {type.name}
                               </span>
@@ -3139,10 +3114,10 @@ const AdminDashboardPage = ({ currentUser }) => {
                                 <i className="fas fa-trash"></i>
                               </button>
                             </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
+                          </>
+                        )}
+                      />
+                    )}
                   </div>
 
                   <div className="appointments-filters">
@@ -3324,6 +3299,7 @@ const AdminDashboardPage = ({ currentUser }) => {
         onSubmit={handleAppointmentSubmit}
         appointment={editingAppointment}
         staff={staff}
+        specializations={specializations}
       />
 
       {/* Category Modal */}
