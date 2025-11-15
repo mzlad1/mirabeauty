@@ -564,11 +564,15 @@
   flex: 1;
 }
 
-.product-details-tab-btn:hover,
+.product-details-tab-btn:hover {
+  color: var(--navy-blue);
+  background: rgba(184, 146, 31, 0.05);
+}
+
 .product-details-tab-btn.active {
   color: var(--navy-blue);
   border-bottom-color: var(--gold);
-  background: rgba(184, 146, 31, 0.05);
+  background: rgba(184, 146, 31, 0.07);
 }
 
 .product-details-tabs-content {
@@ -626,7 +630,7 @@
 }
 
 .product-details-ingredients-list li {
-  background: rgba(184, 146, 31, 0.1);
+  background: rgba(184, 146, 31, 0.04);
   padding: 0.75rem 1rem;
   border-radius: 8px;
   border-right: 4px solid var(--gold);
@@ -856,6 +860,34 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Tab border expand animation - grows from center outward */
+@keyframes tabBorderExpand {
+  from {
+    width: 0;
+    left: 50%;
+    right: 50%;
+  }
+  to {
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
+}
+
+/* Tab border collapse animation - shrinks to center */
+@keyframes tabBorderCollapse {
+  from {
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
+  to {
+    width: 0;
+    left: 50%;
+    right: 50%;
   }
 }
 
