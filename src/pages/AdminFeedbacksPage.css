@@ -512,6 +512,7 @@
 
   .feedbacks-stats-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 
   .feedback-card-header {
@@ -537,11 +538,6 @@
 
   .admin-feedbacks-header h1 {
     font-size: 1.4rem;
-  }
-
-  .feedbacks-stats-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
   }
 
   .stat-card {

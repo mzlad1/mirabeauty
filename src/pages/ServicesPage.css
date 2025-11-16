@@ -756,9 +756,13 @@
 }
 
 @media (max-width: 884px) {
-.services-page-layout {
-  display: inline;
-}
+  .services-page-sidebar{
+    position: static;
+  }
+
+  .services-page-layout {
+    display: inline;
+  }
 }
 
 @media (max-width: 768px) {

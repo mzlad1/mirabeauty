@@ -420,10 +420,6 @@
     font-size: 1.5rem;
   }
 
-  .users-stats-grid {
-    grid-template-columns: 1fr;
-  }
-
   .filter-buttons {
     flex-direction: column;
   }
