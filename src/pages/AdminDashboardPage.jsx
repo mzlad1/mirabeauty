@@ -3071,7 +3071,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                     <div className="faq-drag-info">
                       <i className="fas fa-info-circle"></i>
                       <span>
-                        يمكنك سحب وإفلات الأنواع لإعادة ترتيبها الأجهزة
+                        يمكنك سحب وإفلات الأنواع لإعادة ترتيبها
                       </span>
                     </div>
                     {faqTypes.length === 0 ? (
@@ -3084,15 +3084,24 @@ const AdminDashboardPage = ({ currentUser }) => {
                         items={faqTypes}
                         onReorder={(reorderedTypes) => {
                           setFaqTypes(reorderedTypes);
-                          reorderFAQTypes(reorderedTypes).catch((err) =>
-                            console.error("Error reordering FAQ types:", err)
-                          );
+                          reorderFAQTypes(reorderedTypes)
+                            .then(() => {
+                              // Reload FAQ types to ensure UI reflects Firebase state
+                              loadFAQTypes();
+                            })
+                            .catch((err) => {
+                              console.error("Error reordering FAQ types:", err);
+                              // Reload to revert to server state on error
+                              loadFAQTypes();
+                            });
                         }}
                         keyExtractor={(type) => type.id}
                         renderItem={(type) => (
                           <>
                             <div className="faq-type-info">
                               <span className="faq-type-label">
+                                {type.order + 1}
+                                {" - "}
                                 {type.name}
                               </span>
                             </div>
