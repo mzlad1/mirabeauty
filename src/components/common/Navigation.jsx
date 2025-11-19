@@ -100,10 +100,135 @@ const Navigation = ({ currentUser, userData }) => {
               الأسئلة الشائعة
             </Link>
           </li>
+
+          {/* Mobile User Actions - Inside menu on mobile */}
+          <div className="nav-actions nav-actions-mobile">
+            {currentUser ? (
+              <div className="user-menu">
+                <div className="user-info">
+                  <img
+                    src={userData?.avatar || "/assets/default-avatar.jpg"}
+                    alt={
+                      userData?.name || currentUser?.displayName || "المستخدم"
+                    }
+                    className="user-avatar"
+                    onError={(e) => {
+                      e.target.src = "/assets/default-avatar.jpg";
+                    }}
+                  />
+                  <div className="user-details">
+                    <span className="user-name">
+                      {userData?.name || currentUser?.displayName || "المستخدم"}
+                    </span>
+                    <span className="user-role">
+                      {userData?.role === "customer" && "عميل"}
+                      {userData?.role === "staff" && "موظف"}
+                      {userData?.role === "admin" && "مدير"}
+                    </span>
+                  </div>
+                </div>
+                <div className="user-dropdown">
+                  {userData?.role === "customer" && (
+                    <Link
+                      to="/profile"
+                      className="dropdown-item"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <span className="dropdown-icon">
+                        <i className="fas fa-user"></i>
+                      </span>
+                      الملف الشخصي
+                    </Link>
+                  )}
+                  {(userData?.role === "staff" ||
+                    userData?.role === "admin") && (
+                    <Link
+                      to="/dashboard"
+                      className="dropdown-item"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <span className="dropdown-icon">
+                        <i className="fas fa-tachometer-alt"></i>
+                      </span>
+                      لوحة التحكم
+                    </Link>
+                  )}
+                  {userData?.role === "admin" && (
+                    <>
+                      <Link
+                        to="/admin/reports"
+                        className="dropdown-item"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <span className="dropdown-icon">
+                          <i className="fas fa-chart-bar"></i>
+                        </span>
+                        التقارير
+                      </Link>
+                      <Link
+                        to="/admin/feedbacks"
+                        className="dropdown-item"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <span className="dropdown-icon">
+                          <i className="fas fa-comments"></i>
+                        </span>
+                        التقييمات
+                      </Link>
+                      <Link
+                        to="/admin/users"
+                        className="dropdown-item"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <span className="dropdown-icon">
+                          <i className="fas fa-users"></i>
+                        </span>
+                        إدارة المستخدمين
+                      </Link>
+                      <Link
+                        to="/admin/orders"
+                        className="dropdown-item"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <span className="dropdown-icon">
+                          <i className="fas fa-shopping-bag"></i>
+                        </span>
+                        إدارة الطلبات
+                      </Link>
+                    </>
+                  )}
+                  <button
+                    className="dropdown-item logout"
+                    onClick={handleLogout}
+                  >
+                    <span className="dropdown-icon">
+                      <i className="fas fa-sign-out-alt"></i>
+                    </span>
+                    تسجيل الخروج
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="auth-buttons">
+                <button
+                  className="nav-btn login-btn"
+                  onClick={() => handleNavigation("/login")}
+                >
+                  تسجيل الدخول
+                </button>
+                <button
+                  className="nav-btn register-btn"
+                  onClick={() => handleNavigation("/register")}
+                >
+                  إنشاء حساب
+                </button>
+              </div>
+            )}
+          </div>
         </ul>
 
-        {/* User Actions */}
-        <div className="nav-actions">
+        {/* Desktop User Actions */}
+        <div className="nav-actions nav-actions-desktop">
           {currentUser ? (
             <div className="user-menu">
               <div className="user-info">

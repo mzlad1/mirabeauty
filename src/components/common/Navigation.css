@@ -115,6 +115,14 @@
   gap: 1rem;
 }
 
+.nav-actions-mobile {
+  display: none;
+}
+
+.nav-actions-desktop {
+  display: flex;
+}
+
 /* Auth Buttons */
 .auth-buttons {
   display: flex;
@@ -359,7 +367,7 @@
     background-color: var(--white);
     border-left: 2px solid var(--border-color);
     flex-direction: column;
-    padding: 2rem 0;
+    padding: 0;
     gap: 0;
     /* Use transform for smoother, GPU-accelerated animation and to match nav-actions */
     transform: translateX(100%);
@@ -367,10 +375,24 @@
     z-index: 1000;
     overflow-y: auto;
     box-shadow: -4px 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
   }
 
   .nav-menu.active {
     transform: translateX(0);
+  }
+
+  .nav-actions-desktop {
+    display: none;
+  }
+
+  .nav-actions-mobile {
+    display: block;
+    width: 100%;
+    background-color: var(--white);
+    padding: 1rem;
+    margin-top: auto;
+    border-top: 2px solid var(--border-color);
   }
 
   .nav-menu li {
@@ -396,75 +418,46 @@
   }
 
   .nav-actions {
-    position: fixed;
+    position: static;
     min-width: 15rem;
-    bottom: 2rem;
-    right: 2rem;
     background-color: var(--white);
     padding: 1rem;
     z-index: 1001;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-    opacity: 0;
-    visibility: hidden;
+    margin-top: auto;
+    border-top: 2px solid var(--border-color);
   }
 
-  .nav-menu.active ~ .nav-actions {
-    transform: translateX(0);
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .auth-buttons {
+  .nav-actions-mobile .auth-buttons {
     flex-direction: column;
     width: 100%;
   }
 
-  .nav-btn {
+  .nav-actions-mobile .nav-btn {
     width: 100%;
     padding: 12px;
   }
 
-  .user-menu {
+  .nav-actions-mobile .user-menu {
     width: 100%;
   }
 
-  .user-info {
+  .nav-actions-mobile .user-info {
     padding: 12px 20px;
     border-bottom: 1px solid var(--border-color);
   }
 
-  .user-dropdown {
+  .nav-actions-mobile .user-dropdown {
     position: static;
     opacity: 1;
     visibility: visible;
     transform: none;
     border: none;
     border-top: 1px solid var(--border-color);
-    max-height: 300px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    max-height: none;
+    overflow: visible;
   }
 
-  /* Scrollbar styling for user dropdown in mobile */
-  .user-dropdown::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .user-dropdown::-webkit-scrollbar-track {
-    background: #f1f1f1;
-  }
-
-  .user-dropdown::-webkit-scrollbar-thumb {
-    background: var(--gold);
-    border-radius: 3px;
-  }
-
-  .user-dropdown::-webkit-scrollbar-thumb:hover {
-    background: #b8921f;
-  }
-
-  .dropdown-item {
+  .nav-actions-mobile .dropdown-item {
     padding: 16px 20px;
     display: flex;
     justify-content: flex-start;
