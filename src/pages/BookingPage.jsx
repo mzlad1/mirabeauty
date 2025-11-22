@@ -244,16 +244,49 @@ const BookingPage = ({ currentUser, userData }) => {
     }
 
     try {
+      // Get the selected service and its category
+      const selectedService = services.find(
+        (s) => s.id === bookingData.serviceId
+      );
+      if (!selectedService) {
+        setAvailableTimeSlots(timeSlots);
+        return;
+      }
+
+      // Get the category booking limit
+      const serviceCategory = categories.find(
+        (cat) =>
+          cat.id === selectedService.categoryId ||
+          cat.id === selectedService.category
+      );
+      const bookingLimit = serviceCategory?.bookingLimit || 999; // Default high number if not set
+
       // Get all appointments for the selected date
       const dateAppointments = await getAppointmentsByDate(selectedDate);
 
+      // Group appointments by time slot and count per category
+      const timeSlotsBookingCount = {};
+
+      dateAppointments.forEach((apt) => {
+        // Only count confirmed and pending appointments
+        if (apt.status === "مؤكد" || apt.status === "في الانتظار") {
+          // Check if appointment is for same category
+          if (
+            apt.serviceCategory === selectedService.category ||
+            apt.serviceCategory === selectedService.categoryId
+          ) {
+            if (!timeSlotsBookingCount[apt.time]) {
+              timeSlotsBookingCount[apt.time] = 0;
+            }
+            timeSlotsBookingCount[apt.time]++;
+          }
+        }
+      });
+
       // Get booked time slots
-      // 1. Confirmed appointments block for everyone
-      // 2. User's own pending appointments block for them only
-      const bookedTimes = dateAppointments
+      // 1. User's own pending appointments block for them only
+      const userBookedTimes = dateAppointments
         .filter((apt) => {
-          // Block confirmed appointments for everyone
-          if (apt.status === "مؤكد") return true;
           // Block user's own pending appointments
           if (
             apt.status === "في الانتظار" &&
@@ -264,8 +297,16 @@ const BookingPage = ({ currentUser, userData }) => {
         })
         .map((apt) => apt.time);
 
-      // Filter available time slots
-      const available = timeSlots.filter((time) => !bookedTimes.includes(time));
+      // Filter available time slots based on booking limit
+      const available = timeSlots.filter((time) => {
+        // Block user's own bookings
+        if (userBookedTimes.includes(time)) return false;
+
+        // Check if this time slot has reached the booking limit
+        const bookingsAtThisTime = timeSlotsBookingCount[time] || 0;
+        return bookingsAtThisTime < bookingLimit;
+      });
+
       setAvailableTimeSlots(available);
     } catch (error) {
       console.error("Error loading available time slots:", error);
@@ -418,12 +459,55 @@ const BookingPage = ({ currentUser, userData }) => {
 
       await createAppointment(appointmentData);
       showSuccess(
-        "تم حجز موعدك بنجاح! سيتم تعيين الأخصائية المناسبة والتواصل معك قريباً لتأكيد الموعد."
+        <>
+          <p style={{ marginBottom: "1rem" }}>
+            تم حجز موعدك بنجاح! سيتم تعيين الأخصائية المناسبة والتواصل معك
+            قريباً لتأكيد الموعد.
+          </p>
+          <div
+            style={{
+              backgroundColor: "#fff3cd",
+              border: "1px solid #ffc107",
+              borderRadius: "8px",
+              padding: "0.75rem",
+              marginTop: "1rem",
+            }}
+          >
+            <p
+              style={{
+                color: "#856404",
+                fontWeight: "bold",
+                marginBottom: "0.5rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+              }}
+            >
+              <span style={{ color: "#dc3545" }}>⚠️</span> تنبيه هام:
+            </p>
+            <ul
+              style={{
+                margin: 0,
+                paddingRight: "1.5rem",
+                color: "#856404",
+                lineHeight: "1.8",
+              }}
+            >
+              <li>
+                في حال تأخرتي عن الموعد المحدد لأكثر من 10 دقائق، سيتم إلغاء
+                الحجز.
+              </li>
+              <li>
+                يمكنك إلغاء الموعد قبل 12 ساعة على الأقل من وقت الموعد المحدد.
+              </li>
+            </ul>
+          </div>
+        </>
       );
       // Wait for user to see the success message before redirecting
       setTimeout(() => {
         navigate("/profile");
-      }, 2500);
+      }, 6500);
     } catch (error) {
       console.error("Error creating booking:", error);
       console.error("Error details:", error.message, error.code);
@@ -899,14 +983,42 @@ const BookingPage = ({ currentUser, userData }) => {
                         {selectedService?.duration || 60}
                       </span>
                     </div>
-                    <div className="summary-item price-item">
+                    {/* <div className="summary-item price-item">
                       <span className="label">السعر:</span>
                       <span className="value">{selectedService?.price}</span>
-                    </div>
+                    </div> */}
                     <div className="summary-note">
-                      <p>
-                        <strong>ملاحظة:</strong> سيتم تعيين الأخصائية المناسبة
-                        من قبل الإدارة وسيتم إشعارك بالتفاصيل.
+                      {(() => {
+                        // Check if user has appointments in the last 6 months
+                        const sixMonthsAgo = new Date();
+                        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+                        const hasRecentAppointments = userAppointments.some(
+                          (apt) => {
+                            const aptDate = new Date(apt.date);
+                            return aptDate >= sixMonthsAgo;
+                          }
+                        );
+
+                        return (
+                          hasRecentAppointments && (
+                            <p className="summary-note-info">
+                              <i className="fas fa-info-circle"></i>
+                              <strong>ملاحظة:</strong> اذا كنت تفضلين أخصائية
+                              معينة، يرجى ذكر ذلك في قسم الملاحظات أدناه.
+                            </p>
+                          )
+                        );
+                      })()}
+                      <p className="summary-note-warning">
+                        <i className="fas fa-exclamation-triangle"></i>
+                        <strong>تنبيه:</strong> في حال تأخرتي عن الموعد المحدد
+                        لأكثر من 10 دقيقة، سيتم إلغاء الحجز.
+                      </p>
+                      <p className="summary-note-warning">
+                        <i className="fas fa-exclamation-triangle"></i>
+                        <strong>تنبيه:</strong> يمكنك إلغاء الموعد قبل 12 ساعة
+                        على الأقل من وقت الموعد المحدد.
                       </p>
                     </div>
                   </div>
@@ -1316,14 +1428,14 @@ const BookingPage = ({ currentUser, userData }) => {
           <div className="container">
             <div className="cta-content text-center">
               <h2>مستعدة لتجربة التميز؟</h2>
-              <p>احجزي استشارة مجانية اليوم واكتشفي الخدمة المناسبة لك</p>
+              <p>اكتشفي الخدمة المناسبة لك</p>
               <div className="cta-buttons">
-                <button
+                {/* <button
                   className="btn-primary"
                   onClick={() => setSelectedCategory("consultation")}
                 >
                   احجزي استشارة مجانية
-                </button>
+                </button> */}
                 <button
                   className="consultation-btn-secondary"
                   onClick={() => navigate("/faq")}

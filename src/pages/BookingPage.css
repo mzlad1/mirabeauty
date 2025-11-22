@@ -886,16 +886,44 @@
 
 .summary-note {
   margin-top: 1.5rem;
-  padding: 1rem;
-  background-color: #e8f4fd;
-  border: 1px solid #b3d9f7;
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .summary-note p {
   margin: 0;
-  color: var(--navy-blue);
+  padding: 1rem;
+  border-radius: 8px;
   font-size: 0.9rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  line-height: 1.6;
+}
+
+.summary-note-info {
+  background-color: #e8f4fd;
+  border: 1px solid #b3d9f7;
+  color: var(--navy-blue);
+}
+
+.summary-note-info i {
+  color: #2196f3;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.summary-note-warning {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+}
+
+.summary-note-warning i {
+  color: #dc3545;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
 }
 
 /* Booking Summary */

@@ -31,6 +31,7 @@ const ServiceEditModal = ({
     icon: service?.icon || "",
     popular: service?.popular || false,
     sessions: service?.sessions || "",
+    hidden: service?.hidden || false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -52,6 +53,7 @@ const ServiceEditModal = ({
         icon: service.icon || "",
         popular: service.popular || false,
         sessions: service.sessions || "",
+        hidden: service.hidden || false,
       });
     } else {
       // Reset form for new service
@@ -67,6 +69,7 @@ const ServiceEditModal = ({
         icon: "",
         popular: false,
         sessions: "",
+        hidden: false,
       });
       setSelectedFiles([]);
     }
@@ -441,6 +444,17 @@ const ServiceEditModal = ({
                   onChange={handleChange}
                 />
                 خدمة مميزة (Popular)
+              </label>
+            </div>
+            <div className="service-edit-form-group service-edit-checkbox-group">
+              <label className="service-edit-checkbox-label">
+                <input
+                  type="checkbox"
+                  name="hidden"
+                  checked={formData.hidden}
+                  onChange={handleChange}
+                />
+                مخفية (قريباً)
               </label>
             </div>
           </div>

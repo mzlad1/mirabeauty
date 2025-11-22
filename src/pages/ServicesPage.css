@@ -46,6 +46,70 @@
   font-weight: 600;
 }
 
+/* Pricing Info Banner */
+.pricing-info-banner {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.pricing-banner-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.pricing-banner-header i {
+  color: #ffc107;
+  font-size: 1.3rem;
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.pricing-banner-header p {
+  color: #856404;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.pricing-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.pricing-list-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.pricing-category-name {
+  color: var(--navy-blue);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.pricing-dots {
+  border-bottom: 2px dotted rgba(133, 100, 4, 0.3);
+  height: 1px;
+  min-width: 20px;
+}
+
+.pricing-category-price {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
 /* Why Choose Services Section */
 .services-page-why-choose {
   background: linear-gradient(135deg, var(--navy-blue) 0%, #0f2a5a 100%);
@@ -294,8 +358,8 @@
   transition: all 0.3s cubic-bezier(0.4, 1, 0.3, 1);
   overflow: hidden;
   /* padding: 2.5rem 2rem; */
-    height: 100%;                  /* مهم: الكارد يملأ خانته */
-  display: flex;                 /* ترتيب عمودي داخل الكارد */
+  height: 100%; /* مهم: الكارد يملأ خانته */
+  display: flex; /* ترتيب عمودي داخل الكارد */
   flex-direction: column;
 }
 
@@ -393,7 +457,8 @@
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  flex: 1;  }
+  flex: 1;
+}
 
 .services-page-category {
   width: fit-content;
@@ -460,8 +525,8 @@
 .services-page-actions {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: .5rem;
-  margin-top: auto;              /* يثبتها أسفل .services-page-info */
+  gap: 0.5rem;
+  margin-top: auto; /* يثبتها أسفل .services-page-info */
 }
 
 .services-page-book-btn {
@@ -524,6 +589,128 @@
 .services-page-book-btn:active::after,
 .services-page-book-btn:focus-visible::after {
   animation: btn-shine 0.6s ease forwards;
+}
+
+/* Hidden Service (Coming Soon) Styles */
+.services-page-card-hidden {
+  opacity: 0.7;
+  pointer-events: none;
+  position: relative;
+}
+
+.services-page-card-hidden:hover {
+  transform: none;
+  border-color: var(--border-color);
+  box-shadow: 0 8px 24px rgba(11, 34, 53, 0.08);
+}
+
+.services-page-image-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  position: relative;
+}
+
+.coming-soon-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(11, 34, 53, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.coming-soon-badge {
+  background: var(--gold);
+  color: var(--white);
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(184, 146, 31, 0.4);
+  animation: pulse-badge 2s infinite;
+}
+
+.coming-soon-badge i {
+  font-size: 1.2rem;
+}
+
+.services-skeleton-text {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  height: 20px;
+  width: 60%;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.services-skeleton-title {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  height: 24px;
+  width: 80%;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+}
+
+.services-skeleton-description {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.services-skeleton-line {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  height: 14px;
+  width: 100%;
+  border-radius: 4px;
+}
+
+.services-skeleton-line.short {
+  width: 70%;
+}
+
+.services-page-card-hidden .services-page-book-btn {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.services-page-card-hidden .services-page-book-btn:hover {
+  transform: none;
+  background-color: #ccc;
+  box-shadow: none;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes pulse-badge {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 .services-page-bookmark-btn {
@@ -756,7 +943,7 @@
 }
 
 @media (max-width: 884px) {
-  .services-page-sidebar{
+  .services-page-sidebar {
     position: static;
   }
 
@@ -778,6 +965,28 @@
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+  }
+
+  .pricing-info-banner {
+    padding: 1rem;
+  }
+
+  .pricing-banner-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .pricing-banner-header i {
+    margin: 0 auto;
+  }
+
+  .pricing-list-item {
+    gap: 0.5rem;
+  }
+
+  .pricing-category-name,
+  .pricing-category-price {
+    font-size: 0.9rem;
   }
 
   .services-page-benefits-grid {

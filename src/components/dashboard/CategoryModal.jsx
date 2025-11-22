@@ -13,6 +13,8 @@ const CategoryModal = ({
     name: "",
     description: "",
     image: "",
+    price: "",
+    bookingLimit: "",
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
@@ -26,6 +28,8 @@ const CategoryModal = ({
         name: editingCategory.name || "",
         description: editingCategory.description || "",
         image: editingCategory.image || "",
+        price: editingCategory.price || "",
+        bookingLimit: editingCategory.bookingLimit || "",
       });
       setImagePreview(editingCategory.image || "");
     } else {
@@ -33,6 +37,8 @@ const CategoryModal = ({
         name: "",
         description: "",
         image: "",
+        price: "",
+        bookingLimit: "",
       });
       setImagePreview("");
     }
@@ -51,6 +57,25 @@ const CategoryModal = ({
 
     if (formData.description && formData.description.length > 500) {
       newErrors.description = "الوصف يجب أن يكون أقل من 500 حرف";
+    }
+
+    // Validate price for service categories
+    if (categoryType === "service") {
+      if (!formData.price.trim()) {
+        newErrors.price = "السعر العام مطلوب";
+      } else if (isNaN(formData.price) || parseFloat(formData.price) <= 0) {
+        newErrors.price = "السعر يجب أن يكون رقم موجب";
+      }
+
+      // Validate booking limit
+      if (!formData.bookingLimit.trim()) {
+        newErrors.bookingLimit = "حد الحجوزات المتزامنة مطلوب";
+      } else if (
+        isNaN(formData.bookingLimit) ||
+        parseInt(formData.bookingLimit) <= 0
+      ) {
+        newErrors.bookingLimit = "الحد يجب أن يكون رقم صحيح موجب";
+      }
     }
 
     setErrors(newErrors);
@@ -142,6 +167,11 @@ const CategoryModal = ({
         name: formData.name.trim(),
         description: formData.description.trim(),
         image: imageUrl,
+        price: categoryType === "service" ? formData.price.trim() : "",
+        bookingLimit:
+          categoryType === "service"
+            ? parseInt(formData.bookingLimit.trim())
+            : 0,
       });
       onClose();
     } catch (error) {
@@ -221,6 +251,78 @@ const CategoryModal = ({
               {formData.description.length}/500 حرف
             </small>
           </div>
+
+          {/* Price - Only for Service Categories */}
+          {categoryType === "service" && (
+            <div className="form-group">
+              <label htmlFor="price">
+                السعر العام (شيكل) <span className="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="price"
+                name="price"
+                value={formData.price}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Allow only numbers and decimal point
+                  if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                    setFormData({ ...formData, price: value });
+                    if (errors.price) {
+                      setErrors({ ...errors, price: "" });
+                    }
+                  }
+                }}
+                placeholder="مثال: 100"
+                className={errors.price ? "error" : ""}
+              />
+              {errors.price && (
+                <span className="error-message">{errors.price}</span>
+              )}
+              <small className="field-note">
+                هذا السعر العام سيظهر في صفحة الخدمات. السعر النهائي قد يختلف
+                حسب الخصومات.
+              </small>
+            </div>
+          )}
+
+          {/* Booking Limit - Only for Service Categories */}
+          {categoryType === "service" && (
+            <div className="form-group">
+              <label htmlFor="bookingLimit">
+                حد الحجوزات المتزامنة <span className="required">*</span>
+              </label>
+              <input
+                type="number"
+                id="bookingLimit"
+                name="bookingLimit"
+                value={formData.bookingLimit}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Allow only positive integers
+                  if (
+                    value === "" ||
+                    (/^\d+$/.test(value) && parseInt(value) >= 0)
+                  ) {
+                    setFormData({ ...formData, bookingLimit: value });
+                    if (errors.bookingLimit) {
+                      setErrors({ ...errors, bookingLimit: "" });
+                    }
+                  }
+                }}
+                placeholder="مثال: 3"
+                min="1"
+                className={errors.bookingLimit ? "error" : ""}
+              />
+              {errors.bookingLimit && (
+                <span className="error-message">{errors.bookingLimit}</span>
+              )}
+              <small className="field-note">
+                الحد الأقصى لعدد الحجوزات المسموح بها في نفس الوقت. يعتمد على
+                عدد الأخصائيات المتاحات لهذا التصنيف.
+              </small>
+            </div>
+          )}
 
           {/* Image Upload - Only for Service Categories */}
           {categoryType === "service" && (

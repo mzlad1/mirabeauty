@@ -19,6 +19,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminOrdersPage from "./pages/AdminOrdersPage";
+import AdminAppointmentsPage from "./pages/AdminAppointmentsPage";
 import ReportsPage from "./pages/ReportsPage";
 import AdminFeedbacksPage from "./pages/AdminFeedbacksPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
@@ -136,6 +137,21 @@ const AppContent = () => {
     }
   };
 
+  // Protected route component for admin appointments
+  const ProtectedAdminAppointments = () => {
+    if (!currentUser || !userData) {
+      return <Navigate to="/login" replace />;
+    }
+
+    if (userData.role === "admin") {
+      return (
+        <AdminAppointmentsPage currentUser={currentUser} userData={userData} />
+      );
+    } else {
+      return <Navigate to="/" replace />;
+    }
+  };
+
   // Protected route component for user details
   const ProtectedUserDetails = () => {
     if (!currentUser || !userData) {
@@ -222,6 +238,10 @@ const AppContent = () => {
               element={<ProtectedUserDetails />}
             />
             <Route path="/admin/orders" element={<ProtectedAdminOrders />} />
+            <Route
+              path="/admin/appointments"
+              element={<ProtectedAdminAppointments />}
+            />
             {/* Catch-all route for 404 Not Found */}
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

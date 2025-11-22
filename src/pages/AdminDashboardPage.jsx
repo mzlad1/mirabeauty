@@ -157,6 +157,7 @@ const AdminDashboardPage = ({ currentUser }) => {
   // Filter states for services
   const [serviceCategoryFilter, setServiceCategoryFilter] = useState("");
   const [serviceSearchFilter, setServiceSearchFilter] = useState("");
+  const [serviceHiddenFilter, setServiceHiddenFilter] = useState("");
   const [currentServicePage, setCurrentServicePage] = useState(1);
   const servicesPerPage = 10;
 
@@ -624,6 +625,13 @@ const AdminDashboardPage = ({ currentUser }) => {
         if (!serviceName.includes(searchLower)) {
           return false;
         }
+      }
+
+      // Hidden filter
+      if (serviceHiddenFilter === "hidden") {
+        if (!service.hidden) return false;
+      } else if (serviceHiddenFilter === "visible") {
+        if (service.hidden) return false;
       }
 
       return true;
@@ -1575,7 +1583,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                   <i className="nav-icon fas fa-calendar-alt"></i>
                   المواعيد
                 </button>
-                <button
+                {/* <button
                   className={`nav-item ${
                     activeTab === "consultations" ? "active" : ""
                   }`}
@@ -1583,7 +1591,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                 >
                   <i className="nav-icon fas fa-comments"></i>
                   الاستشارات
-                </button>
+                </button> */}
                 <button
                   className={`nav-item ${
                     activeTab === "services" ? "active" : ""
@@ -2010,14 +2018,14 @@ const AdminDashboardPage = ({ currentUser }) => {
                 </div>
               )}
 
-              {/* Consultations Tab */}
+              {/* Consultations Tab - COMMENTED OUT FOR FUTURE USE 
               {activeTab === "consultations" && (
                 <div className="tab-content">
                   <div className="tab-header">
                     <h2>إدارة الاستشارات</h2>
                   </div>
 
-                  {/* Consultation Filters */}
+                  Consultation Filters
                   <div className="appointments-filters">
                     <select
                       className="filter-select"
@@ -2151,43 +2159,40 @@ const AdminDashboardPage = ({ currentUser }) => {
                       </div>
 
                       {/* Pagination */}
-                      {getTotalConsultationPages() > 1 && (
-                        <div className="pagination">
-                          <button
-                            onClick={() =>
-                              setCurrentConsultationPage((prev) =>
-                                Math.max(prev - 1, 1)
-                              )
-                            }
-                            disabled={currentConsultationPage === 1}
-                            className="pagination-btn"
-                          >
-                            السابق
-                          </button>
-                          <span className="pagination-info">
-                            صفحة {currentConsultationPage} من{" "}
-                            {getTotalConsultationPages()}
-                          </span>
-                          <button
-                            onClick={() =>
-                              setCurrentConsultationPage((prev) =>
-                                Math.min(prev + 1, getTotalConsultationPages())
-                              )
-                            }
-                            disabled={
-                              currentConsultationPage ===
-                              getTotalConsultationPages()
-                            }
-                            className="pagination-btn"
-                          >
-                            التالي
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  )}
+              {getTotalConsultationPages() > 1 && (
+                <div className="pagination">
+                  <button
+                    onClick={() =>
+                      setCurrentConsultationPage((prev) =>
+                        Math.max(prev - 1, 1)
+                      )
+                    }
+                    disabled={currentConsultationPage === 1}
+                    className="pagination-btn"
+                  >
+                    السابق
+                  </button>
+                  <span className="pagination-info">
+                    صفحة {currentConsultationPage} من{" "}
+                    {getTotalConsultationPages()}
+                  </span>
+                  <button
+                    onClick={() =>
+                      setCurrentConsultationPage((prev) =>
+                        Math.min(prev + 1, getTotalConsultationPages())
+                      )
+                    }
+                    disabled={
+                      currentConsultationPage === getTotalConsultationPages()
+                    }
+                    className="pagination-btn"
+                  >
+                    التالي
+                  </button>
                 </div>
               )}
+
+              {/* Services section starts below */}
 
               {/* Services Tab */}
               {activeTab === "services" && (
@@ -2216,6 +2221,18 @@ const AdminDashboardPage = ({ currentUser }) => {
                         </option>
                       ))}
                     </select>
+                    <select
+                      className="filter-select"
+                      value={serviceHiddenFilter}
+                      onChange={(e) => {
+                        setServiceHiddenFilter(e.target.value);
+                        setCurrentServicePage(1);
+                      }}
+                    >
+                      <option value="">جميع الحالات</option>
+                      <option value="visible">ظاهرة</option>
+                      <option value="hidden">مخفية</option>
+                    </select>
                     <input
                       type="text"
                       className="filter-search"
@@ -2236,7 +2253,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                           <th>الفئة</th>
                           <th>السعر</th>
                           <th>المدة</th>
-                          <th>عدد الحجوزات</th>
+                          <th>الحالة</th>
                           <th>الإيرادات</th>
                           <th>الإجراءات</th>
                         </tr>
@@ -2248,7 +2265,17 @@ const AdminDashboardPage = ({ currentUser }) => {
                             <td>{service.categoryName}</td>
                             <td>{formatPrice(service.price)}</td>
                             <td>{service.duration}</td>
-                            <td>{service.appointmentCount}</td>
+                            <td>
+                              <span
+                                className={`status-badge ${
+                                  service.hidden
+                                    ? "status-hidden"
+                                    : "status-visible"
+                                }`}
+                              >
+                                {service.hidden ? "مخفي" : "ظاهر"}
+                              </span>
+                            </td>
                             <td>{service.revenue} شيكل</td>
                             <td>
                               <div className="table-actions">
@@ -2671,6 +2698,27 @@ const AdminDashboardPage = ({ currentUser }) => {
                                 </p>
                               )}
                               <div className="category-meta">
+                                {/** Price - Only for Service Categories and if the price is not existing add a note */}
+                                {category.price ? (
+                                  <span className="category-price">
+                                    السعر: {category.price} شيكل
+                                  </span>
+                                ) : (
+                                  <span className="category-price no-price">
+                                    السعر: غير محدد
+                                  </span>
+                                )}
+                                <br />
+                                {category.bookingLimit ? (
+                                  <span className="category-booking-limit">
+                                    حد الحجز: {category.bookingLimit}
+                                  </span>
+                                ) : (
+                                  <span className="category-price no-price">
+                                    حد الحجز: غير محدد
+                                  </span>
+                                )}
+                                <br />
                                 <span className="category-date">
                                   تم الإنشاء:{" "}
                                   {formatFirestoreDate(
@@ -3070,9 +3118,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                     </div>
                     <div className="faq-drag-info">
                       <i className="fas fa-info-circle"></i>
-                      <span>
-                        يمكنك سحب وإفلات الأنواع لإعادة ترتيبها
-                      </span>
+                      <span>يمكنك سحب وإفلات الأنواع لإعادة ترتيبها</span>
                     </div>
                     {faqTypes.length === 0 ? (
                       <div className="empty-types">

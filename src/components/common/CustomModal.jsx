@@ -63,7 +63,11 @@ const CustomModal = ({
         </div>
 
         <div className="custom-modal-body">
-          <p className="custom-modal-message">{message}</p>
+          {typeof message === "string" ? (
+            <p className="custom-modal-message">{message}</p>
+          ) : (
+            <div className="custom-modal-message">{message}</div>
+          )}
         </div>
 
         <div className="custom-modal-footer">

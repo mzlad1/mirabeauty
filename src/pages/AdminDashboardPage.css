@@ -2519,3 +2519,14 @@
     padding: 0.3rem 0.6rem;
   }
 }
+
+/* Service Status Badges */
+.status-badge.status-hidden {
+  background: #ffc107;
+  color: #000;
+}
+
+.status-badge.status-visible {
+  background: #28a745;
+  color: var(--white);
+}

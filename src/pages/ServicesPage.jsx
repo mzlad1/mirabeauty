@@ -188,6 +188,36 @@ const ServicesPage = () => {
                 </span>
               </div>
 
+              {/* Pricing Info Banner */}
+              {categories.filter((cat) => cat.id !== "all" && cat.price)
+                .length > 0 && (
+                <div className="pricing-info-banner">
+                  <div className="pricing-banner-header">
+                    <i className="fas fa-info-circle"></i>
+                    <p>
+                      <strong>ملاحظة:</strong> الأسعار المعروضة هي أسعار عامة
+                      وقد تختلف حسب الحالة. <br />
+                      عند الدفع، ستحصلين على الخصومات والعروض المتاحة.
+                    </p>
+                  </div>
+                  <div className="pricing-list">
+                    {categories
+                      .filter((cat) => cat.id !== "all" && cat.price)
+                      .map((category) => (
+                        <div key={category.id} className="pricing-list-item">
+                          <span className="pricing-category-name">
+                            {category.name}
+                          </span>
+                          <span className="pricing-dots"></span>
+                          <span className="pricing-category-price">
+                            {category.price} شيكل
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
               {loading ? (
                 <div className="services-page-loading">
                   <div className="loading-spinner"></div>
@@ -214,7 +244,44 @@ const ServicesPage = () => {
                       image: service.image,
                       images: service.images,
                       primaryImageIndex: service.primaryImageIndex,
+                      hidden: service.hidden,
                     });
+
+                    // Check if service is hidden
+                    if (service.hidden) {
+                      return (
+                        <div
+                          key={service.id}
+                          className="services-page-card services-page-card-hidden"
+                        >
+                          <div className="services-page-image services-page-image-skeleton">
+                            <div className="coming-soon-overlay">
+                              <div className="coming-soon-badge">
+                                <i className="fas fa-clock"></i>
+                                <span>قريباً</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="services-page-info">
+                            <div className="services-page-category services-skeleton-text"></div>
+                            <h3 className="services-skeleton-title"></h3>
+                            <p className="services-page-description services-skeleton-description">
+                              <span className="services-skeleton-line"></span>
+                              <span className="services-skeleton-line"></span>
+                              <span className="services-skeleton-line short"></span>
+                            </p>
+                            <div className="services-page-actions">
+                              <button
+                                className="services-page-book-btn"
+                                disabled
+                              >
+                                قريباً
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
 
                     // Get primary image or first image - handle object-based images
                     const primaryImage =
