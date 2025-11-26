@@ -176,6 +176,16 @@ const Navigation = ({ currentUser, userData }) => {
                         التقييمات
                       </Link>
                       <Link
+                        to="/admin/appointments"
+                        className="dropdown-item"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <span className="dropdown-icon">
+                          <i className="fas fa-calendar-check"></i>
+                        </span>
+                        إدارة المواعيد
+                      </Link>
+                      <Link
                         to="/admin/users"
                         className="dropdown-item"
                         onClick={() => setIsMobileMenuOpen(false)}

@@ -266,44 +266,48 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
 
   // Handle appointment cancellation
   const handleCancelAppointment = async (appointmentId) => {
-    showConfirm(
-      "تأكيد الإلغاء",
+    const confirmed = await showConfirm(
       "هل أنت متأكدة من إلغاء هذا الموعد؟",
-      async () => {
-        try {
-          await cancelAppointment(appointmentId, "إلغاء من قبل العميل");
-          // Reload appointments
-          const appointments = await getAppointmentsByCustomer(currentUser.uid);
-          setUserAppointments(appointments);
-          showSuccess("تم إلغاء الموعد بنجاح");
-        } catch (error) {
-          console.error("Error cancelling appointment:", error);
-          showError("حدث خطأ أثناء إلغاء الموعد");
-        }
-      }
+      "تأكيد الإلغاء",
+      "إلغاء الموعد",
+      "تراجع"
     );
+
+    if (confirmed) {
+      try {
+        await cancelAppointment(appointmentId, "إلغاء من قبل العميل");
+        // Reload appointments
+        const appointments = await getAppointmentsByCustomer(currentUser.uid);
+        setUserAppointments(appointments);
+        showSuccess("تم إلغاء الموعد بنجاح");
+      } catch (error) {
+        console.error("Error cancelling appointment:", error);
+        showError("حدث خطأ أثناء إلغاء الموعد");
+      }
+    }
   };
 
   // Handle consultation cancellation
   const handleCancelConsultation = async (consultationId) => {
-    showConfirm(
-      "تأكيد الإلغاء",
+    const confirmed = await showConfirm(
       "هل أنت متأكدة من إلغاء هذه الاستشارة؟",
-      async () => {
-        try {
-          await cancelConsultation(consultationId, "إلغاء من قبل العميلة");
-          // Reload consultations
-          const consultations = await getConsultationsByCustomer(
-            currentUser.uid
-          );
-          setUserConsultations(consultations);
-          showSuccess("تم إلغاء الاستشارة بنجاح");
-        } catch (error) {
-          console.error("Error cancelling consultation:", error);
-          showError("حدث خطأ أثناء إلغاء الاستشارة");
-        }
-      }
+      "تأكيد الإلغاء",
+      "إلغاء الاستشارة",
+      "تراجع"
     );
+
+    if (confirmed) {
+      try {
+        await cancelConsultation(consultationId, "إلغاء من قبل العميلة");
+        // Reload consultations
+        const consultations = await getConsultationsByCustomer(currentUser.uid);
+        setUserConsultations(consultations);
+        showSuccess("تم إلغاء الاستشارة بنجاح");
+      } catch (error) {
+        console.error("Error cancelling consultation:", error);
+        showError("حدث خطأ أثناء إلغاء الاستشارة");
+      }
+    }
   };
 
   // Handle appointment edit - open edit modal
@@ -315,16 +319,24 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
   // Handle appointment edit submission
   const handleAppointmentEditSubmit = async (updatedData) => {
     try {
-      // Check if the new date/time is available for the staff member
-      const isAvailable = await checkStaffAvailability(
-        editingAppointment.staffId,
-        updatedData.date,
-        updatedData.time
-      );
+      // Check if date or time has changed
+      const dateChanged = updatedData.date !== editingAppointment.date;
+      const timeChanged = updatedData.time !== editingAppointment.time;
 
-      if (!isAvailable) {
-        showError("عذراً، الموعد المختار محجوز بالفعل. يرجى اختيار موعد آخر.");
-        return;
+      // Only check availability if date or time has changed
+      if (dateChanged || timeChanged) {
+        const isAvailable = await checkStaffAvailability(
+          editingAppointment.staffId,
+          updatedData.date,
+          updatedData.time
+        );
+
+        if (!isAvailable) {
+          showError(
+            "عذراً، الموعد المختار محجوز بالفعل. يرجى اختيار موعد آخر."
+          );
+          return;
+        }
       }
 
       // Update the appointment
@@ -332,7 +344,10 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
         date: updatedData.date,
         time: updatedData.time,
         notes: updatedData.notes,
-        status: "في الانتظار", // Reset to pending after edit
+        status:
+          dateChanged || timeChanged
+            ? "في الانتظار"
+            : editingAppointment.status, // Reset to pending only if date/time changed
       });
 
       // Reload appointments
@@ -620,12 +635,12 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                             </span>
                           </div>
                           <div className="appointment-details">
-                            <div className="detail-row">
+                            {/* <div className="detail-row">
                               <span className="label">الأخصائية:</span>
                               <span className="value">
                                 {appointment.staffName}
                               </span>
-                            </div>
+                            </div> */}
                             <div className="detail-row">
                               <span className="label">التاريخ:</span>
                               <span className="value">{appointment.date}</span>
@@ -641,14 +656,16 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                                   appointment.duration}
                               </span>
                             </div>
-                            <div className="detail-row">
-                              <span className="label">السعر:</span>
-                              <span className="value">
-                                {formatPrice(
-                                  appointment.servicePrice || appointment.price
-                                )}
-                              </span>
-                            </div>
+                            {/* Price will be visible only if the status is confirmed or done*/}
+                            {(appointment.status === "مؤكد" ||
+                              appointment.status === "مكتمل") && (
+                              <div className="detail-row">
+                                <span className="label">السعر:</span>
+                                <span className="value">
+                                  {formatPrice(appointment.actualPaidAmount)}
+                                </span>
+                              </div>
+                            )}
                             {appointment.note && (
                               <div className="detail-row">
                                 <span className="label">
@@ -737,12 +754,12 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                             >
                               إلغاء
                             </button>
-                            <button
+                            {/* <button
                               className="action-btn edit"
                               onClick={() => handleEditAppointment(appointment)}
                             >
                               تعديل
-                            </button>
+                            </button> */}
                           </div>
                         </div>
                       ))}
@@ -761,7 +778,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                   )}
 
                   {/* Consultations Section */}
-                  <div className="consultations-section">
+                  {/* <div className="consultations-section">
                     <h3>استشاراتي</h3>
                     {userConsultations.filter(
                       (c) => c.status !== "مكتمل" && c.status !== "ملغي"
@@ -851,7 +868,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                         </button>
                       </div>
                     )}
-                  </div>
+                  </div> */}
                 </div>
               )}
 

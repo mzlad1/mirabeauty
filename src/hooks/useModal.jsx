@@ -10,6 +10,7 @@ export const useModal = () => {
     cancelText: "إلغاء",
     showCancel: false,
     onConfirm: null,
+    onCancel: null,
     extraActionText: null,
     onExtraAction: null,
   });
@@ -78,20 +79,28 @@ export const useModal = () => {
 
   const showConfirm = (
     message,
-    onConfirm,
     title = "تأكيد العملية",
     confirmText = "تأكيد",
     cancelText = "إلغاء"
   ) => {
-    setModalState({
-      isOpen: true,
-      type: "confirm",
-      title,
-      message,
-      confirmText,
-      cancelText,
-      showCancel: true,
-      onConfirm,
+    return new Promise((resolve) => {
+      setModalState({
+        isOpen: true,
+        type: "confirm",
+        title,
+        message,
+        confirmText,
+        cancelText,
+        showCancel: true,
+        onConfirm: () => {
+          resolve(true);
+          closeModal();
+        },
+        onCancel: () => {
+          resolve(false);
+          closeModal();
+        },
+      });
     });
   };
 

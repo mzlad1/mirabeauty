@@ -120,7 +120,7 @@ const AppointmentDetailsModal = ({
             <div className="detail-item">
               <span className="detail-label">السعر:</span>
               <span className="detail-value">
-                {formatPrice(appointment.servicePrice || appointment.price)}
+                {formatPrice(appointment.actualPaidAmount)}
               </span>
             </div>
 
@@ -183,7 +183,7 @@ const AppointmentDetailsModal = ({
             )}
 
             {/* 3. Staff Note to Customer (after completion) - stored as staffNoteToCustomer when completed */}
-            {(appointment.staffNoteToCustomer) && (
+            {appointment.staffNoteToCustomer && (
               <div className="note-item staff-note-customer">
                 <h4>
                   <i className="fas fa-user-nurse"></i> ملاحظة الموظفة للعميل
@@ -222,24 +222,40 @@ const AppointmentDetailsModal = ({
                     style={{ width: "100%", marginTop: "0.5rem" }}
                   />
 
-                  <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem" }}>
+                  <div
+                    style={{
+                      marginTop: "0.5rem",
+                      display: "flex",
+                      gap: "0.5rem",
+                    }}
+                  >
                     <button
                       className="btn-primary"
                       onClick={saveInternalNote}
                       disabled={savingInternal}
                     >
-                      {savingInternal ? "جاري الحفظ..." : "حفظ الملاحظة الداخلية"}
+                      {savingInternal
+                        ? "جاري الحفظ..."
+                        : "حفظ الملاحظة الداخلية"}
                     </button>
                     <button
                       className="btn-secondary"
-                      onClick={() => setInternalNote(appointment.staffInternalNote || "")}
+                      onClick={() =>
+                        setInternalNote(appointment.staffInternalNote || "")
+                      }
                       disabled={savingInternal}
                     >
                       تراجع
                     </button>
                   </div>
 
-                  <small style={{ color: "#666", display: "block", marginTop: "0.5rem" }}>
+                  <small
+                    style={{
+                      color: "#666",
+                      display: "block",
+                      marginTop: "0.5rem",
+                    }}
+                  >
                     هذه الملاحظة خاصة بالموظفين والإدارة ولن تُعرض للعميل.
                   </small>
                 </div>

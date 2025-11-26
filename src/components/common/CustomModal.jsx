@@ -5,6 +5,7 @@ const CustomModal = ({
   isOpen,
   onClose,
   onConfirm,
+  onCancel,
   title,
   message,
   type = "info", // "info", "success", "warning", "error", "confirm"
@@ -72,7 +73,13 @@ const CustomModal = ({
 
         <div className="custom-modal-footer">
           {showCancel && (
-            <button className="custom-modal-btn cancel" onClick={onClose}>
+            <button
+              className="custom-modal-btn cancel"
+              onClick={() => {
+                if (onCancel) onCancel();
+                else onClose();
+              }}
+            >
               {cancelText}
             </button>
           )}

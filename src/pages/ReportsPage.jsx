@@ -153,23 +153,21 @@ const ReportsPage = ({ currentUser, userData }) => {
       return sum + price;
     }, 0);
 
-  // Count only delivered orders
-  const deliveredOrders = filteredOrders.filter(
-    (order) => order.status === "delivered"
-  );
-  const totalOrders = deliveredOrders.length;
-  const confirmedOrders = filteredOrders.filter(
+  // Count only confirmed orders
+  const confirmedOrdersList = filteredOrders.filter(
     (order) => order.status === "confirmed"
-  ).length;
+  );
+  const totalOrders = confirmedOrdersList.length;
+  const confirmedOrders = confirmedOrdersList.length;
   const pendingOrders = filteredOrders.filter(
     (order) => order.status === "pending"
   ).length;
-  const rejectedOrders = filteredOrders.filter(
-    (order) => order.status === "rejected"
+  const cancelledOrders = filteredOrders.filter(
+    (order) => order.status === "cancelled"
   ).length;
 
-  // Calculate revenue only from delivered orders
-  const ordersRevenue = deliveredOrders.reduce(
+  // Calculate revenue only from confirmed orders
+  const ordersRevenue = confirmedOrdersList.reduce(
     (sum, order) => sum + parsePrice(order.total),
     0
   );
@@ -196,17 +194,17 @@ const ReportsPage = ({ currentUser, userData }) => {
     })
     .sort((a, b) => b.revenue - a.revenue);
 
-  // Product statistics - count only delivered orders
+  // Product statistics - count only confirmed orders
   const productStats = products
     .map((product) => {
-      const deliveredProductOrders = deliveredOrders.filter((order) =>
+      const confirmedProductOrders = confirmedOrdersList.filter((order) =>
         order.items?.some((item) => item.id === product.id)
       );
-      const totalSold = deliveredProductOrders.reduce((sum, order) => {
+      const totalSold = confirmedProductOrders.reduce((sum, order) => {
         const item = order.items.find((i) => i.id === product.id);
         return sum + (item?.quantity || 0);
       }, 0);
-      const revenue = deliveredProductOrders.reduce((sum, order) => {
+      const revenue = confirmedProductOrders.reduce((sum, order) => {
         const item = order.items.find((i) => i.id === product.id);
         return sum + parsePrice(item?.price || 0) * (item?.quantity || 0);
       }, 0);
@@ -901,7 +899,7 @@ const ReportsPage = ({ currentUser, userData }) => {
                 </div>
               </div>
 
-              <div className="summary-card consultations">
+              {/* <div className="summary-card consultations">
                 <div className="card-icon">
                   <i className="fas fa-comments" style={{ color: "white" }}></i>
                 </div>
@@ -910,7 +908,7 @@ const ReportsPage = ({ currentUser, userData }) => {
                   <p className="amount">{totalConsultations}</p>
                   <span className="sub-text">استشارات مجانية</span>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Charts */}

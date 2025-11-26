@@ -239,11 +239,8 @@ const AdminOrdersPage = () => {
                 className="filter-select"
               >
                 <option value="all">جميع الحالات</option>
-                <option value="pending">قيد الانتظار</option>
+                <option value="pending">في الانتظار</option>
                 <option value="confirmed">مؤكد</option>
-                <option value="rejected">مرفوض</option>
-                <option value="shipped">تم الشحن</option>
-                <option value="delivered">تم التسليم</option>
                 <option value="cancelled">ملغي</option>
               </select>
             </div>
@@ -260,7 +257,7 @@ const AdminOrdersPage = () => {
               >
                 <option value="all">جميع المناطق</option>
                 {Object.entries(DELIVERY_AREAS).map(([key, area]) => (
-                  <option key={key} value={key}>
+                  <option key={key} value={area.name}>
                     {area.name}
                   </option>
                 ))}

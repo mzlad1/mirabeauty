@@ -1574,7 +1574,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                   <i className="nav-icon fas fa-chart-pie"></i>
                   نظرة عامة
                 </button>
-                <button
+                {/* <button
                   className={`nav-item ${
                     activeTab === "appointments" ? "active" : ""
                   }`}
@@ -1582,7 +1582,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                 >
                   <i className="nav-icon fas fa-calendar-alt"></i>
                   المواعيد
-                </button>
+                </button> */}
                 {/* <button
                   className={`nav-item ${
                     activeTab === "consultations" ? "active" : ""

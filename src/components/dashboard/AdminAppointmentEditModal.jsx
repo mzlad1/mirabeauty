@@ -102,7 +102,7 @@ const AdminAppointmentEditModal = ({
       onClose();
     } catch (error) {
       console.error("Error submitting appointment edit:", error);
-      showError("حدث خطأ أثناء الحفظ");
+      // Don't show error here - parent already handles it
     } finally {
       setLoading(false);
     }
@@ -174,7 +174,6 @@ const AdminAppointmentEditModal = ({
                 name="staffId"
                 value={formData.staffId}
                 onChange={handleStaffChange}
-                required
                 className="admin-appointment-edit-form-input"
               >
                 <option value="">اختر الأخصائية</option>

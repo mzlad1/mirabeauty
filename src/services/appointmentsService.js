@@ -237,11 +237,12 @@ export const confirmAppointment = async (appointmentId) => {
 export const completeAppointment = async (
   appointmentId,
   staffNoteToCustomer = "",
-  staffInternalNote = ""
+  staffInternalNote = "",
+  actualPaidAmount = null
 ) => {
   try {
     const appointmentDoc = doc(db, APPOINTMENTS_COLLECTION, appointmentId);
-    await updateDoc(appointmentDoc, {
+    const updateData = {
       status: "مكتمل", // completed
       completedAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -249,7 +250,14 @@ export const completeAppointment = async (
       staffNoteToCustomer: staffNoteToCustomer,
       // internal note visible only to staff/admin
       staffInternalNote: staffInternalNote,
-    });
+    };
+
+    // Add actual paid amount if provided
+    if (actualPaidAmount !== null && actualPaidAmount !== undefined) {
+      updateData.actualPaidAmount = actualPaidAmount;
+    }
+
+    await updateDoc(appointmentDoc, updateData);
 
     return appointmentId;
   } catch (error) {

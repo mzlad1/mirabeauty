@@ -1551,3 +1551,52 @@ button:disabled:hover {
     font-size: 0.85rem;
   }
 }
+
+/* Pricing Info Banner */
+.pricing-info-banner {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffe8a1 100%);
+  border: 2px solid #ffc107;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+}
+
+.pricing-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pricing-banner-content i {
+  color: #ffc107;
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.pricing-text {
+  flex: 1;
+}
+
+.pricing-text p {
+  color: #856404;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}
+
+.pricing-text p:last-child {
+  margin-bottom: 0;
+}
+
+.price-highlight {
+  color: var(--gold);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.discount-note {
+  font-size: 0.9rem !important;
+  color: #6c5a00 !important;
+  font-style: italic;
+}

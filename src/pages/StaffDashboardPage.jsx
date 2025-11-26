@@ -835,10 +835,7 @@ const StaffDashboardPage = ({ currentUser, userData }) => {
                                 </span>
                                 <span>
                                   <i className="fas fa-money-bill"></i>{" "}
-                                  {formatPrice(
-                                    appointment.servicePrice ||
-                                      appointment.price
-                                  )}
+                                  {formatPrice(appointment.actualPaidAmount)}
                                 </span>
                               </div>
                             </div>

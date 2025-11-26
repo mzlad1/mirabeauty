@@ -21,9 +21,6 @@ const ORDERS_COLLECTION = "orders";
 export const ORDER_STATUS = {
   PENDING: "pending",
   CONFIRMED: "confirmed",
-  PROCESSING: "processing",
-  SHIPPED: "shipped",
-  DELIVERED: "delivered",
   CANCELLED: "cancelled",
 };
 
@@ -31,11 +28,7 @@ export const ORDER_STATUS = {
 export const ORDER_STATUS_DISPLAY = {
   pending: "في الانتظار",
   confirmed: "مؤكد",
-  processing: "قيد المعالجة",
-  shipped: "تم الشحن",
-  delivered: "تم التسليم",
   cancelled: "ملغي",
-  rejected: "مرفوض",
 };
 
 // Delivery areas with prices
@@ -210,16 +203,16 @@ export const getOrderStatistics = async () => {
     );
     const confirmedOrders = await getDocs(confirmedQuery);
 
-    // Get delivered orders
-    const deliveredQuery = query(
+    // Get cancelled orders
+    const cancelledQuery = query(
       ordersRef,
-      where("status", "==", ORDER_STATUS.DELIVERED)
+      where("status", "==", ORDER_STATUS.CANCELLED)
     );
-    const deliveredOrders = await getDocs(deliveredQuery);
+    const cancelledOrders = await getDocs(cancelledQuery);
 
-    // Calculate total revenue from delivered orders
+    // Calculate total revenue from confirmed orders
     let totalRevenue = 0;
-    deliveredOrders.forEach((doc) => {
+    confirmedOrders.forEach((doc) => {
       const order = doc.data();
       totalRevenue += order.total || 0;
     });
@@ -228,7 +221,7 @@ export const getOrderStatistics = async () => {
       totalOrders,
       pendingOrders: pendingOrders.size,
       confirmedOrders: confirmedOrders.size,
-      deliveredOrders: deliveredOrders.size,
+      cancelledOrders: cancelledOrders.size,
       totalRevenue,
     };
   } catch (error) {

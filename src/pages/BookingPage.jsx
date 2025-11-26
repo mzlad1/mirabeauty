@@ -615,8 +615,15 @@ const BookingPage = ({ currentUser, userData }) => {
               <div className="category-cards">
                 {categories.map((category) => {
                   const services = categoryServices[category.id] || [];
-                  const displayServices = services.slice(0, 4);
-                  const hasMore = services.length > 5;
+
+                  // فلترة الخدمات المخفية
+                  const visibleServices = services.filter((s) => !s.hidden);
+
+                  // لو ما في خدمات مرئية → ما نعرض التصنيف
+                  if (visibleServices.length === 0) return null;
+
+                  const displayServices = visibleServices.slice(0, 4);
+                  const hasMore = visibleServices.length > 4;
 
                   return (
                     <div
@@ -638,6 +645,7 @@ const BookingPage = ({ currentUser, userData }) => {
                             <i className="fas fa-spa"></i>
                           </div>
                         )}
+
                         <div className="category-overlay">
                           <h3>{category.name}</h3>
                           {category.description && (
@@ -648,26 +656,26 @@ const BookingPage = ({ currentUser, userData }) => {
                         </div>
 
                         {/* Services Preview on Hover */}
-                        {hoveredCategory === category.id &&
-                          services.length > 0 && (
-                            <div className="services-preview">
-                              <h4>الخدمات المتاحة:</h4>
-                              <ul>
-                                {displayServices.map((service) => (
-                                  <li key={service.id}>
-                                    <i className="fas fa-check-circle"></i>
-                                    {service.name}
-                                  </li>
-                                ))}
-                                {hasMore && (
-                                  <li className="more-services">
-                                    <i className="fas fa-plus-circle"></i>و{" "}
-                                    {services.length - 4} خدمات أخرى
-                                  </li>
-                                )}
-                              </ul>
-                            </div>
-                          )}
+                        {hoveredCategory === category.id && (
+                          <div className="services-preview">
+                            <h4>الخدمات المتاحة:</h4>
+                            <ul>
+                              {displayServices.map((service) => (
+                                <li key={service.id}>
+                                  <i className="fas fa-check-circle"></i>
+                                  {service.name}
+                                </li>
+                              ))}
+
+                              {hasMore && (
+                                <li className="more-services">
+                                  <i className="fas fa-plus-circle"></i>و{" "}
+                                  {visibleServices.length - 4} خدمات أخرى
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -722,6 +730,36 @@ const BookingPage = ({ currentUser, userData }) => {
                       selectedCategory}
                   </h2>
                 </div>
+
+                {/* Pricing Info Banner for selected category */}
+                {(() => {
+                  const selectedCat = categories.find(
+                    (c) => c.id === selectedCategory
+                  );
+                  if (selectedCat && selectedCat.price) {
+                    return (
+                      <div className="pricing-info-banner">
+                        <div className="pricing-banner-content">
+                          <i className="fas fa-tag"></i>
+                          <div className="pricing-text">
+                            <p>
+                              سعر فئة <strong>{selectedCat.name}</strong> يبدأ
+                              من{" "}
+                              <strong className="price-highlight">
+                                {selectedCat.price} شيكل
+                              </strong>
+                            </p>
+                            <p className="discount-note">
+                              ستحصلين على أي خصم او عرض خاص بكِ عند الدفع!
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+
                 <div className="services-selection">
                   {(() => {
                     console.log("BookingPage - Filtering services...");
@@ -735,6 +773,11 @@ const BookingPage = ({ currentUser, userData }) => {
                     );
 
                     const filtered = services.filter((service) => {
+                      // Skip hidden services
+                      if (service.hidden) {
+                        return false;
+                      }
+
                       // Check if category matches using ID
                       const matches =
                         service.categoryId === selectedCategory ||
@@ -790,6 +833,9 @@ const BookingPage = ({ currentUser, userData }) => {
                             <span className="duration">
                               المدة: {service.duration}
                             </span>
+                            {/* <span className="price">
+                              السعر: {service.price}
+                            </span> */}
                           </div>
                         </div>
                       </div>
@@ -1044,7 +1090,7 @@ const BookingPage = ({ currentUser, userData }) => {
                   </div>
 
                   <div className="customer-info">
-                    <h4>معلومات التواصل</h4>
+                    <h4>معلومات صاحبة الجلسة</h4>
                     <div className="info-grid">
                       <div className="form-group">
                         <label className="form-label">الاسم</label>

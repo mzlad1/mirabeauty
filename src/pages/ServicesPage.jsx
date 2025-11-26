@@ -188,36 +188,6 @@ const ServicesPage = () => {
                 </span>
               </div>
 
-              {/* Pricing Info Banner */}
-              {categories.filter((cat) => cat.id !== "all" && cat.price)
-                .length > 0 && (
-                <div className="pricing-info-banner">
-                  <div className="pricing-banner-header">
-                    <i className="fas fa-info-circle"></i>
-                    <p>
-                      <strong>ملاحظة:</strong> الأسعار المعروضة هي أسعار عامة
-                      وقد تختلف حسب الحالة. <br />
-                      عند الدفع، ستحصلين على الخصومات والعروض المتاحة.
-                    </p>
-                  </div>
-                  <div className="pricing-list">
-                    {categories
-                      .filter((cat) => cat.id !== "all" && cat.price)
-                      .map((category) => (
-                        <div key={category.id} className="pricing-list-item">
-                          <span className="pricing-category-name">
-                            {category.name}
-                          </span>
-                          <span className="pricing-dots"></span>
-                          <span className="pricing-category-price">
-                            {category.price} شيكل
-                          </span>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              )}
-
               {loading ? (
                 <div className="services-page-loading">
                   <div className="loading-spinner"></div>

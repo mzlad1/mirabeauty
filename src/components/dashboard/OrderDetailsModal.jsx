@@ -178,11 +178,7 @@ const OrderDetailsModal = ({
               >
                 <option value="pending">في الانتظار</option>
                 <option value="confirmed">مؤكد</option>
-                <option value="processing">قيد المعالجة</option>
-                <option value="shipped">تم الشحن</option>
-                <option value="delivered">تم التسليم</option>
                 <option value="cancelled">ملغي</option>
-                <option value="rejected">مرفوض</option>
               </select>
               {submitting && (
                 <span className="updating-text">جاري التحديث...</span>

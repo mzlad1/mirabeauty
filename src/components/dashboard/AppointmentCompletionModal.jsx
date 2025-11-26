@@ -12,6 +12,7 @@ const AppointmentCompletionModal = ({
   const { modalState, closeModal, showError } = useModal();
   const [staffNoteToCustomer, setStaffNoteToCustomer] = useState("");
   const [staffInternalNote, setStaffInternalNote] = useState("");
+  const [actualPaidAmount, setActualPaidAmount] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -19,13 +20,31 @@ const AppointmentCompletionModal = ({
 
     if (isSubmitting) return;
 
+    // Validate paid amount
+    if (!actualPaidAmount || actualPaidAmount === "") {
+      showError("يرجى إدخال المبلغ المدفوع");
+      return;
+    }
+
+    const paidAmount = parseFloat(actualPaidAmount);
+    if (isNaN(paidAmount) || paidAmount < 0) {
+      showError("يرجى إدخال مبلغ صحيح");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await onComplete(appointment.id, staffNoteToCustomer, staffInternalNote);
+      await onComplete(
+        appointment.id,
+        staffNoteToCustomer,
+        staffInternalNote,
+        paidAmount
+      );
       // Reset form
       setStaffNoteToCustomer("");
       setStaffInternalNote("");
+      setActualPaidAmount("");
       onClose();
     } catch (error) {
       console.error("Error completing appointment:", error);
@@ -39,6 +58,7 @@ const AppointmentCompletionModal = ({
     if (!isSubmitting) {
       setStaffNoteToCustomer("");
       setStaffInternalNote("");
+      setActualPaidAmount("");
       onClose();
     }
   };
@@ -79,9 +99,35 @@ const AppointmentCompletionModal = ({
             <span className="label">الوقت:</span>
             <span className="value">{appointment.time}</span>
           </div>
+          <div className="completion-info-item">
+            <span className="label">السعر الأصلي:</span>
+            <span className="value">
+              {appointment.servicePrice || appointment.price || "غير محدد"}
+            </span>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="appointment-completion-form">
+          <div className="completion-form-group">
+            <label htmlFor="actualPaidAmount">
+              <i className="fas fa-money-bill-wave"></i>
+              المبلغ المدفوع فعلياً (نقداً)
+              <span className="note-description required">
+                (المبلغ الذي تم دفعه من العميل - مطلوب *)
+              </span>
+            </label>
+            <input
+              type="number"
+              id="actualPaidAmount"
+              value={actualPaidAmount}
+              onChange={(e) => setActualPaidAmount(e.target.value)}
+              placeholder="أدخل المبلغ المدفوع بالشيكل"
+              min="0"
+              step="0.01"
+              disabled={isSubmitting}
+              required
+            />
+          </div>
           <div className="completion-form-group">
             <label htmlFor="staffNoteToCustomer">
               <i className="fas fa-user"></i>

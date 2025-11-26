@@ -86,11 +86,7 @@ const UserDetailsPage = ({ currentUser, userData }) => {
     const statusMap = {
       pending: { text: "في الانتظار", class: "pending" },
       confirmed: { text: "مؤكد", class: "confirmed" },
-      processing: { text: "قيد المعالجة", class: "processing" },
-      shipped: { text: "تم الشحن", class: "shipped" },
-      delivered: { text: "تم التسليم", class: "delivered" },
       cancelled: { text: "ملغي", class: "cancelled" },
-      rejected: { text: "مرفوض", class: "rejected" },
     };
     const statusInfo = statusMap[status] || { text: status, class: "pending" };
     return (
@@ -128,9 +124,9 @@ const UserDetailsPage = ({ currentUser, userData }) => {
   const isStaff = user?.role === "staff";
 
   const totalOrders = orders.length;
-  const deliveredOrders = orders.filter((o) => o.status === "delivered").length;
+  const confirmedOrders = orders.filter((o) => o.status === "confirmed").length;
   const totalOrdersAmount = orders
-    .filter((o) => o.status === "delivered")
+    .filter((o) => o.status === "confirmed")
     .reduce((sum, order) => sum + parsePrice(order.total), 0);
 
   const totalAppointments = appointments.length;
@@ -227,7 +223,7 @@ const UserDetailsPage = ({ currentUser, userData }) => {
               <div className="stat-info">
                 <h3>الطلبات</h3>
                 <p className="stat-number">{totalOrders}</p>
-                <span className="stat-sub">تم التسليم: {deliveredOrders}</span>
+                <span className="stat-sub">مؤكد: {confirmedOrders}</span>
               </div>
             </div>
           )}
@@ -365,8 +361,8 @@ const UserDetailsPage = ({ currentUser, userData }) => {
                       <div className="activity-item">
                         <i className="fas fa-check-circle"></i>
                         <div>
-                          <strong>الطلبات المسلمة:</strong>
-                          <span>{deliveredOrders} طلب</span>
+                          <strong>الطلبات المؤكدة:</strong>
+                          <span>{confirmedOrders} طلب</span>
                         </div>
                       </div>
                     </>
