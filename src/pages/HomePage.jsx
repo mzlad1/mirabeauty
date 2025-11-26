@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
 import { getAllProducts } from "../services/productsService";
-import { getAllServices } from "../services/servicesService";
+import { getPopularServices } from "../services/servicesService";
 import { getApprovedGeneralFeedbacks } from "../services/feedbackService";
 import PromotionalBanner from "../components/common/PromotionalBanner";
 import ProductCard from "../components/customer/ProductCard";
@@ -65,7 +65,7 @@ const HomePage = () => {
           taskId: "services",
           fn: async (onProgress) => {
             onProgress(20);
-            const data = await getAllServices();
+            const data = await getPopularServices();
             onProgress(100);
             setServices(data);
             return data;
@@ -212,7 +212,7 @@ const HomePage = () => {
                 </button>
               </div>
             ) : (
-              services.slice(0, 3).map((service) => {
+              services.map((service) => {
                 // Get primary image or first image - handle object-based images
                 const primaryImage =
                   service.images && service.images.length > 0

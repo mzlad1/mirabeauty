@@ -28,10 +28,10 @@ export const getAllServices = async () => {
       id: doc.id,
       ...doc.data(),
     }));
-    
+
     // console.log("servicesService - getAllServices data:", services);
     // console.log("servicesService - First service structure:", services[0]);
-    
+
     return services;
   } catch (error) {
     console.error("Error getting all services:", error);
@@ -53,10 +53,10 @@ export const getServicesByCategory = async (category) => {
       id: doc.id,
       ...doc.data(),
     }));
-    
+
     console.log("servicesService - getServicesByCategory data:", services);
     console.log("servicesService - First service structure:", services[0]);
-    
+
     return services;
   } catch (error) {
     console.error("Error getting services by category:", error);
@@ -111,7 +111,12 @@ export const searchServices = async (searchTerm) => {
 export const getPopularServices = async () => {
   try {
     const servicesRef = collection(db, SERVICES_COLLECTION);
-    const q = query(servicesRef, where("popular", "==", true), orderBy("name"));
+    const q = query(
+      servicesRef,
+      where("popular", "==", true),
+      where("hidden", "==", false),
+      orderBy("name")
+    );
     const snapshot = await getDocs(q);
     return snapshot.docs.map((doc) => ({
       id: doc.id,
