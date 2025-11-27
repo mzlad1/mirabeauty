@@ -2264,7 +2264,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                             <td>{service.name}</td>
                             <td>{service.categoryName}</td>
                             <td>{formatPrice(service.price)}</td>
-                            <td>{service.duration}</td>
+                            <td>{service.duration} دقيقة</td>
                             <td>
                               <span
                                 className={`status-badge ${
@@ -2437,7 +2437,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                             <tr key={product.id}>
                               <td>{product.name}</td>
                               <td>{product.categoryName}</td>
-                              <td>{product.price}</td>
+                              <td>{product.price} شيكل</td>
                               <td>{product.originalPrice || "-"}</td>
                               <td>
                                 <span

@@ -15,12 +15,18 @@ const CategoryModal = ({
     image: "",
     price: "",
     bookingLimit: "",
+    timeType: "fixed", // 'fixed' or 'flexible'
+    fixedTimeSlots: ["08:30", "10:00", "11:30", "13:00", "15:00"], // For fixed time
+    forbiddenStartTimes: ["08:00", "08:30", "16:30"], // For flexible time
+    maxEndTime: "16:30", // For flexible time
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newTimeSlot, setNewTimeSlot] = useState("");
+  const [newForbiddenTime, setNewForbiddenTime] = useState("");
 
   useEffect(() => {
     if (editingCategory) {
@@ -30,6 +36,20 @@ const CategoryModal = ({
         image: editingCategory.image || "",
         price: editingCategory.price || "",
         bookingLimit: editingCategory.bookingLimit || "",
+        timeType: editingCategory.timeType || "fixed",
+        fixedTimeSlots: editingCategory.fixedTimeSlots || [
+          "08:30",
+          "10:00",
+          "11:30",
+          "13:00",
+          "15:00",
+        ],
+        forbiddenStartTimes: editingCategory.forbiddenStartTimes || [
+          "08:00",
+          "08:30",
+          "16:30",
+        ],
+        maxEndTime: editingCategory.maxEndTime || "16:30",
       });
       setImagePreview(editingCategory.image || "");
     } else {
@@ -39,11 +59,17 @@ const CategoryModal = ({
         image: "",
         price: "",
         bookingLimit: "",
+        timeType: "fixed",
+        fixedTimeSlots: ["08:30", "10:00", "11:30", "13:00", "15:00"],
+        forbiddenStartTimes: ["08:00", "08:30", "16:30"],
+        maxEndTime: "16:30",
       });
       setImagePreview("");
     }
     setImageFile(null);
     setErrors({});
+    setNewTimeSlot("");
+    setNewForbiddenTime("");
   }, [editingCategory, isOpen]);
 
   const validateForm = () => {
@@ -61,19 +87,24 @@ const CategoryModal = ({
 
     // Validate price for service categories
     if (categoryType === "service") {
-      if (!formData.price.trim()) {
+      const priceValue =
+        typeof formData.price === "string"
+          ? formData.price.trim()
+          : String(formData.price || "");
+      if (!priceValue) {
         newErrors.price = "السعر العام مطلوب";
-      } else if (isNaN(formData.price) || parseFloat(formData.price) <= 0) {
+      } else if (isNaN(priceValue) || parseFloat(priceValue) <= 0) {
         newErrors.price = "السعر يجب أن يكون رقم موجب";
       }
 
       // Validate booking limit
-      if (!formData.bookingLimit.trim()) {
+      const bookingLimitValue =
+        typeof formData.bookingLimit === "string"
+          ? formData.bookingLimit.trim()
+          : String(formData.bookingLimit || "");
+      if (!bookingLimitValue) {
         newErrors.bookingLimit = "حد الحجوزات المتزامنة مطلوب";
-      } else if (
-        isNaN(formData.bookingLimit) ||
-        parseInt(formData.bookingLimit) <= 0
-      ) {
+      } else if (isNaN(bookingLimitValue) || parseInt(bookingLimitValue) <= 0) {
         newErrors.bookingLimit = "الحد يجب أن يكون رقم صحيح موجب";
       }
     }
@@ -167,11 +198,33 @@ const CategoryModal = ({
         name: formData.name.trim(),
         description: formData.description.trim(),
         image: imageUrl,
-        price: categoryType === "service" ? formData.price.trim() : "",
+        price:
+          categoryType === "service"
+            ? typeof formData.price === "string"
+              ? formData.price.trim()
+              : String(formData.price)
+            : "",
         bookingLimit:
           categoryType === "service"
-            ? parseInt(formData.bookingLimit.trim())
+            ? parseInt(
+                typeof formData.bookingLimit === "string"
+                  ? formData.bookingLimit
+                  : String(formData.bookingLimit)
+              )
             : 0,
+        timeType: categoryType === "service" ? formData.timeType : "",
+        fixedTimeSlots:
+          categoryType === "service" && formData.timeType === "fixed"
+            ? formData.fixedTimeSlots
+            : [],
+        forbiddenStartTimes:
+          categoryType === "service" && formData.timeType === "flexible"
+            ? formData.forbiddenStartTimes
+            : [],
+        maxEndTime:
+          categoryType === "service" && formData.timeType === "flexible"
+            ? formData.maxEndTime
+            : "",
       });
       onClose();
     } catch (error) {
@@ -322,6 +375,187 @@ const CategoryModal = ({
                 عدد الأخصائيات المتاحات لهذا التصنيف.
               </small>
             </div>
+          )}
+
+          {/* Time Configuration - Only for Service Categories */}
+          {categoryType === "service" && (
+            <>
+              <div className="form-group">
+                <label htmlFor="timeType">
+                  نوع التوقيت <span className="required">*</span>
+                </label>
+                <select
+                  id="timeType"
+                  name="timeType"
+                  value={formData.timeType}
+                  onChange={handleChange}
+                  className="form-select"
+                >
+                  <option value="fixed">أوقات ثابتة (مثل الجلد)</option>
+                  <option value="flexible">أوقات مرنة (مثل الليزر)</option>
+                </select>
+                <small className="field-note">
+                  اختر "أوقات ثابتة" إذا كان التصنيف يستخدم فترات زمنية محددة
+                  مسبقاً، أو "أوقات مرنة" إذا كان يسمح للعميل باختيار الوقت
+                  بحرية.
+                </small>
+              </div>
+
+              {/* Fixed Time Slots */}
+              {formData.timeType === "fixed" && (
+                <div className="form-group">
+                  <label>
+                    الأوقات الثابتة المتاحة <span className="required">*</span>
+                  </label>
+                  <div className="time-slots-manager">
+                    <div className="time-slots-list">
+                      {formData.fixedTimeSlots.map((slot, index) => (
+                        <div key={index} className="time-slot-item">
+                          <span>{slot}</span>
+                          <button
+                            type="button"
+                            className="remove-btn"
+                            onClick={() => {
+                              const newSlots = formData.fixedTimeSlots.filter(
+                                (_, i) => i !== index
+                              );
+                              setFormData({
+                                ...formData,
+                                fixedTimeSlots: newSlots,
+                              });
+                            }}
+                          >
+                            <i className="fas fa-times"></i>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="add-time-slot">
+                      <input
+                        type="time"
+                        value={newTimeSlot}
+                        onChange={(e) => setNewTimeSlot(e.target.value)}
+                        className="time-input"
+                      />
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => {
+                          if (
+                            newTimeSlot &&
+                            !formData.fixedTimeSlots.includes(newTimeSlot)
+                          ) {
+                            setFormData({
+                              ...formData,
+                              fixedTimeSlots: [
+                                ...formData.fixedTimeSlots,
+                                newTimeSlot,
+                              ].sort(),
+                            });
+                            setNewTimeSlot("");
+                          }
+                        }}
+                      >
+                        <i className="fas fa-plus"></i> إضافة وقت
+                      </button>
+                    </div>
+                  </div>
+                  <small className="field-note">
+                    هذه الأوقات سيتم عرضها للعملاء عند حجز خدمة من هذا التصنيف.
+                  </small>
+                </div>
+              )}
+
+              {/* Flexible Time Configuration */}
+              {formData.timeType === "flexible" && (
+                <>
+                  <div className="form-group">
+                    <label>
+                      الأوقات الممنوعة للبدء <span className="required">*</span>
+                    </label>
+                    <div className="time-slots-manager">
+                      <div className="time-slots-list">
+                        {formData.forbiddenStartTimes.map((time, index) => (
+                          <div key={index} className="time-slot-item forbidden">
+                            <span>{time}</span>
+                            <button
+                              type="button"
+                              className="remove-btn"
+                              onClick={() => {
+                                const newTimes =
+                                  formData.forbiddenStartTimes.filter(
+                                    (_, i) => i !== index
+                                  );
+                                setFormData({
+                                  ...formData,
+                                  forbiddenStartTimes: newTimes,
+                                });
+                              }}
+                            >
+                              <i className="fas fa-times"></i>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="add-time-slot">
+                        <input
+                          type="time"
+                          value={newForbiddenTime}
+                          onChange={(e) => setNewForbiddenTime(e.target.value)}
+                          className="time-input"
+                        />
+                        <button
+                          type="button"
+                          className="btn-secondary"
+                          onClick={() => {
+                            if (
+                              newForbiddenTime &&
+                              !formData.forbiddenStartTimes.includes(
+                                newForbiddenTime
+                              )
+                            ) {
+                              setFormData({
+                                ...formData,
+                                forbiddenStartTimes: [
+                                  ...formData.forbiddenStartTimes,
+                                  newForbiddenTime,
+                                ].sort(),
+                              });
+                              setNewForbiddenTime("");
+                            }
+                          }}
+                        >
+                          <i className="fas fa-plus"></i> إضافة وقت ممنوع
+                        </button>
+                      </div>
+                    </div>
+                    <small className="field-note">
+                      الأوقات التي لا يمكن للعملاء البدء فيها (مثل فترات
+                      الاستراحة).
+                    </small>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="maxEndTime">
+                      آخر وقت يمكن الانتهاء فيه{" "}
+                      <span className="required">*</span>
+                    </label>
+                    <input
+                      type="time"
+                      id="maxEndTime"
+                      name="maxEndTime"
+                      value={formData.maxEndTime}
+                      onChange={handleChange}
+                      className="time-input"
+                    />
+                    <small className="field-note">
+                      آخر وقت يمكن أن تنتهي فيه الخدمة في اليوم (مثل 16:30
+                      لنهاية الدوام).
+                    </small>
+                  </div>
+                </>
+              )}
+            </>
           )}
 
           {/* Image Upload - Only for Service Categories */}

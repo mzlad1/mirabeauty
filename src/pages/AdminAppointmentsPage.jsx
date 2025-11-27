@@ -16,6 +16,7 @@ import { getAllServiceCategories } from "../services/categoriesService";
 import AdminAppointmentEditModal from "../components/dashboard/AdminAppointmentEditModal";
 import AppointmentDetailsModal from "../components/dashboard/AppointmentDetailsModal";
 import AppointmentCompletionModal from "../components/dashboard/AppointmentCompletionModal";
+import AdminCreateAppointmentModal from "../components/admin/AdminCreateAppointmentModal";
 import CustomModal from "../components/common/CustomModal";
 import { useModal } from "../hooks/useModal";
 
@@ -60,6 +61,7 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
   const [appointmentToView, setAppointmentToView] = useState(null);
   const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false);
   const [appointmentToComplete, setAppointmentToComplete] = useState(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Load appointments, staff, and specializations
   useEffect(() => {
@@ -368,7 +370,13 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
 
   // Handle book new appointment
   const handleBookNewAppointment = () => {
-    navigate("/book");
+    setIsCreateModalOpen(true);
+  };
+
+  // Handle successful appointment creation
+  const handleCreateSuccess = () => {
+    showSuccess("تم إنشاء الموعد بنجاح");
+    reloadAppointments();
   };
 
   if (loading) {
@@ -398,7 +406,7 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
 
   return (
     <div className="admin-appointments-page-unique">
-      {/* <div className="aap-page-header">
+      <div className="aap-page-header">
         <div className="aap-header-content">
           <h1>
             <i className="fas fa-calendar-check"></i>
@@ -410,7 +418,7 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
           <i className="fas fa-plus"></i>
           حجز موعد جديد
         </button>
-      </div> */}
+      </div>
 
       {/* Filters */}
       <div className="aap-appointments-filters">
@@ -518,8 +526,6 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
               <th>التاريخ</th>
               <th>الوقت</th>
               <th>الحالة</th>
-              <th>ملاحظات العميل</th>
-              <th>ملاحظات داخلية</th>
               <th>الإجراءات</th>
             </tr>
           </thead>
@@ -561,35 +567,6 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
                     >
                       {appointment.status}
                     </span>
-                  </td>
-                  <td>
-                    <div className="aap-notes-cell">
-                      {appointment.notes ? (
-                        <span title={appointment.notes}>
-                          {appointment.notes.length > 30
-                            ? `${appointment.notes.substring(0, 30)}...`
-                            : appointment.notes}
-                        </span>
-                      ) : (
-                        <span className="aap-no-notes">-</span>
-                      )}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="aap-notes-cell">
-                      {appointment.staffInternalNote ? (
-                        <span title={appointment.staffInternalNote}>
-                          {appointment.staffInternalNote.length > 30
-                            ? `${appointment.staffInternalNote.substring(
-                                0,
-                                30
-                              )}...`
-                            : appointment.staffInternalNote}
-                        </span>
-                      ) : (
-                        <span className="aap-no-notes">-</span>
-                      )}
-                    </div>
                   </td>
                   <td>
                     <div className="aap-table-actions">
@@ -729,6 +706,13 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
           onComplete={handleAppointmentCompletion}
         />
       )}
+
+      {/* Admin Create Appointment Modal */}
+      <AdminCreateAppointmentModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
     </div>
   );
 };

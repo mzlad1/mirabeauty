@@ -249,30 +249,33 @@ const ServiceEditModal = ({
 
           <div className="service-edit-form-row-2">
             <div className="service-edit-form-group">
-              <label htmlFor="price">السعر *</label>
+              <label htmlFor="price">السعر (بالشيكل) *</label>
               <input
-                type="text"
+                type="number"
                 id="price"
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
                 required
                 className="service-edit-form-input"
-                placeholder="مثال: 200 شيكل"
+                placeholder="مثال: 200"
+                min="0"
+                step="0.01"
               />
             </div>
 
             <div className="service-edit-form-group">
-              <label htmlFor="duration">المدة *</label>
+              <label htmlFor="duration">المدة (بالدقائق) *</label>
               <input
-                type="text"
+                type="number"
                 id="duration"
                 name="duration"
                 value={formData.duration}
                 onChange={handleChange}
                 required
                 className="service-edit-form-input"
-                placeholder="مثال: 60 دقيقة"
+                placeholder="مثال: 60"
+                min="1"
               />
             </div>
           </div>

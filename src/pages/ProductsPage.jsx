@@ -329,16 +329,13 @@ const ProductsPage = ({ setCurrentPage }) => {
 
                         <div className="product-rating">
                           <div className="stars">
-                            {Array.from(
-                              { length: product.rating },
-                              (_, i) => (
-                                <i
-                                  key={i}
-                                  className="fas fa-star"
-                                  style={{ color: "var(--gold)" }}
-                                ></i>
-                              )
-                            )}
+                            {Array.from({ length: product.rating }, (_, i) => (
+                              <i
+                                key={i}
+                                className="fas fa-star"
+                                style={{ color: "var(--gold)" }}
+                              ></i>
+                            ))}
                           </div>
                           <span className="rating-text">
                             {product.rating} ({product.reviewsCount} تقييمات)
@@ -346,10 +343,12 @@ const ProductsPage = ({ setCurrentPage }) => {
                         </div>
 
                         <div className="product-price">
-                          <span className="current-price">{product.price}</span>
+                          <span className="current-price">
+                            {product.price} شيكل
+                          </span>
                           {product.originalPrice && (
                             <span className="original-price">
-                              {product.originalPrice}
+                              {product.originalPrice} شيكل
                             </span>
                           )}
                         </div>

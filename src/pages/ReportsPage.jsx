@@ -563,7 +563,7 @@ const ReportsPage = ({ currentUser, userData }) => {
                   <td>${product.name}</td>
                   <td>${product.totalSold || 0}</td>
                   <td>${formatCurrency(product.revenue || 0)}</td>
-                  <td>${product.price}</td>
+                  <td>${product.price} شيكل</td>
                   <td>${product.stock || 0}</td>
                 </tr>
               `
@@ -1178,7 +1178,7 @@ const ReportsPage = ({ currentUser, userData }) => {
                       <td className="revenue-cell">
                         {product.revenue.toFixed(2)} شيكل
                       </td>
-                      <td>{product.price}</td>
+                      <td>{product.price} شيكل</td>
                       <td>
                         <span
                           className={`stock-status ${

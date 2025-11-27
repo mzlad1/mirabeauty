@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import "./AdminAppointmentEditModal.css";
 import useModal from "../../hooks/useModal";
 import CustomModal from "../common/CustomModal";
+import { getAllServices } from "../../services/servicesService";
+import { getAllServiceCategories } from "../../services/categoriesService";
 
 const AdminAppointmentEditModal = ({
   isOpen,
@@ -12,6 +14,8 @@ const AdminAppointmentEditModal = ({
   specializations = [],
 }) => {
   const { modalState, closeModal, showError } = useModal();
+  const [services, setServices] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   // Helper function to get specialization name by ID
   const getSpecializationName = (specializationId) => {
@@ -40,13 +44,45 @@ const AdminAppointmentEditModal = ({
     staffName: appointment?.staffName || "",
     status: appointment?.status || "مؤكد",
     adminNote: appointment?.adminNote || "",
+    flexibleStartHour: "",
+    flexibleStartMinute: "",
+    useTimeInput: false, // Toggle between hour/minute dropdowns and time input
   });
 
   const [loading, setLoading] = useState(false);
 
+  // Constants for hour/minute dropdowns
+  const FLEXIBLE_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16];
+  const FLEXIBLE_MINUTES = ["00", "15", "30", "45"];
+
+  // Load services and categories
+  useEffect(() => {
+    if (isOpen) {
+      loadData();
+    }
+  }, [isOpen]);
+
+  const loadData = async () => {
+    try {
+      const [servicesData, categoriesData] = await Promise.all([
+        getAllServices(),
+        getAllServiceCategories(),
+      ]);
+      setServices(servicesData);
+      setCategories(categoriesData);
+    } catch (err) {
+      console.error("Error loading data:", err);
+    }
+  };
+
   // Update form data when appointment changes
   useEffect(() => {
     if (appointment) {
+      // Parse time if it exists for flexible time services
+      const [hour, minute] = appointment.time
+        ? appointment.time.split(":")
+        : ["", ""];
+
       setFormData({
         date: appointment.date || "",
         time: appointment.time || "",
@@ -54,11 +90,44 @@ const AdminAppointmentEditModal = ({
         staffName: appointment.staffName || "",
         status: appointment.status || "مؤكد",
         adminNote: appointment.adminNote || "",
+        flexibleStartHour: hour || "",
+        flexibleStartMinute: minute || "",
+        useTimeInput: false,
       });
     }
   }, [appointment]);
 
-  const timeSlots = [
+  // Category helper functions
+  const getServiceCategory = (serviceId) => {
+    const service = services.find((s) => s.id === serviceId);
+    if (!service) return null;
+    const categoryId = service.categoryId || service.category;
+    return categories.find((c) => c.id === categoryId);
+  };
+
+  const getCategoryFromAppointment = () => {
+    if (!appointment?.serviceId) return null;
+    return getServiceCategory(appointment.serviceId);
+  };
+
+  const getCategoryTimeType = () => {
+    const category = getCategoryFromAppointment();
+    return category?.timeType || "fixed";
+  };
+
+  const getCategoryFixedTimeSlots = () => {
+    const category = getCategoryFromAppointment();
+    return (
+      category?.fixedTimeSlots || ["08:30", "10:00", "11:30", "13:00", "15:00"]
+    );
+  };
+
+  const isFixedTimeService = () => {
+    return getCategoryTimeType() === "fixed";
+  };
+
+  // Fallback time slots
+  const defaultTimeSlots = [
     "09:00",
     "09:30",
     "10:00",
@@ -78,6 +147,15 @@ const AdminAppointmentEditModal = ({
     "17:00",
     "17:30",
   ];
+
+  // Get time slots based on service category
+  const getTimeSlots = () => {
+    if (isFixedTimeService()) {
+      return getCategoryFixedTimeSlots();
+    }
+    // For flexible time services, allow manual time input or show default slots
+    return defaultTimeSlots;
+  };
 
   const statusOptions = ["في الانتظار", "مؤكد", "مكتمل", "ملغي"];
 
@@ -203,26 +281,178 @@ const AdminAppointmentEditModal = ({
             </div>
           </div>
 
-          <div className="admin-appointment-edit-form-row">
-            <div className="admin-appointment-edit-form-group">
-              <label htmlFor="time">الوقت *</label>
-              <select
-                id="time"
-                name="time"
-                value={formData.time}
-                onChange={handleChange}
-                required
-                className="admin-appointment-edit-form-input"
-              >
-                <option value="">اختر الوقت</option>
-                {timeSlots.map((slot) => (
-                  <option key={slot} value={slot}>
-                    {slot}
-                  </option>
-                ))}
-              </select>
+          {/* Time Selection */}
+          {isFixedTimeService() ? (
+            /* Fixed Time Services - Dropdown */
+            <div className="admin-appointment-edit-form-row">
+              <div className="admin-appointment-edit-form-group">
+                <label htmlFor="time">الوقت *</label>
+                <select
+                  id="time"
+                  name="time"
+                  value={formData.time}
+                  onChange={handleChange}
+                  required
+                  className="admin-appointment-edit-form-input"
+                >
+                  <option value="">اختر الوقت</option>
+                  {getTimeSlots().map((slot) => (
+                    <option key={slot} value={slot}>
+                      {slot}
+                    </option>
+                  ))}
+                </select>
+                <small
+                  style={{
+                    color: "#666",
+                    fontSize: "0.85rem",
+                    marginTop: "0.25rem",
+                    display: "block",
+                  }}
+                >
+                  هذه الخدمة تستخدم أوقات ثابتة محددة في التصنيف
+                </small>
+              </div>
             </div>
-          </div>
+          ) : (
+            /* Flexible Time Services - Hour/Minute or Time Input */
+            <>
+              <div className="admin-appointment-edit-form-row">
+                <div className="admin-appointment-edit-form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={formData.useTimeInput}
+                      onChange={(e) => {
+                        const useInput = e.target.checked;
+                        setFormData({
+                          ...formData,
+                          useTimeInput: useInput,
+                          time: useInput
+                            ? formData.time
+                            : `${formData.flexibleStartHour}:${formData.flexibleStartMinute}`,
+                        });
+                      }}
+                      style={{ marginLeft: "0.5rem" }}
+                    />
+                    استخدام إدخال الوقت المباشر
+                  </label>
+                </div>
+              </div>
+
+              {formData.useTimeInput ? (
+                /* Time Input Field */
+                <div className="admin-appointment-edit-form-row">
+                  <div className="admin-appointment-edit-form-group">
+                    <label htmlFor="time">الوقت *</label>
+                    <input
+                      type="time"
+                      id="time"
+                      name="time"
+                      value={formData.time}
+                      onChange={handleChange}
+                      required
+                      className="admin-appointment-edit-form-input"
+                    />
+                    <small
+                      style={{
+                        color: "#666",
+                        fontSize: "0.85rem",
+                        marginTop: "0.25rem",
+                        display: "block",
+                      }}
+                    >
+                      يمكن إدخال أي وقت مباشرة
+                    </small>
+                  </div>
+                </div>
+              ) : (
+                /* Hour and Minute Dropdowns */
+                <div
+                  className="admin-appointment-edit-form-row"
+                  style={{ display: "flex", gap: "1rem" }}
+                >
+                  <div
+                    className="admin-appointment-edit-form-group"
+                    style={{ flex: 1 }}
+                  >
+                    <label htmlFor="flexibleStartHour">الساعة *</label>
+                    <select
+                      id="flexibleStartHour"
+                      value={formData.flexibleStartHour}
+                      onChange={(e) => {
+                        const hour = e.target.value;
+                        setFormData({
+                          ...formData,
+                          flexibleStartHour: hour,
+                          time:
+                            hour && formData.flexibleStartMinute
+                              ? `${hour}:${formData.flexibleStartMinute}`
+                              : "",
+                        });
+                      }}
+                      required
+                      className="admin-appointment-edit-form-input"
+                    >
+                      <option value="">اختر الساعة</option>
+                      {FLEXIBLE_HOURS.map((hour) => (
+                        <option
+                          key={hour}
+                          value={String(hour).padStart(2, "0")}
+                        >
+                          {String(hour).padStart(2, "0")}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div
+                    className="admin-appointment-edit-form-group"
+                    style={{ flex: 1 }}
+                  >
+                    <label htmlFor="flexibleStartMinute">الدقائق *</label>
+                    <select
+                      id="flexibleStartMinute"
+                      value={formData.flexibleStartMinute}
+                      onChange={(e) => {
+                        const minute = e.target.value;
+                        setFormData({
+                          ...formData,
+                          flexibleStartMinute: minute,
+                          time:
+                            formData.flexibleStartHour && minute
+                              ? `${formData.flexibleStartHour}:${minute}`
+                              : "",
+                        });
+                      }}
+                      required
+                      className="admin-appointment-edit-form-input"
+                    >
+                      <option value="">اختر الدقائق</option>
+                      {FLEXIBLE_MINUTES.map((minute) => (
+                        <option key={minute} value={minute}>
+                          {minute}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              <div className="admin-appointment-edit-form-row">
+                <small
+                  style={{
+                    color: "#666",
+                    fontSize: "0.85rem",
+                    display: "block",
+                  }}
+                >
+                  هذه الخدمة تستخدم أوقات مرنة - يمكن استخدام القوائم المنسدلة
+                  أو إدخال الوقت مباشرة
+                </small>
+              </div>
+            </>
+          )}
 
           <div className="admin-appointment-edit-form-row">
             <div className="admin-appointment-edit-form-group">

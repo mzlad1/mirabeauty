@@ -276,29 +276,35 @@ const ProductEditModal = ({
 
           <div className="product-edit-form-row-2">
             <div className="product-edit-form-group">
-              <label htmlFor="price">السعر الظاهر</label>
+              <label htmlFor="price">السعر الظاهر (بالشيكل)</label>
               <input
-                type="text"
+                type="number"
                 id="price"
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
                 required
                 className="product-edit-form-input"
-                placeholder="مثال: 150 شيكل"
+                placeholder="مثال: 150"
+                min="0"
+                step="0.01"
               />
             </div>
 
             <div className="product-edit-form-group">
-              <label htmlFor="originalPrice">السعر الأصلي (اختياري في حال وجود خصم)</label>
+              <label htmlFor="originalPrice">
+                السعر الأصلي (بالشيكل) - اختياري في حال وجود خصم
+              </label>
               <input
-                type="text"
+                type="number"
                 id="originalPrice"
                 name="originalPrice"
                 value={formData.originalPrice}
                 onChange={handleChange}
                 className="product-edit-form-input"
-                placeholder="مثال: 180 شيكل"
+                placeholder="مثال: 180"
+                min="0"
+                step="0.01"
               />
             </div>
           </div>

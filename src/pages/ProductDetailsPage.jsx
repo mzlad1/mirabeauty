@@ -346,11 +346,11 @@ const ProductDetailsPage = () => {
 
               <div className="product-details-price">
                 <span className="product-details-current-price">
-                  {product.price}
+                  {product.price} شيكل
                 </span>
                 {product.originalPrice && (
                   <span className="product-details-original-price">
-                    {product.originalPrice}
+                    {product.originalPrice} شيكل
                   </span>
                 )}
               </div>
@@ -400,7 +400,7 @@ const ProductDetailsPage = () => {
                       <span>جاري الإضافة...</span>
                     </>
                   ) : product.inStock ? (
-                    `أضف للسلة - ${product.price}`
+                    `أضف للسلة - ${product.price} شيكل`
                   ) : (
                     "غير متوفر"
                   )}
@@ -562,10 +562,10 @@ const ProductDetailsPage = () => {
                             )}
                           </div>
                           <span className="product-details-rating-text-summary">
-                            {product.rating}&nbsp;&nbsp;({product.reviewsCount} تقييمات)
+                            {product.rating}&nbsp;&nbsp;({product.reviewsCount}{" "}
+                            تقييمات)
                           </span>
                         </div>
-
                       </div>
                       <div className="product-details-reviews-list">
                         {productFeedbacks.map((feedback) => (

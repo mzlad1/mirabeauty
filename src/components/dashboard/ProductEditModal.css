@@ -90,7 +90,7 @@
 
 .product-edit-form-input,
 .product-edit-form-textarea {
-  padding: 12px 15px;
+  padding: 12px 5px;
   border: 2px solid var(--border-color);
   border-radius: 8px;
   font-size: 1rem;

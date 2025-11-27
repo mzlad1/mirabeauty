@@ -322,11 +322,11 @@ const ServicesPage = () => {
 
                       <div className="services-page-price">
                         <span className="services-page-current-price">
-                          {service.price || "اتصل للاستفسار"}
+                          {service.price ? `${service.price} شيكل` : "اتصل للاستفسار"}
                         </span>
                         {service.originalPrice && (
                           <span className="services-page-original-price">
-                            {service.originalPrice}
+                            {service.originalPrice} شيكل
                           </span>
                         )}
                       </div> */}

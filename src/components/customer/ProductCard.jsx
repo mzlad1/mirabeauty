@@ -34,7 +34,6 @@ const ProductCard = ({ product, onAddToCart }) => {
         product.images[product.primaryImageIndex || 0]
       : product.image || "/assets/default-product.jpg";
 
-
   const discountPercentage =
     product.originalPrice && product.price
       ? Math.round(
@@ -91,10 +90,12 @@ const ProductCard = ({ product, onAddToCart }) => {
         </div>
 
         <div className="product-card-pricing">
-          <span className="product-card-current-price">{product.price}</span>
+          <span className="product-card-current-price">
+            {product.price} شيكل
+          </span>
           {product.originalPrice && (
             <span className="product-card-original-price">
-              {product.originalPrice}
+              {product.originalPrice} شيكل
             </span>
           )}
         </div>

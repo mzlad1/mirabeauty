@@ -118,7 +118,11 @@ export const addServiceCategory = async (categoryData) => {
   try {
     const docRef = await addDoc(collection(db, "serviceCategories"), {
       ...categoryData,
-      image: categoryData.image || "", // Add image field
+      image: categoryData.image || "",
+      timeType: categoryData.timeType || "fixed",
+      fixedTimeSlots: categoryData.fixedTimeSlots || [],
+      forbiddenStartTimes: categoryData.forbiddenStartTimes || [],
+      maxEndTime: categoryData.maxEndTime || "16:30",
       createdAt: new Date(),
       updatedAt: new Date(),
     });
