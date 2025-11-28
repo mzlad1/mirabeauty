@@ -65,40 +65,6 @@ Refactored the FAQ and Skin Types system to use document IDs as references inste
 - Added grip icon to indicate draggable items
 - Calls `reorderFAQTypes()` service function to persist order
 
-## Migration Notes
-
-### For Existing Data:
-
-If you have existing users or FAQs in your database:
-
-1. **Skin Types Migration:**
-
-   - Old users have `skinType: "oily"` (string)
-   - New users will have `skinType: "abc123"` (document ID)
-   - You need to migrate old data or handle both formats
-
-2. **FAQ Categories Migration:**
-   - Old FAQs have `category: "general"` (string)
-   - New FAQs will have `category: "xyz789"` (document ID)
-   - You need to migrate old data or handle both formats
-
-### Migration Script Needed:
-
-```javascript
-// Example migration for skin types
-const migrateUserSkinTypes = async () => {
-  const oldToNewMapping = {
-    normal: "newDocId1",
-    oily: "newDocId2",
-    dry: "newDocId3",
-    // ... etc
-  };
-
-  // Update all users with old string values to new IDs
-  // ... implementation
-};
-```
-
 ## Benefits
 
 1. **Flexibility**: Admin can rename types without breaking references
@@ -124,4 +90,3 @@ const migrateUserSkinTypes = async () => {
 1. Add skin type descriptions or properties
 2. Add FAQ type icons or colors
 3. Implement skin types ordering (similar to FAQ types)
-4. Add bulk migration tool for existing data
