@@ -38,7 +38,7 @@ import { useAuth, AuthProvider } from "./hooks/useAuth.jsx";
 
 // Import Loading Hook and Provider
 import { useLoading, LoadingProvider } from "./hooks/useLoading.jsx";
-import LoadingPage from "./components/common/LoadingPage";
+// import LoadingPage from "./components/common/LoadingPage";
 
 // Main App Content Component
 const AppContent = () => {
@@ -192,7 +192,7 @@ const AppContent = () => {
       <ScrollToTop />
       <div className="App" dir="rtl">
         {/* Show loading page when isLoading is true */}
-        {isLoading && <LoadingPage progress={progress} />}
+        {/* {isLoading && <LoadingPage progress={progress} />} */}
 
         <Navigation currentUser={currentUser} userData={userData} />
         <main className="main-content">

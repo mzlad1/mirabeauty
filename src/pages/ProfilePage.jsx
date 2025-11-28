@@ -6,6 +6,7 @@ import {
   cancelAppointment,
   updateAppointment,
   checkStaffAvailability,
+  checkStaffAvailabilityWithDuration,
 } from "../services/appointmentsService";
 import {
   getConsultationsByCustomer,
@@ -13,7 +14,7 @@ import {
 } from "../services/consultationsService";
 import { updateUser, getUserById } from "../services/usersService";
 import { getUserOrders, ORDER_STATUS_DISPLAY } from "../services/ordersService";
-import AppointmentEditModal from "../components/profile/AppointmentEditModal";
+// import AppointmentEditModal from "../components/profile/AppointmentEditModal";
 import { uploadSingleImage, deleteImage } from "../utils/imageUpload";
 import CustomModal from "../components/common/CustomModal";
 import { useModal } from "../hooks/useModal";
@@ -43,8 +44,8 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
     skinType: "",
     allergies: "",
   });
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingAppointment, setEditingAppointment] = useState(null);
+  // const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // const [editingAppointment, setEditingAppointment] = useState(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarFile, setAvatarFile] = useState(null);
 
@@ -311,61 +312,92 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
   };
 
   // Handle appointment edit - open edit modal
-  const handleEditAppointment = (appointment) => {
-    setEditingAppointment(appointment);
-    setIsEditModalOpen(true);
-  };
+  // const handleEditAppointment = (appointment) => {
+  //   setEditingAppointment(appointment);
+  //   setIsEditModalOpen(true);
+  // };
 
   // Handle appointment edit submission
-  const handleAppointmentEditSubmit = async (updatedData) => {
+  // const handleAppointmentEditSubmit = async (updatedData) => {
+  //   try {
+  //     // Check if date or time has changed
+  //     const dateChanged = updatedData.date !== editingAppointment.date;
+  //     const timeChanged = updatedData.time !== editingAppointment.time;
+
+  //     // Only check availability if date or time has changed and staff is assigned
+  //     if ((dateChanged || timeChanged) && editingAppointment.staffId) {
+  //       const duration =
+  //         editingAppointment.serviceDuration ||
+  //         editingAppointment.duration ||
+  //         60;
+
+  //       const availabilityCheck = await checkStaffAvailabilityWithDuration(
+  //         editingAppointment.staffId,
+  //         updatedData.date,
+  //         updatedData.time,
+  //         duration,
+  //         editingAppointment.id // Exclude current appointment
+  //       );
+
+  //       if (!availabilityCheck.available) {
+  //         const conflictDetails = availabilityCheck.conflicts
+  //           .map((c) => `- ${c.customerName} (${c.serviceName}) في ${c.time}`)
+  //           .join("\n");
+
+  //         showError(
+  //           `عذراً، الأخصائية لديها تعارض في المواعيد:\n\n${conflictDetails}\n\nالرجاء اختيار وقت آخر.`
+  //         );
+  //         return;
+  //       }
+  //     }
+
+  //     // Update the appointment
+  //     await updateAppointment(editingAppointment.id, {
+  //       date: updatedData.date,
+  //       time: updatedData.time,
+  //       notes: updatedData.notes,
+  //       status:
+  //         dateChanged || timeChanged
+  //           ? "في الانتظار"
+  //           : editingAppointment.status, // Reset to pending only if date/time changed
+  //     });
+
+  //     // Reload appointments
+  //     const appointments = await getAppointmentsByCustomer(currentUser.uid);
+  //     setUserAppointments(appointments);
+
+  //     setIsEditModalOpen(false);
+  //     setEditingAppointment(null);
+  //     showSuccess("تم تعديل الموعد بنجاح. سيتم مراجعته والتواصل معك للتأكيد.");
+  //   } catch (error) {
+  //     console.error("Error updating appointment:", error);
+  //     throw error;
+  //   }
+  // };
+
+  // Helper function to check if cancellation is allowed (more than 12 hours before appointment)
+  const canCancelAppointment = (appointment) => {
     try {
-      // Check if date or time has changed
-      const dateChanged = updatedData.date !== editingAppointment.date;
-      const timeChanged = updatedData.time !== editingAppointment.time;
-
-      // Only check availability if date or time has changed
-      if (dateChanged || timeChanged) {
-        const isAvailable = await checkStaffAvailability(
-          editingAppointment.staffId,
-          updatedData.date,
-          updatedData.time
-        );
-
-        if (!isAvailable) {
-          showError(
-            "عذراً، الموعد المختار محجوز بالفعل. يرجى اختيار موعد آخر."
-          );
-          return;
-        }
-      }
-
-      // Update the appointment
-      await updateAppointment(editingAppointment.id, {
-        date: updatedData.date,
-        time: updatedData.time,
-        notes: updatedData.notes,
-        status:
-          dateChanged || timeChanged
-            ? "في الانتظار"
-            : editingAppointment.status, // Reset to pending only if date/time changed
-      });
-
-      // Reload appointments
-      const appointments = await getAppointmentsByCustomer(currentUser.uid);
-      setUserAppointments(appointments);
-
-      setIsEditModalOpen(false);
-      setEditingAppointment(null);
-      showSuccess("تم تعديل الموعد بنجاح. سيتم مراجعته والتواصل معك للتأكيد.");
+      const now = new Date();
+      const appointmentDateTime = new Date(
+        `${appointment.date}T${appointment.time}`
+      );
+      const hoursDifference = (appointmentDateTime - now) / (1000 * 60 * 60);
+      return hoursDifference > 12;
     } catch (error) {
-      console.error("Error updating appointment:", error);
-      throw error;
+      console.error("Error calculating time difference:", error);
+      return false;
     }
   };
 
-  const upcomingAppointments = userAppointments.filter(
-    (apt) => apt.status === "مؤكد" || apt.status === "في الانتظار"
-  );
+  // Filter and sort upcoming appointments by date and time
+  const upcomingAppointments = userAppointments
+    .filter((apt) => apt.status === "مؤكد" || apt.status === "في الانتظار")
+    .sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.time}`);
+      const dateB = new Date(`${b.date}T${b.time}`);
+      return dateA - dateB;
+    });
 
   const pastAppointments = userAppointments.filter(
     (apt) => apt.status === "مكتمل" || apt.status === "ملغي"
@@ -746,20 +778,55 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                             )}
                           </div>
                           <div className="appointment-actions">
-                            <button
-                              className="action-btn cancel"
-                              onClick={() =>
-                                handleCancelAppointment(appointment.id)
-                              }
-                            >
-                              إلغاء
-                            </button>
+                            {canCancelAppointment(appointment) ? (
+                              <button
+                                className="action-btn cancel"
+                                onClick={() =>
+                                  handleCancelAppointment(appointment.id)
+                                }
+                              >
+                                إلغاء
+                              </button>
+                            ) : (
+                              <div
+                                style={{
+                                  padding: "0.5rem 1rem",
+                                  backgroundColor: "#fff3cd",
+                                  borderRadius: "8px",
+                                  fontSize: "0.85rem",
+                                  color: "#856404",
+                                  textAlign: "center",
+                                }}
+                              >
+                                <i
+                                  className="fas fa-exclamation-triangle"
+                                  style={{ marginLeft: "0.5rem" }}
+                                ></i>
+                                لا يمكن الإلغاء (أقل من 12 ساعة)
+                              </div>
+                            )}
                             {/* <button
                               className="action-btn edit"
                               onClick={() => handleEditAppointment(appointment)}
                             >
                               تعديل
                             </button> */}
+                          </div>
+                          <div
+                            style={{
+                              marginTop: "0.75rem",
+                              padding: "0.75rem",
+                              backgroundColor: "#e8f5e9",
+                              borderRadius: "8px",
+                              fontSize: "0.9rem",
+                              textAlign: "center",
+                            }}
+                          >
+                            <i
+                              className="fab fa-whatsapp"
+                              style={{ color: "#25D366", marginLeft: "0.5rem" }}
+                            ></i>
+                            لتعديل الموعد، تواصلي معنا عبر واتساب
                           </div>
                         </div>
                       ))}
@@ -1155,13 +1222,27 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                       <div className="form-group">
                         <label className="form-label">رقم الهاتف</label>
                         {editMode ? (
-                          <input
-                            type="tel"
-                            name="phone"
-                            value={editData.phone}
-                            onChange={handleInputChange}
-                            className="form-input"
-                          />
+                          <>
+                            <input
+                              type="tel"
+                              name="phone"
+                              value={editData.phone}
+                              onChange={(e) => {
+                                const value = e.target.value
+                                  .replace(/[^\d\s\-+]/g, "")
+                                  .slice(0, 18);
+                                handleInputChange({
+                                  target: { name: "phone", value },
+                                });
+                              }}
+                              className="form-input"
+                              placeholder="+972501234567"
+                              maxLength="18"
+                            />
+                            <small className="field-hint">
+                              يرجى إدخال رقم الهاتف مع المقدمة الخاصة بالواتس اب
+                            </small>
+                          </>
                         ) : (
                           <p className="form-value">
                             {completeUserData?.phone || "غير محدد"}
@@ -1239,7 +1320,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
       </section>
 
       {/* Appointment Edit Modal */}
-      <AppointmentEditModal
+      {/* <AppointmentEditModal
         isOpen={isEditModalOpen}
         onClose={() => {
           setIsEditModalOpen(false);
@@ -1247,7 +1328,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
         }}
         onSubmit={handleAppointmentEditSubmit}
         appointment={editingAppointment}
-      />
+      /> */}
 
       <CustomModal
         isOpen={modalState.isOpen}

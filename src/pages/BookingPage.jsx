@@ -11,6 +11,7 @@ import {
   checkStaffAvailability,
   getAppointmentsByCustomer,
   getAppointmentsByDate,
+  checkStaffAvailabilityWithDuration,
 } from "../services/appointmentsService";
 import {
   createConsultation,
@@ -1562,17 +1563,25 @@ const BookingPage = ({ currentUser, userData }) => {
                           type="tel"
                           className="form-input"
                           value={bookingData.customerInfo.phone}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const value = e.target.value
+                              .replace(/[^\d\s\-+]/g, "")
+                              .slice(0, 18);
                             setBookingData({
                               ...bookingData,
                               customerInfo: {
                                 ...bookingData.customerInfo,
-                                phone: e.target.value,
+                                phone: value,
                               },
-                            })
-                          }
+                            });
+                          }}
+                          placeholder="+972501234567"
+                          maxLength="18"
                           required
                         />
+                        <small className="field-hint">
+                          يرجى إدخال رقم الهاتف مع المقدمة الخاصة بالواتس اب
+                        </small>
                       </div>
                     </div>
                   </div>
@@ -1658,17 +1667,25 @@ const BookingPage = ({ currentUser, userData }) => {
                         type="tel"
                         className="form-input"
                         value={consultationData.customerInfo.phone}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = e.target.value
+                            .replace(/[^\d\s\-+]/g, "")
+                            .slice(0, 18);
                           setConsultationData({
                             ...consultationData,
                             customerInfo: {
                               ...consultationData.customerInfo,
-                              phone: e.target.value,
+                              phone: value,
                             },
-                          })
-                        }
+                          });
+                        }}
+                        placeholder="+972501234567"
+                        maxLength="18"
                         required
                       />
+                      <small className="field-hint">
+                        يرجى إدخال رقم الهاتف مع المقدمة الخاصة بالواتس اب
+                      </small>
                     </div>
 
                     <div className="form-group">

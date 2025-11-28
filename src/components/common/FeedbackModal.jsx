@@ -79,8 +79,11 @@ const FeedbackModal = ({
 
       // Validate phone number format if provided
       if (formData.phone && formData.phone.trim() !== "") {
-        if (!/^05[0-9]{8}$/.test(formData.phone.trim())) {
-          setError("رقم الهاتف غير صحيح. يجب أن يبدأ بـ 05 ويتكون من 10 أرقام");
+        const cleanPhone = formData.phone.replace(/[\s\-+]/g, "");
+        if (!/^(972|970)[0-9]{9}$/.test(cleanPhone)) {
+          setError(
+            "رقم الهاتف غير صحيح. يجب أن يبدأ بـ 972 أو 970 (مثال: 972501234567 أو 970591234567)"
+          );
           setSubmitting(false);
           return;
         }
@@ -199,14 +202,13 @@ const FeedbackModal = ({
                 value={formData.phone}
                 onChange={(e) => {
                   const value = e.target.value;
-                  // Only allow numbers and limit to 10 digits
-                  if (/^\d{0,10}$/.test(value)) {
+                  // Allow digits, spaces, dashes, and plus sign
+                  if (/^[\d\s\-+]{0,18}$/.test(value)) {
                     handleChange(e);
                   }
                 }}
-                placeholder="05xxxxxxxx"
-                maxLength="10"
-                pattern="^05[0-9]{8}$"
+                placeholder="+972501234567"
+                maxLength="18"
                 disabled={!!currentUser && !!userData?.phone}
                 style={
                   currentUser && userData?.phone
@@ -220,7 +222,9 @@ const FeedbackModal = ({
               </small>
               {formData.phone &&
                 formData.phone.length > 0 &&
-                !/^05[0-9]{8}$/.test(formData.phone) && (
+                !/^(972|970)[0-9]{9}$/.test(
+                  formData.phone.replace(/[\s\-+]/g, "")
+                ) && (
                   <small
                     style={{
                       color: "var(--danger)",
@@ -229,7 +233,7 @@ const FeedbackModal = ({
                     }}
                   >
                     <i className="fas fa-exclamation-circle"></i> رقم الهاتف يجب
-                    أن يبدأ بـ 05 ويتكون من 10 أرقام
+                    أن يبدأ بـ 972 أو 970 (مثال: +972501234567)
                   </small>
                 )}
             </div>

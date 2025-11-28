@@ -319,6 +319,77 @@ export const checkStaffAvailability = async (staffId, date, time) => {
   }
 };
 
+// Helper function to convert time string (HH:MM) to minutes since midnight
+const timeToMinutes = (timeStr) => {
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
+// Check if staff is available for a time range (considering appointment duration)
+export const checkStaffAvailabilityWithDuration = async (
+  staffId,
+  date,
+  startTime,
+  durationMinutes,
+  excludeAppointmentId = null
+) => {
+  try {
+    // Get all appointments for this staff on this date
+    const appointmentsCollection = collection(db, APPOINTMENTS_COLLECTION);
+    const appointmentsQuery = query(
+      appointmentsCollection,
+      where("staffId", "==", staffId),
+      where("date", "==", date),
+      where("status", "in", ["في الانتظار", "مؤكد"])
+    );
+    const snapshot = await getDocs(appointmentsQuery);
+
+    // Calculate new appointment time range
+    const newStartMinutes = timeToMinutes(startTime);
+    const newEndMinutes = newStartMinutes + durationMinutes;
+
+    // Check for overlaps
+    const conflicts = [];
+    snapshot.forEach((doc) => {
+      const appointment = { id: doc.id, ...doc.data() };
+
+      // Skip if this is the appointment being edited
+      if (excludeAppointmentId && appointment.id === excludeAppointmentId) {
+        return;
+      }
+
+      // Get existing appointment time range
+      const existingStartMinutes = timeToMinutes(appointment.time);
+      const existingDuration =
+        appointment.serviceDuration || appointment.duration || 60;
+      const existingEndMinutes = existingStartMinutes + existingDuration;
+
+      // Check for overlap: new appointment overlaps if:
+      // - new start is before existing end AND new end is after existing start
+      if (
+        newStartMinutes < existingEndMinutes &&
+        newEndMinutes > existingStartMinutes
+      ) {
+        conflicts.push({
+          appointmentId: appointment.id,
+          customerName: appointment.customerName,
+          serviceName: appointment.serviceName,
+          time: appointment.time,
+          duration: existingDuration,
+        });
+      }
+    });
+
+    return {
+      available: conflicts.length === 0,
+      conflicts: conflicts,
+    };
+  } catch (error) {
+    console.error("Error checking staff availability with duration:", error);
+    throw error;
+  }
+};
+
 // Get appointments for a specific date
 export const getAppointmentsByDate = async (date) => {
   try {

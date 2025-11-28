@@ -170,6 +170,59 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
     return filtered.slice(startIndex, endIndex);
   };
 
+  // Helper function to send WhatsApp message
+  const sendWhatsAppMessage = (phoneNumber, message) => {
+    // Clean phone number (remove spaces, dashes, plus sign, etc.)
+    const cleanPhone = phoneNumber.replace(/[\s\-+]/g, "");
+    // Check if country code is already present (972 or 970)
+    const fullPhone =
+      cleanPhone.startsWith("972") || cleanPhone.startsWith("970")
+        ? cleanPhone
+        : `970${cleanPhone}`; // Default to 970 if no country code
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${fullPhone}?text=${encodedMessage}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
+  // Generate appointment confirmation message
+  const generateConfirmationMessage = (appointment) => {
+    const staffName = appointment.staffName || "سيتم تحديدها لاحقاً";
+    return `*مرحباً ${appointment.customerName}*
+
+*تم تأكيد موعدك بنجاح!* ✓
+
+*تفاصيل الموعد:*
+━━━━━━━━━━━━━━━
+▪️ الخدمة: ${appointment.serviceName}
+▪️ التاريخ: ${appointment.date}
+▪️ الوقت: ${appointment.time}
+▪️ السعر: ${appointment.servicePrice} شيكل
+
+*⚠ تنبيه هام:*
+• يرجى الحضور قبل 10 دقائق من الموعد
+• في حال التأخر أكثر من 10 دقائق سيتم إلغاء الحجز
+• يمكن إلغاء الموعد قبل 12 ساعة على الأقل
+
+نتطلع لرؤيتك!`;
+  };
+
+  // Generate reminder message
+  const generateReminderMessage = (appointment) => {
+    return `*مرحباً ${appointment.customerName}*
+
+*تذكير بموعدك القادم!*
+
+*تفاصيل الموعد:*
+━━━━━━━━━━━━━━━
+▪️ الخدمة: ${appointment.serviceName}
+▪️ التاريخ: ${appointment.date}
+▪️ الوقت: ${appointment.time}
+
+*⚠ يرجى الحضور قبل 10 دقائق من الموعد*
+
+نتطلع لرؤيتك!`;
+  };
+
   // Handle confirm appointment
   const handleConfirmAppointment = async (appointmentId) => {
     try {
@@ -213,10 +266,68 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
         await confirmAppointment(appointmentId);
         await reloadAppointments();
         showSuccess("تم تأكيد الموعد بنجاح");
+
+        // Send WhatsApp confirmation message
+        if (appointment.customerPhone) {
+          const message = generateConfirmationMessage(appointment);
+          sendWhatsAppMessage(appointment.customerPhone, message);
+        }
       }
     } catch (error) {
       console.error("Error confirming appointment:", error);
       showError("فشل في تأكيد الموعد");
+    }
+  };
+
+  // Handle sending reminder for filtered appointments
+  const handleSendBulkReminders = async () => {
+    try {
+      const filteredAppts = getFilteredAppointments();
+
+      if (filteredAppts.length === 0) {
+        showWarning("لا توجد مواعيد مفلترة لإرسال تذكير لها");
+        return;
+      }
+
+      const confirmed = await showConfirm(
+        `سيتم إرسال تذكير عبر واتساب لـ ${filteredAppts.length} موعد.\n\nهل تريد المتابعة؟`,
+        "إرسال تذكير جماعي",
+        "إرسال",
+        "إلغاء"
+      );
+
+      if (confirmed) {
+        let sentCount = 0;
+        let failedCount = 0;
+
+        for (const appointment of filteredAppts) {
+          if (appointment.customerPhone) {
+            try {
+              const message = generateReminderMessage(appointment);
+              sendWhatsAppMessage(appointment.customerPhone, message);
+              sentCount++;
+              // Add delay between messages to avoid rate limiting
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+            } catch (err) {
+              console.error(
+                `Failed to send reminder for ${appointment.customerName}:`,
+                err
+              );
+              failedCount++;
+            }
+          } else {
+            failedCount++;
+          }
+        }
+
+        showSuccess(
+          `تم إرسال ${sentCount} تذكير بنجاح` +
+            (failedCount > 0 ? `\nفشل إرسال ${failedCount} تذكير` : "")
+        );
+      }
+    } catch (error) {
+      console.error("Error sending bulk reminders:", error);
+      showError("فشل في إرسال التذكيرات");
     }
   };
 
@@ -455,6 +566,17 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
             setCurrentPage(1);
           }}
         />
+        {statusFilter === "مؤكد" && (
+          <button
+            className="aap-btn-reminder"
+            onClick={handleSendBulkReminders}
+            title="إرسال تذكير واتساب للمواعيد المؤكدة"
+            disabled={getFilteredAppointments().length === 0}
+          >
+            <i className="fab fa-whatsapp"></i>
+            إرسال تذكير ({getFilteredAppointments().length})
+          </button>
+        )}
       </div>
 
       {/* Statistics */}
@@ -582,13 +704,35 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
                         </button>
                       )}
                       {appointment.status === "مؤكد" && (
-                        <button
-                          className="aap-action-btn aap-complete"
-                          onClick={() => handleCompleteAppointment(appointment)}
-                          title="إتمام الموعد"
-                        >
-                          إتمام
-                        </button>
+                        <>
+                          <button
+                            className="aap-action-btn aap-complete"
+                            onClick={() =>
+                              handleCompleteAppointment(appointment)
+                            }
+                            title="إتمام الموعد"
+                          >
+                            إتمام
+                          </button>
+                          <button
+                            className="aap-action-btn aap-whatsapp"
+                            onClick={() => {
+                              if (appointment.customerPhone) {
+                                const message =
+                                  generateReminderMessage(appointment);
+                                sendWhatsAppMessage(
+                                  appointment.customerPhone,
+                                  message
+                                );
+                              } else {
+                                showWarning("لا يوجد رقم هاتف لهذا العميل");
+                              }
+                            }}
+                            title="إرسال تذكير واتساب"
+                          >
+                            <i className="fab fa-whatsapp"></i>
+                          </button>
+                        </>
                       )}
                       <button
                         className="aap-action-btn aap-edit"

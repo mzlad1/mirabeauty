@@ -4,6 +4,7 @@ import useModal from "../../hooks/useModal";
 import CustomModal from "../common/CustomModal";
 import { getAllServices } from "../../services/servicesService";
 import { getAllServiceCategories } from "../../services/categoriesService";
+import { checkStaffAvailabilityWithDuration } from "../../services/appointmentsService";
 
 const AdminAppointmentEditModal = ({
   isOpen,
@@ -171,6 +172,41 @@ const AdminAppointmentEditModal = ({
     try {
       // Find selected staff member
       const selectedStaff = staff.find((s) => s.id === formData.staffId);
+
+      // Check for staff conflicts if staff is assigned and time/date changed
+      if (
+        formData.staffId &&
+        (formData.date !== appointment?.date ||
+          formData.time !== appointment?.time)
+      ) {
+        // Get appointment duration
+        const duration =
+          appointment?.serviceDuration || appointment?.duration || 60;
+
+        // Check for conflicts
+        const availabilityCheck = await checkStaffAvailabilityWithDuration(
+          formData.staffId,
+          formData.date,
+          formData.time,
+          duration,
+          appointment?.id // Exclude current appointment
+        );
+
+        if (!availabilityCheck.available) {
+          const conflictDetails = availabilityCheck.conflicts
+            .map((c) => `- ${c.customerName} (${c.serviceName}) في ${c.time}`)
+            .join("\n");
+
+          showError(
+            `الأخصائية ${
+              selectedStaff?.name || "المحددة"
+            } لديها تعارض في المواعيد:\n\n${conflictDetails}\n\nالرجاء اختيار وقت آخر أو أخصائية أخرى.`
+          );
+          setLoading(false);
+          return;
+        }
+      }
+
       const updatedData = {
         ...formData,
         staffName: selectedStaff ? selectedStaff.name : formData.staffName,

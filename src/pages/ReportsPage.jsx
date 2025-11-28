@@ -149,7 +149,9 @@ const ReportsPage = ({ currentUser, userData }) => {
   const appointmentRevenue = filteredAppointments
     .filter((apt) => apt.status === "مكتمل")
     .reduce((sum, apt) => {
-      const price = parsePrice(apt.servicePrice || apt.price);
+      const price = parsePrice(
+        apt.actualPaidAmount || apt.servicePrice || apt.price
+      );
       return sum + price;
     }, 0);
 
@@ -182,7 +184,9 @@ const ReportsPage = ({ currentUser, userData }) => {
         (apt) => apt.serviceId === service.id && apt.status === "مكتمل"
       );
       const revenue = completedAppts.reduce((sum, apt) => {
-        const price = parsePrice(apt.servicePrice || apt.price);
+        const price = parsePrice(
+          apt.actualPaidAmount || apt.servicePrice || apt.price
+        );
         return sum + price;
       }, 0);
       return {
@@ -226,7 +230,9 @@ const ReportsPage = ({ currentUser, userData }) => {
         (apt) => apt.status === "مكتمل"
       );
       const revenue = completedAppts.reduce((sum, apt) => {
-        const price = parsePrice(apt.servicePrice || apt.price);
+        const price = parsePrice(
+          apt.actualPaidAmount || apt.servicePrice || apt.price
+        );
         return sum + price;
       }, 0);
       return {
@@ -251,7 +257,9 @@ const ReportsPage = ({ currentUser, userData }) => {
         customerAppointments
           .filter((apt) => apt.status === "مكتمل")
           .reduce((sum, apt) => {
-            const price = parsePrice(apt.servicePrice || apt.price);
+            const price = parsePrice(
+              apt.actualPaidAmount || apt.servicePrice || apt.price
+            );
             return sum + price;
           }, 0) +
         customerOrders
@@ -308,7 +316,9 @@ const ReportsPage = ({ currentUser, userData }) => {
 
       const revenue =
         monthAppointments.reduce(
-          (sum, apt) => sum + parsePrice(apt.servicePrice || apt.price),
+          (sum, apt) =>
+            sum +
+            parsePrice(apt.actualPaidAmount || apt.servicePrice || apt.price),
           0
         ) +
         monthOrders.reduce((sum, order) => sum + parsePrice(order.total), 0);

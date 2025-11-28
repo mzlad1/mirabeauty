@@ -5,6 +5,7 @@ import { getUsersByRole } from "../../services/usersService";
 import {
   createAppointment,
   getAppointmentsByDate,
+  checkStaffAvailabilityWithDuration,
 } from "../../services/appointmentsService";
 import { getAllServiceCategories } from "../../services/categoriesService";
 
@@ -284,11 +285,34 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
         appointmentEndTime = formData.customEndTime;
       }
 
-      // Get staff name if staff is assigned
+      // Get staff name if staff is assigned and check for conflicts
       let staffName = null;
       if (formData.staffId) {
         const staff = staffMembers.find((s) => s.id === formData.staffId);
         staffName = staff?.name || null;
+
+        // Check for staff time conflicts
+        const availabilityCheck = await checkStaffAvailabilityWithDuration(
+          formData.staffId,
+          formData.date,
+          formData.time,
+          appointmentDuration,
+          null // No appointment to exclude (new appointment)
+        );
+
+        if (!availabilityCheck.available) {
+          const conflictDetails = availabilityCheck.conflicts
+            .map((c) => `- ${c.customerName} (${c.serviceName}) في ${c.time}`)
+            .join("\n");
+
+          setError(
+            `الأخصائية ${
+              staffName || "المحددة"
+            } لديها تعارض في المواعيد:\n\n${conflictDetails}\n\nالرجاء اختيار وقت آخر أو أخصائية أخرى.`
+          );
+          setLoading(false);
+          return;
+        }
       }
 
       // Create appointment data

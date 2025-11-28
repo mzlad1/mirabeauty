@@ -2438,7 +2438,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                               <td>{product.name}</td>
                               <td>{product.categoryName}</td>
                               <td>{product.price} شيكل</td>
-                              <td>{product.originalPrice || "-"}</td>
+                              <td>{product.originalPrice || "-"}شيكل</td>
                               <td>
                                 <span
                                   className={`status ${
@@ -2997,9 +2997,22 @@ const AdminDashboardPage = ({ currentUser }) => {
                                   type="tel"
                                   name="phone"
                                   value={editData.phone}
-                                  onChange={handleInputChange}
+                                  onChange={(e) => {
+                                    const value = e.target.value
+                                      .replace(/[^\d\s\-+]/g, "")
+                                      .slice(0, 18);
+                                    handleInputChange({
+                                      target: { name: "phone", value },
+                                    });
+                                  }}
                                   className="form-input"
+                                  placeholder="+972501234567"
+                                  maxLength="18"
                                 />
+                                <small className="form-note">
+                                  يرجى إدخال رقم الهاتف مع المقدمة الخاصة
+                                  بالواتس اب
+                                </small>
                               </div>
                               <div className="form-group">
                                 <label>العنوان</label>

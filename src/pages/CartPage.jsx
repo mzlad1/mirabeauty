@@ -153,10 +153,13 @@ const CartPage = () => {
       return;
     }
 
-    // Validate phone number (must be 10 digits and start with 05)
-    const phoneRegex = /^05\d{8}$/;
-    if (!phoneRegex.test(userInfo.phone.trim())) {
-      showWarning("رقم الهاتف يجب أن يبدأ بـ 05 ويتكون من 10 أرقام");
+    // Validate phone number (must start with 972 or 970)
+    const cleanPhone = userInfo.phone.replace(/[\s\-+]/g, "");
+    const phoneRegex = /^(972|970)[0-9]{9}$/;
+    if (!phoneRegex.test(cleanPhone)) {
+      showWarning(
+        "رقم الهاتف يجب أن يبدأ بـ 972 أو 970 (مثال: 972501234567 أو 970591234567)"
+      );
       return;
     }
 
@@ -436,16 +439,16 @@ const CartPage = () => {
                 />
                 <input
                   type="tel"
-                  placeholder="رقم الهاتف * (مثال: 0599123456)"
+                  placeholder="رقم الهاتف * ( يرجى إدخال رقم الهاتف  مع المقدمة الخاصة بالواتس اب)"
                   value={userInfo.phone}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/[^\d]/g, "");
-                    if (value.length <= 10) {
+                    // Allow digits, spaces, dashes, and plus sign
+                    const value = e.target.value.replace(/[^\d\s\-+]/g, "");
+                    if (value.length <= 18) {
                       handleUserInfoChange("phone", value);
                     }
                   }}
-                  pattern="05[0-9]{8}"
-                  maxLength="10"
+                  maxLength="18"
                   required
                 />
                 <textarea

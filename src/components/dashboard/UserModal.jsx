@@ -101,10 +101,13 @@ const UserModal = ({
   }, [isOpen, userType]);
 
   const validate = () => {
-    // Phone validation - Saudi format: 05XXXXXXXX
-    const phoneRegex = /^05[0-9]{8}$/;
-    if (!phoneRegex.test(formData.phone)) {
-      alert("رقم الهاتف غير صحيح. يجب أن يبدأ بـ 05 ويتكون من 10 أرقام");
+    // Phone validation - Palestine/Israel format: 972XXXXXXXXX or 970XXXXXXXXX
+    const cleanPhone = formData.phone.replace(/[\s\-+]/g, "");
+    const phoneRegex = /^(972|970)[0-9]{9}$/;
+    if (!phoneRegex.test(cleanPhone)) {
+      alert(
+        "رقم الهاتف غير صحيح. يجب أن يبدأ بـ 972 أو 970 (مثال: 972501234567 أو 970591234567)"
+      );
       return false;
     }
 
@@ -259,19 +262,21 @@ const UserModal = ({
                 value={formData.phone}
                 onChange={(e) => {
                   const value = e.target.value;
-                  // Only allow numbers and limit to 10 digits
-                  if (/^\d{0,10}$/.test(value)) {
+                  // Allow digits, spaces, dashes, and plus sign
+                  if (/^[\d\s\-+]{0,18}$/.test(value)) {
                     handleChange(e);
                   }
                 }}
                 required
-                maxLength="10"
+                maxLength="18"
                 className="admin-user-form-input"
-                placeholder="05xxxxxxxx"
+                placeholder="+972501234567"
               />
               {formData.phone &&
                 formData.phone.length > 0 &&
-                !/^05[0-9]{8}$/.test(formData.phone) && (
+                !/^(972|970)[0-9]{9}$/.test(
+                  formData.phone.replace(/[\s\-+]/g, "")
+                ) && (
                   <small
                     style={{
                       color: "var(--danger)",
@@ -280,7 +285,7 @@ const UserModal = ({
                     }}
                   >
                     <i className="fas fa-exclamation-circle"></i> رقم الهاتف يجب
-                    أن يبدأ بـ 05 ويتكون من 10 أرقام
+                    أن يبدأ بـ 972 أو 970 (مثال: +972501234567)
                   </small>
                 )}
             </div>

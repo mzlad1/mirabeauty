@@ -76,11 +76,13 @@ const RegisterPage = () => {
     if (!formData.phone) {
       newErrors.phone = "رقم الهاتف مطلوب";
     } else {
-      const cleanPhone = formData.phone.replace(/\s/g, "");
-      // Saudi phone format: 05XXXXXXXX (10 digits starting with 05)
-      const phoneRegex = /^05[0-9]{8}$/;
+      // Remove spaces, dashes, and plus signs
+      const cleanPhone = formData.phone.replace(/[\s\-+]/g, "");
+      // Palestine/Israel phone format: 972XXXXXXXXX or 970XXXXXXXXX (12 digits starting with 972 or 970)
+      const phoneRegex = /^(972|970)[0-9]{9}$/;
       if (!phoneRegex.test(cleanPhone)) {
-        newErrors.phone = "رقم الهاتف يجب أن يبدأ بـ 05 ويتكون من 10 أرقام";
+        newErrors.phone =
+          "رقم الهاتف يجب أن يبدأ بـ 972 أو 970 (مثال: 972501234567 أو 970591234567)";
       }
     }
 
@@ -244,25 +246,24 @@ const RegisterPage = () => {
                         name="phone"
                         value={formData.phone}
                         onChange={(e) => {
-                          // Only allow digits and limit to 10 characters
+                          // Allow digits, spaces, dashes, and plus sign
                           const value = e.target.value
-                            .replace(/\D/g, "")
-                            .slice(0, 10);
+                            .replace(/[^\d\s\-+]/g, "")
+                            .slice(0, 18);
                           handleInputChange({
                             target: { name: "phone", value },
                           });
                         }}
                         className={`form-input ${errors.phone ? "error" : ""}`}
-                        placeholder="05XXXXXXXX"
-                        maxLength="10"
-                        pattern="^05[0-9]{8}$"
+                        placeholder="+972501234567"
+                        maxLength="18"
                         disabled={loading}
                       />
                       {errors.phone && (
                         <span className="field-error">{errors.phone}</span>
                       )}
                       <small className="field-hint">
-                        يجب أن يبدأ الرقم بـ 05 ويتكون من 10 أرقام
+                        يرجى إدخال رقم الهاتف  مع المقدمة الخاصة بالواتس اب
                       </small>
                     </div>
                   </div>
