@@ -1799,7 +1799,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                             <span className="activity-time">
                               {formatFirestoreDate(
                                 appointment.updatedAt,
-                                "en-US"
+                                "en-GB"
                               )}
                             </span>
                           </div>
@@ -2620,7 +2620,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                                   تم الإنشاء:{" "}
                                   {formatFirestoreDate(
                                     category.createdAt,
-                                    "en-US"
+                                    "en-GB"
                                   )}
                                 </span>
                               </div>
@@ -2723,7 +2723,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                                   تم الإنشاء:{" "}
                                   {formatFirestoreDate(
                                     category.createdAt,
-                                    "en-US"
+                                    "en-GB"
                                   )}
                                 </span>
                               </div>

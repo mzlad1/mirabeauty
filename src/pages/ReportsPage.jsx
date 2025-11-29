@@ -85,9 +85,9 @@ const ReportsPage = ({ currentUser, userData }) => {
   const getDateRangeText = () => {
     const now = new Date();
     const formatDate = (date) => {
-      return date.toLocaleDateString("en-US", {
+      return date.toLocaleDateString("en-GB", {
         year: "numeric",
-        month: "long",
+        month: "numeric",
         day: "numeric",
       });
     };
@@ -380,13 +380,14 @@ const ReportsPage = ({ currentUser, userData }) => {
   const monthlyRevenue = getMonthlyRevenue();
 
   const handlePrint = () => {
-    const printDate = new Date().toLocaleDateString("en-US", {
+    const printDate = new Date().toLocaleDateString("en-GB", {
       year: "numeric",
-      month: "long",
+      month: "numeric",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    });
+      hour12: true,
+    }).replace("am", "AM").replace("pm", "PM");
 
     // Helper function to format currency
     const formatCurrency = (amount) => `${parseFloat(amount).toFixed(2)} ₪`;
@@ -503,7 +504,7 @@ const ReportsPage = ({ currentUser, userData }) => {
         <div class="report-header">
           <h1>مركز ميرا بيوتي - Mira Beauty Clinic</h1>
           <p>تقرير شامل للأعمال والإحصائيات</p>
-          <p><strong>فترة التقرير:</strong> ${getDateRangeText()}</p>
+          <p>فترة التقرير: ${getDateRangeText()}</p>
           <p>تاريخ الطباعة: ${printDate}</p>
         </div>
 

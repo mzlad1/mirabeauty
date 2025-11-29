@@ -1094,7 +1094,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                               <p className="order-date">
                                 {new Date(
                                   order.createdAt.toDate()
-                                ).toLocaleDateString("en-US")}
+                                ).toLocaleDateString("en-GB")}
                               </p>
                             </div>
                             <div className={`order-status ${order.status}`}>
