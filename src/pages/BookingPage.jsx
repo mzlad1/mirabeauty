@@ -73,7 +73,15 @@ const timeSlots = [
 
 // Custom locale formatting for Arabic day names with English numbers
 const formatShortWeekday = (locale, date) => {
-  const arabicDays = ["ح", "ن", "ث", "ر", "خ", "ج", "س"];
+  const arabicDays = [
+    "أحد",
+    "إثنين",
+    "ثلاثاء",
+    "أربعاء",
+    "خميس",
+    "جمعة",
+    "سبت",
+  ];
   return arabicDays[date.getDay()];
 };
 
