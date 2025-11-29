@@ -111,7 +111,7 @@ const AppointmentCompletionModal = ({
           <div className="completion-form-group">
             <label htmlFor="actualPaidAmount">
               <i className="fas fa-money-bill-wave"></i>
-              المبلغ المدفوع فعلياً (نقداً)
+              المبلغ المدفوع فعلياً
               <span className="note-description required">
                 (المبلغ الذي تم دفعه من العميل - مطلوب *)
               </span>
@@ -126,6 +126,8 @@ const AppointmentCompletionModal = ({
               step="0.01"
               disabled={isSubmitting}
               required
+              class="admin-appointment-edit-form-input"
+              style={{ width: "100%" }}
             />
           </div>
           <div className="completion-form-group">
@@ -149,9 +151,11 @@ const AppointmentCompletionModal = ({
           <div className="completion-form-group">
             <label htmlFor="staffInternalNote">
               <i className="fas fa-user-md"></i>
-              ملاحظات داخلية (للموظفين والإدارة فقط)
+              {/* ملاحظات داخلية (للموظفين والإدارة فقط) */}
+              ملاحظات داخلية (للإدارة فقط)
               <span className="note-description">
-                (ملاحظات خاصة لن يراها العميل - فقط للموظفين والإدارة)
+                {/* (ملاحظات خاصة لن يراها العميل - فقط للموظفين والإدارة) */}
+                (ملاحظات خاصة لن يراها العميل - فقط للإدارة) 
               </span>
             </label>
             <textarea

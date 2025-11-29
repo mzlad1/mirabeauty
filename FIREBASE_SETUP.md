@@ -2,7 +2,7 @@
 
 ## Initial Setup Instructions
 
-Since you've migrated from sample data to Firebase, here's how to set up your initial admin and staff users:
+Here's how to set up your initial admin and staff users:
 
 ### 1. Create Initial Admin User
 
@@ -104,8 +104,5 @@ service cloud.firestore {
 
 After setting up users:
 
-1. Migrate appointments data to Firestore
-2. Migrate services data to Firestore
-3. Migrate products data to Firestore
-4. Set up storage for images
-5. Implement admin dashboard for user management
+1. Set up storage for images
+2. Implement admin dashboard for user management

@@ -45,7 +45,6 @@ MiraBeauty is a modern beauty salon and e-commerce platform that combines online
 - Date/time selection with validation
 - Booking state management
 - Appointment tracking system
-- Integration with sample data
 - Custom BookingForm component
 ```
 

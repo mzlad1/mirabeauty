@@ -654,7 +654,7 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
             <i className="fas fa-calendar-check"></i>
             إدارة المواعيد
           </h1>
-          <p>إدارة ومتابعة جميع مواعيد العيادة</p>
+          <p>إدارة ومتابعة جميع مواعيد المركز</p>
         </div>
         <button className="aap-btn-primary" onClick={handleBookNewAppointment}>
           <i className="fas fa-plus"></i>

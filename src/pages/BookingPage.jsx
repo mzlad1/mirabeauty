@@ -1540,7 +1540,7 @@ const BookingPage = ({ currentUser, userData }) => {
                         {bookingData.time}
                         {isLaserService(bookingData.serviceId) &&
                           bookingData.time && (
-                            <span style={{ fontSize: "0.9em", color: "#666" }}>
+                            <span /*{ style={{ fontSize: "0.9em", color: "#666" }} }*/ >
                               {" "}
                               إلى{" "}
                               {calculateLaserEndTime(
@@ -1552,7 +1552,7 @@ const BookingPage = ({ currentUser, userData }) => {
                         {isSkinService(bookingData.serviceId) &&
                           bookingData.useCustomTime &&
                           bookingData.customEndTime && (
-                            <span style={{ fontSize: "0.9em", color: "#666" }}>
+                            <span /*{ style={{ fontSize: "0.9em", color: "#666" }} }*/ >
                               {" "}
                               إلى {bookingData.customEndTime}
                             </span>

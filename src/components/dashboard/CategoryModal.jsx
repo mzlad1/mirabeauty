@@ -391,7 +391,7 @@ const CategoryModal = ({
                   onChange={handleChange}
                   className="form-select"
                 >
-                  <option value="fixed">أوقات ثابتة (مثل الجلد)</option>
+                  <option value="fixed">أوقات ثابتة (مثل البشرة)</option>
                   <option value="flexible">أوقات مرنة (مثل الليزر)</option>
                 </select>
                 <small className="field-note">

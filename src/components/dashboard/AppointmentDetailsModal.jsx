@@ -218,7 +218,8 @@ const AppointmentDetailsModal = ({
                     onChange={(e) => setInternalNote(e.target.value)}
                     rows={4}
                     className="admin-appointment-edit-form-textarea"
-                    placeholder="أضف ملاحظة داخلية مرئية فقط للموظفين والإدارة..."
+                    // placeholder="أضف ملاحظة داخلية مرئية فقط للموظفين والإدارة..."
+                    placeholder="أضف ملاحظة داخلية مرئية فقط للإدارة..."
                     style={{ width: "100%", marginTop: "0.5rem" }}
                   />
 
