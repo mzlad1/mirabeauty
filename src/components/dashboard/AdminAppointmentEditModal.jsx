@@ -490,25 +490,7 @@ const AdminAppointmentEditModal = ({
             </>
           )}
 
-          <div className="admin-appointment-edit-form-row">
-            <div className="admin-appointment-edit-form-group">
-              <label htmlFor="status">حالة الموعد *</label>
-              <select
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                required
-                className="admin-appointment-edit-form-input"
-              >
-                {statusOptions.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+          {/* Status field removed - status changes are now handled via table actions (confirm, complete, cancel buttons) */}
 
           {/* Customer Note - Read Only */}
           {appointment?.notes && (

@@ -17,6 +17,7 @@ import AdminAppointmentEditModal from "../components/dashboard/AdminAppointmentE
 import AppointmentDetailsModal from "../components/dashboard/AppointmentDetailsModal";
 import AppointmentCompletionModal from "../components/dashboard/AppointmentCompletionModal";
 import AdminCreateAppointmentModal from "../components/admin/AdminCreateAppointmentModal";
+import StaffSelectionModal from "../components/dashboard/StaffSelectionModal";
 import CustomModal from "../components/common/CustomModal";
 import { useModal } from "../hooks/useModal";
 
@@ -62,6 +63,9 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
   const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false);
   const [appointmentToComplete, setAppointmentToComplete] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isStaffSelectionModalOpen, setIsStaffSelectionModalOpen] =
+    useState(false);
+  const [appointmentToConfirm, setAppointmentToConfirm] = useState(null);
 
   // Load appointments, staff, and specializations
   useEffect(() => {
@@ -196,7 +200,7 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
 ▪️ الخدمة: ${appointment.serviceName}
 ▪️ التاريخ: ${appointment.date}
 ▪️ الوقت: ${appointment.time}
-▪️ السعر: ${appointment.servicePrice} شيكل
+▪️ الأخصائية: ${staffName}
 
 *⚠ تنبيه هام:*
 • يرجى الحضور قبل 10 دقائق من الموعد
@@ -208,6 +212,7 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
 
   // Generate reminder message
   const generateReminderMessage = (appointment) => {
+    const staffName = appointment.staffName || "سيتم تحديدها لاحقاً";
     return `*مرحباً ${appointment.customerName}*
 
 *تذكير بموعدك القادم!*
@@ -217,65 +222,179 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
 ▪️ الخدمة: ${appointment.serviceName}
 ▪️ التاريخ: ${appointment.date}
 ▪️ الوقت: ${appointment.time}
+▪️ الأخصائية: ${staffName}
 
 *⚠ يرجى الحضور قبل 10 دقائق من الموعد*
 
 نتطلع لرؤيتك!`;
   };
 
-  // Handle confirm appointment
-  const handleConfirmAppointment = async (appointmentId) => {
+  // Generate completion message
+  const generateCompletionMessage = (appointment, actualPaidAmount) => {
+    const staffName = appointment.staffName || "غير محدد";
+    return `*مرحباً ${appointment.customerName}*
+
+*شكراً لزيارتك!* ✓
+
+*تفاصيل الجلسة:*
+━━━━━━━━━━━━━━━
+▪️ الخدمة: ${appointment.serviceName}
+▪️ التاريخ: ${appointment.date}
+▪️ الوقت: ${appointment.time}
+▪️ الأخصائية: ${staffName}
+▪️ المبلغ المدفوع: ${actualPaidAmount} شيكل
+
+نتمنى لك السلامة ونسعد بزيارتك القادمة! 🌸`;
+  };
+
+  // Generate cancellation message
+  const generateCancellationMessage = (appointment) => {
+    return `*مرحباً ${appointment.customerName}*
+
+*تم إلغاء موعدك*
+
+*تفاصيل الموعد الملغي:*
+━━━━━━━━━━━━━━━
+▪️ الخدمة: ${appointment.serviceName}
+▪️ التاريخ: ${appointment.date}
+▪️ الوقت: ${appointment.time}
+
+يمكنك حجز موعد جديد في أي وقت يناسبك.`;
+  };
+
+  // Handle cancel appointment
+  const handleCancelAppointmentByAdmin = async (appointmentId) => {
     try {
-      // Find the appointment
       const appointment = appointments.find((apt) => apt.id === appointmentId);
       if (!appointment) return;
 
-      // Check booking limit
-      const category = categories.find(
-        (cat) =>
-          cat.id === appointment.serviceCategory ||
-          cat.id === appointment.categoryId
-      );
-      const bookingLimit = category?.bookingLimit || 999;
-
-      // Get appointments at this time slot for the same category
-      const dateAppointments = await getAppointmentsByDate(appointment.date);
-      const categoryAppointmentsAtTime = dateAppointments.filter(
-        (apt) =>
-          apt.id !== appointmentId && // Exclude current appointment
-          apt.time === appointment.time &&
-          (apt.status === "مؤكد" || apt.status === "في الانتظار") &&
-          (apt.serviceCategory === appointment.serviceCategory ||
-            apt.categoryId === appointment.categoryId)
-      ).length;
-
-      // Show warning if limit reached
-      let confirmMessage = "هل أنت متأكد من تأكيد هذا الموعد؟";
-      if (categoryAppointmentsAtTime >= bookingLimit) {
-        confirmMessage = `تحذير: تم الوصول إلى الحد الأقصى (${bookingLimit}) لحجوزات هذه الفئة في هذا الوقت.\n\nهل تريد المتابعة بالتأكيد؟`;
-      }
-
       const confirmed = await showConfirm(
-        confirmMessage,
-        "تأكيد الموعد",
-        "تأكيد",
-        "إلغاء"
+        `هل أنت متأكد من إلغاء موعد ${appointment.customerName}؟`,
+        "إلغاء الموعد",
+        "إلغاء الموعد",
+        "تراجع"
       );
 
       if (confirmed) {
-        await confirmAppointment(appointmentId);
+        await updateAppointment(appointmentId, {
+          status: "ملغي",
+          cancelledBy: "admin",
+          cancelledAt: new Date().toISOString(),
+        });
         await reloadAppointments();
-        showSuccess("تم تأكيد الموعد بنجاح");
+        showSuccess("تم إلغاء الموعد بنجاح");
 
-        // Send WhatsApp confirmation message
+        // Send WhatsApp cancellation message
         if (appointment.customerPhone) {
-          const message = generateConfirmationMessage(appointment);
+          const message = generateCancellationMessage(appointment);
           sendWhatsAppMessage(appointment.customerPhone, message);
         }
       }
     } catch (error) {
+      console.error("Error cancelling appointment:", error);
+      showError("فشل في إلغاء الموعد");
+    }
+  };
+
+  // Handle confirm appointment - open staff selection modal
+  const handleConfirmAppointment = async (appointmentId) => {
+    const appointment = appointments.find((apt) => apt.id === appointmentId);
+    if (!appointment) return;
+
+    // Open staff selection modal
+    setAppointmentToConfirm(appointment);
+    setIsStaffSelectionModalOpen(true);
+  };
+
+  // Handle confirm with selected staff
+  const handleConfirmWithStaff = async (staffId, staffName, adminNote = "") => {
+    try {
+      if (!appointmentToConfirm) return;
+
+      // Check booking limit
+      const category = categories.find(
+        (cat) =>
+          cat.id === appointmentToConfirm.serviceCategory ||
+          cat.id === appointmentToConfirm.categoryId
+      );
+      const bookingLimit = category?.bookingLimit || 999;
+
+      // Get appointments at this time slot for the same category
+      const dateAppointments = await getAppointmentsByDate(
+        appointmentToConfirm.date
+      );
+      const categoryAppointmentsAtTime = dateAppointments.filter(
+        (apt) =>
+          apt.id !== appointmentToConfirm.id && // Exclude current appointment
+          apt.time === appointmentToConfirm.time &&
+          (apt.status === "مؤكد" || apt.status === "في الانتظار") &&
+          (apt.serviceCategory === appointmentToConfirm.serviceCategory ||
+            apt.categoryId === appointmentToConfirm.categoryId)
+      ).length;
+
+      // Check staff availability
+      const isStaffAvailable = await checkStaffAvailability(
+        staffId,
+        appointmentToConfirm.date,
+        appointmentToConfirm.time,
+        appointmentToConfirm.id
+      );
+
+      if (!isStaffAvailable) {
+        showError(
+          `الأخصائية ${staffName} لديها موعد آخر في نفس التاريخ والوقت`
+        );
+        return;
+      }
+
+      // Show warning if limit reached
+      if (categoryAppointmentsAtTime >= bookingLimit) {
+        const confirmed = await showConfirm(
+          `تحذير: تم الوصول إلى الحد الأقصى (${bookingLimit}) لحجوزات هذه الفئة في هذا الوقت.\n\nهل تريد المتابعة بالتأكيد؟`,
+          "تأكيد الموعد",
+          "تأكيد",
+          "إلغاء"
+        );
+        if (!confirmed) return;
+      }
+
+      // Update appointment with staff, confirm status, and admin note
+      const updateData = {
+        staffId,
+        staffName,
+        status: "مؤكد",
+      };
+
+      // Only add adminNote if it's not empty
+      if (adminNote && adminNote.trim()) {
+        updateData.adminNote = adminNote.trim();
+      }
+
+      await updateAppointment(appointmentToConfirm.id, updateData);
+
+      await reloadAppointments();
+      showSuccess("تم تأكيد الموعد وتعيين الأخصائية بنجاح");
+
+      // Close modal
+      setIsStaffSelectionModalOpen(false);
+      setAppointmentToConfirm(null);
+
+      // Send WhatsApp confirmation message
+      if (appointmentToConfirm.customerPhone) {
+        // Create updated appointment object with staff info for message
+        const updatedAppointment = {
+          ...appointmentToConfirm,
+          staffId,
+          staffName,
+        };
+        const message = generateConfirmationMessage(updatedAppointment);
+        sendWhatsAppMessage(appointmentToConfirm.customerPhone, message);
+      }
+    } catch (error) {
       console.error("Error confirming appointment:", error);
       showError("فشل في تأكيد الموعد");
+      setIsStaffSelectionModalOpen(false);
+      setAppointmentToConfirm(null);
     }
   };
 
@@ -345,6 +464,9 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
     actualPaidAmount
   ) => {
     try {
+      // Find the appointment
+      const appointment = appointments.find((apt) => apt.id === appointmentId);
+
       await completeAppointment(
         appointmentId,
         staffNoteToCustomer,
@@ -353,6 +475,15 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
       );
       await reloadAppointments();
       showSuccess("تم إتمام الموعد بنجاح");
+
+      // Send WhatsApp completion message
+      if (appointment && appointment.customerPhone) {
+        const message = generateCompletionMessage(
+          appointment,
+          actualPaidAmount
+        );
+        sendWhatsAppMessage(appointment.customerPhone, message);
+      }
     } catch (error) {
       console.error("Error completing appointment:", error);
       throw error; // Re-throw to be handled by the modal
@@ -693,15 +824,26 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
                   <td>
                     <div className="aap-table-actions">
                       {appointment.status === "في الانتظار" && (
-                        <button
-                          className="aap-action-btn aap-confirm"
-                          onClick={() =>
-                            handleConfirmAppointment(appointment.id)
-                          }
-                          title="تأكيد الموعد"
-                        >
-                          تأكيد
-                        </button>
+                        <>
+                          <button
+                            className="aap-action-btn aap-confirm"
+                            onClick={() =>
+                              handleConfirmAppointment(appointment.id)
+                            }
+                            title="تأكيد الموعد"
+                          >
+                            تأكيد
+                          </button>
+                          <button
+                            className="aap-action-btn aap-cancel"
+                            onClick={() =>
+                              handleCancelAppointmentByAdmin(appointment.id)
+                            }
+                            title="إلغاء الموعد"
+                          >
+                            إلغاء
+                          </button>
+                        </>
                       )}
                       {appointment.status === "مؤكد" && (
                         <>
@@ -713,6 +855,15 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
                             title="إتمام الموعد"
                           >
                             إتمام
+                          </button>
+                          <button
+                            className="aap-action-btn aap-cancel"
+                            onClick={() =>
+                              handleCancelAppointmentByAdmin(appointment.id)
+                            }
+                            title="إلغاء الموعد"
+                          >
+                            إلغاء
                           </button>
                           <button
                             className="aap-action-btn aap-whatsapp"
@@ -856,6 +1007,19 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={handleCreateSuccess}
+      />
+
+      {/* Staff Selection Modal */}
+      <StaffSelectionModal
+        isOpen={isStaffSelectionModalOpen}
+        onClose={() => {
+          setIsStaffSelectionModalOpen(false);
+          setAppointmentToConfirm(null);
+        }}
+        onConfirm={handleConfirmWithStaff}
+        staff={staff}
+        specializations={specializations}
+        appointment={appointmentToConfirm}
       />
     </div>
   );

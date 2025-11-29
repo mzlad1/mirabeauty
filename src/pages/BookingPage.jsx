@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import "./BookingPage.css";
 import {
   getAllServices,
@@ -68,6 +70,12 @@ const timeSlots = [
   "19:30",
   "20:00",
 ];
+
+// Custom locale formatting for Arabic day names with English numbers
+const formatShortWeekday = (locale, date) => {
+  const arabicDays = ["ح", "ن", "ث", "ر", "خ", "ج", "س"];
+  return arabicDays[date.getDay()];
+};
 
 const BookingPage = ({ currentUser, userData }) => {
   const navigate = useNavigate();
@@ -556,13 +564,9 @@ const BookingPage = ({ currentUser, userData }) => {
   const checkDuplicateBooking = (serviceId, date, time) => {
     const selectedService = services.find((s) => s.id === serviceId);
 
-    // Check if user has same service on same day
-    const sameServiceSameDay = userAppointments.some(
-      (apt) =>
-        apt.serviceId === serviceId &&
-        apt.date === date &&
-        (apt.status === "في الانتظار" || apt.status === "مؤكد")
-    );
+    // Allow multiple bookings of same service on same day
+    // Only prevent booking at exact same time
+    const sameServiceSameDay = false; // Removed restriction
 
     // Check if user has any appointment at same date and time
     const sameDateTime = userAppointments.some(
@@ -655,20 +659,12 @@ const BookingPage = ({ currentUser, userData }) => {
       }
 
       // Handle regular appointment booking
-      // Check for duplicate bookings
-      const { sameServiceSameDay, sameDateTime } = checkDuplicateBooking(
+      // Check for duplicate bookings at same time only
+      const { sameDateTime } = checkDuplicateBooking(
         bookingData.serviceId,
         bookingData.date,
         bookingData.time
       );
-
-      if (sameServiceSameDay) {
-        showError(
-          "لديك حجز مسبق لنفس الخدمة في هذا اليوم. لا يمكن حجز نفس الخدمة أكثر من مرة في اليوم الواحد."
-        );
-        setSubmitting(false);
-        return;
-      }
 
       if (sameDateTime) {
         showError("لديك حجز مسبق في نفس التاريخ والوقت. يرجى اختيار وقت آخر.");
@@ -1120,19 +1116,25 @@ const BookingPage = ({ currentUser, userData }) => {
                     <strong>الخدمة:</strong> {selectedService?.name}
                   </div>
                   <div className="info-item">
-                    <strong>المدة:</strong> {selectedService?.duration || 60}
+                    <strong>المدة:</strong>{" "}
+                    {selectedService?.duration || "غير محددة"} دقيقة
                   </div>
                 </div>
                 <div className="datetime-selection">
                   {/* Date Selection (common for all) */}
                   <div className="date-selection">
                     <h3>اختاري التاريخ</h3>
-                    <input
-                      type="date"
-                      value={bookingData.date}
-                      min={getMinDate()}
-                      onChange={async (e) => {
-                        const selectedDate = e.target.value;
+                    <Calendar
+                      onChange={async (date) => {
+                        // Format date as YYYY-MM-DD
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(
+                          2,
+                          "0"
+                        );
+                        const day = String(date.getDate()).padStart(2, "0");
+                        const selectedDate = `${year}-${month}-${day}`;
+
                         setBookingData({
                           ...bookingData,
                           date: selectedDate,
@@ -1142,8 +1144,18 @@ const BookingPage = ({ currentUser, userData }) => {
                           await loadAvailableTimeSlots(selectedDate);
                         }
                       }}
-                      className="form-input"
+                      value={
+                        bookingData.date ? new Date(bookingData.date) : null
+                      }
+                      minDate={new Date()}
+                      formatShortWeekday={formatShortWeekday}
+                      className="booking-calendar"
                     />
+                    {bookingData.date && (
+                      <p className="selected-date-display">
+                        التاريخ المختار: {bookingData.date}
+                      </p>
+                    )}
                   </div>
 
                   {/* Time Selection - Different UI for Flexible vs Fixed Time */}
@@ -1153,6 +1165,17 @@ const BookingPage = ({ currentUser, userData }) => {
                         /* FLEXIBLE TIME SELECTION (Laser-like services) */
                         <div className="laser-time-selection">
                           <h3>حددي الوقت</h3>
+                          <p
+                            className="info-text"
+                            style={{
+                              fontSize: "0.9rem",
+                              color: "#666",
+                              marginBottom: "1rem",
+                            }}
+                          >
+                            ملاحظة: يتم عرض الأوقات المتاحة فقط بناءً على مدة
+                            الخدمة وأوقات العمل
+                          </p>
 
                           <div className="laser-time-inputs">
                             <div className="form-group">
@@ -1164,16 +1187,56 @@ const BookingPage = ({ currentUser, userData }) => {
                                   setBookingData({
                                     ...bookingData,
                                     laserStartHour: e.target.value,
+                                    laserStartMinute: "", // Reset minute when hour changes
                                     time: "", // Reset combined time
                                   });
                                 }}
                               >
                                 <option value="">اختر الساعة</option>
-                                {LASER_HOURS.map((hour) => (
-                                  <option key={hour} value={hour}>
-                                    {String(hour).padStart(2, "0")}
-                                  </option>
-                                ))}
+                                {LASER_HOURS.filter((hour) => {
+                                  // Check if at least one valid minute exists for this hour
+                                  const serviceDuration =
+                                    parseInt(selectedService?.duration) || 60;
+                                  const maxEndTime = getCategoryMaxEndTime(
+                                    bookingData.serviceId
+                                  );
+                                  const maxEndMinutes =
+                                    timeToMinutes(maxEndTime);
+
+                                  // Check if any minute combination is valid for this hour
+                                  return LASER_MINUTES.some((minute) => {
+                                    const timeStr = `${String(hour).padStart(
+                                      2,
+                                      "0"
+                                    )}:${minute}`;
+
+                                    // Check forbidden times
+                                    if (
+                                      isStartTimeForbidden(
+                                        timeStr,
+                                        bookingData.serviceId
+                                      )
+                                    ) {
+                                      return false;
+                                    }
+
+                                    // Check maxEndTime
+                                    const endTime = calculateLaserEndTime(
+                                      timeStr,
+                                      serviceDuration
+                                    );
+                                    const endMinutes = timeToMinutes(endTime);
+
+                                    return endMinutes <= maxEndMinutes;
+                                  });
+                                }).map((hour) => {
+                                  const hourStr = String(hour).padStart(2, "0");
+                                  return (
+                                    <option key={hour} value={hour}>
+                                      {hourStr}
+                                    </option>
+                                  );
+                                })}
                               </select>
                             </div>
 
@@ -1191,7 +1254,43 @@ const BookingPage = ({ currentUser, userData }) => {
                                 }}
                               >
                                 <option value="">اختر الدقائق</option>
-                                {LASER_MINUTES.map((minute) => (
+                                {LASER_MINUTES.filter((minute) => {
+                                  // Filter out forbidden time combinations and times that exceed maxEndTime
+                                  if (!bookingData.laserStartHour) return true;
+                                  const timeStr = `${String(
+                                    bookingData.laserStartHour
+                                  ).padStart(2, "0")}:${minute}`;
+
+                                  // Check forbidden start times
+                                  if (
+                                    isStartTimeForbidden(
+                                      timeStr,
+                                      bookingData.serviceId
+                                    )
+                                  ) {
+                                    return false;
+                                  }
+
+                                  // Check if end time would exceed maxEndTime
+                                  const serviceDuration =
+                                    parseInt(selectedService?.duration) || 60;
+                                  const endTime = calculateLaserEndTime(
+                                    timeStr,
+                                    serviceDuration
+                                  );
+                                  const maxEndTime = getCategoryMaxEndTime(
+                                    bookingData.serviceId
+                                  );
+                                  const maxEndMinutes =
+                                    timeToMinutes(maxEndTime);
+                                  const endMinutes = timeToMinutes(endTime);
+
+                                  if (endMinutes > maxEndMinutes) {
+                                    return false;
+                                  }
+
+                                  return true;
+                                }).map((minute) => (
                                   <option key={minute} value={minute}>
                                     {minute}
                                   </option>
@@ -1859,19 +1958,36 @@ const BookingPage = ({ currentUser, userData }) => {
 
                   <div className="form-group">
                     <label className="form-label">التاريخ المفضل</label>
-                    <input
-                      type="date"
-                      className="form-input"
-                      value={consultationData.date}
-                      min={getMinDate()}
-                      onChange={(e) =>
+                    <Calendar
+                      onChange={(date) => {
+                        // Format date as YYYY-MM-DD
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(
+                          2,
+                          "0"
+                        );
+                        const day = String(date.getDate()).padStart(2, "0");
+                        const selectedDate = `${year}-${month}-${day}`;
+
                         setConsultationData({
                           ...consultationData,
-                          date: e.target.value,
-                        })
+                          date: selectedDate,
+                        });
+                      }}
+                      value={
+                        consultationData.date
+                          ? new Date(consultationData.date)
+                          : null
                       }
-                      required
+                      minDate={new Date()}
+                      formatShortWeekday={formatShortWeekday}
+                      className="booking-calendar"
                     />
+                    {consultationData.date && (
+                      <p className="selected-date-display">
+                        التاريخ المختار: {consultationData.date}
+                      </p>
+                    )}
                   </div>
 
                   <div className="form-group">

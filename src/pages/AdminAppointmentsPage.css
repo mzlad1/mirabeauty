@@ -327,6 +327,16 @@
   font-size: 1rem;
 }
 
+.aap-action-btn.aap-cancel {
+  background-color: #ffc107;
+  color: var(--dark);
+}
+
+.aap-action-btn.aap-cancel:hover {
+  background-color: #e0a800;
+  transform: translateY(-2px);
+}
+
 /* Empty State */
 .aap-empty-state-cell {
   padding: 3rem !important;

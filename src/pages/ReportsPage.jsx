@@ -81,6 +81,48 @@ const ReportsPage = ({ currentUser, userData }) => {
     return parseFloat(numericValue) || 0;
   };
 
+  // Helper function to get date range text
+  const getDateRangeText = () => {
+    const now = new Date();
+    const formatDate = (date) => {
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    };
+
+    switch (dateRange) {
+      case "all":
+        return "جميع الفترات";
+      case "today":
+        return `اليوم - ${formatDate(now)}`;
+      case "week":
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - 7);
+        return `آخر 7 أيام (من ${formatDate(weekStart)} إلى ${formatDate(
+          now
+        )})`;
+      case "month":
+        const monthStart = new Date(now);
+        monthStart.setMonth(now.getMonth() - 1);
+        return `آخر شهر (من ${formatDate(monthStart)} إلى ${formatDate(now)})`;
+      case "year":
+        const yearStart = new Date(now);
+        yearStart.setFullYear(now.getFullYear() - 1);
+        return `آخر سنة (من ${formatDate(yearStart)} إلى ${formatDate(now)})`;
+      case "custom":
+        if (customStartDate && customEndDate) {
+          return `من ${formatDate(new Date(customStartDate))} إلى ${formatDate(
+            new Date(customEndDate)
+          )}`;
+        }
+        return "فترة مخصصة";
+      default:
+        return "غير محدد";
+    }
+  };
+
   // Filter data by date range
   const filterByDateRange = (data, dateField = "createdAt") => {
     // Ensure data is an array
@@ -244,8 +286,9 @@ const ReportsPage = ({ currentUser, userData }) => {
     })
     .sort((a, b) => b.revenue - a.revenue);
 
-  // Customer statistics
+  // Customer statistics (exclude admin and staff)
   const customerStats = customers
+    .filter((customer) => customer.role === "customer")
     .map((customer) => {
       const customerAppointments = filteredAppointments.filter(
         (apt) => apt.customerId === customer.id
@@ -355,7 +398,6 @@ const ReportsPage = ({ currentUser, userData }) => {
       <html dir="rtl" lang="ar">
       <head>
         <meta charset="UTF-8">
-        <title>تقرير شامل - مركز ميرا بيوتي</title>
         <style>
           * {
             margin: 0;
@@ -461,6 +503,7 @@ const ReportsPage = ({ currentUser, userData }) => {
         <div class="report-header">
           <h1>مركز ميرا بيوتي - Mira Beauty Clinic</h1>
           <p>تقرير شامل للأعمال والإحصائيات</p>
+          <p><strong>فترة التقرير:</strong> ${getDateRangeText()}</p>
           <p>تاريخ الطباعة: ${printDate}</p>
         </div>
 
@@ -648,6 +691,7 @@ const ReportsPage = ({ currentUser, userData }) => {
               )}</div>
             </div>
           </div>
+          <p style="margin-bottom: 15px; color: #666; font-size: 14px;">أفضل 10 عملاء حسب الإنفاق - Top 10 Customers by Spending</p>
           <table>
             <thead>
               <tr>
@@ -661,7 +705,7 @@ const ReportsPage = ({ currentUser, userData }) => {
             </thead>
             <tbody>
               ${customerStats
-                .slice(0, 20)
+                .slice(0, 10)
                 .map(
                   (customer, index) => `
                 <tr>
