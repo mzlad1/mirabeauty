@@ -869,9 +869,24 @@
 }
 
 .booking-calendar .react-calendar__tile:disabled {
-  background-color: transparent;
-  color: #ccc;
+  background-color: #f5f5f5;
+  color: #999;
   cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* Remove red color from weekends (Saturday & Sunday) */
+.booking-calendar .react-calendar__month-view__days__day--weekend {
+  color: inherit;
+}
+
+.booking-calendar
+  .react-calendar__month-view__days__day--weekend:not(:disabled) {
+  color: var(--charcoal);
+}
+
+.booking-calendar .react-calendar__month-view__days__day--weekend:disabled {
+  color: #999;
 }
 
 .selected-date-display {
