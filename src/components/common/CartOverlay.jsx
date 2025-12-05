@@ -59,6 +59,17 @@ const CartOverlay = ({ isOpen, onClose, fromAddToCart = false }) => {
       return;
     }
 
+    // Get the product to check available quantity
+    const cartItem = cartItems.find(item => item.id === id);
+    if (cartItem) {
+      const availableQuantity = cartItem.stockQuantity || (cartItem.quantity !== undefined ? cartItem.quantity : (cartItem.inStock ? 999 : 0));
+      
+      // Prevent increasing beyond available stock
+      if (newQuantity > availableQuantity) {
+        return; // Don't update if exceeding stock
+      }
+    }
+
     const updatedItems = cartItems.map((item) =>
       item.id === id ? { ...item, quantity: newQuantity } : item
     );

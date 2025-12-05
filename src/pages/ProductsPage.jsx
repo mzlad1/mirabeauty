@@ -97,6 +97,8 @@ const ProductsPage = ({ setCurrentPage }) => {
   const addToCart = (product) => {
     const savedCart = localStorage.getItem("cartItems");
     const cartItems = savedCart ? JSON.parse(savedCart) : [];
+    
+    const availableQuantity = product.quantity !== undefined ? product.quantity : (product.inStock ? 999 : 0);
 
     const existingItem = cartItems.find((item) => item.id === product.id);
     let updatedCart;
@@ -107,7 +109,7 @@ const ProductsPage = ({ setCurrentPage }) => {
       );
       showToast(`تم زيادة كمية ${product.name} في السلة`, "success");
     } else {
-      updatedCart = [...cartItems, { ...product, quantity: 1 }];
+      updatedCart = [...cartItems, { ...product, quantity: 1, stockQuantity: availableQuantity }];
       showToast(`تم إضافة ${product.name} للسلة بنجاح`, "success");
     }
 
@@ -298,27 +300,33 @@ const ProductsPage = ({ setCurrentPage }) => {
                             %
                           </div>
                         )}
-                        {!product.inStock && (
-                          <div className="out-of-stock-badge">
-                            نفذ من المخزن
-                          </div>
-                        )}
-                        {product.inStock && (
-                          <button
-                            className="product-add-to-cart-icon"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              addToCart(product);
-                            }}
-                            title="إضافة إلى السلة"
-                          >
-                            <i
-                              className="fas fa-shopping-cart"
-                              style={{ color: "white" }}
-                            ></i>
-                          </button>
-                        )}
+                        {(() => {
+                          const quantity = product.quantity !== undefined ? product.quantity : (product.inStock ? 999 : 0);
+                          return quantity <= 0 ? (
+                            <div className="out-of-stock-badge">
+                              نفذ من المخزن
+                            </div>
+                          ) : null;
+                        })()}
+                        {(() => {
+                          const quantity = product.quantity !== undefined ? product.quantity : (product.inStock ? 999 : 0);
+                          return quantity > 0 ? (
+                            <button
+                              className="product-add-to-cart-icon"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                addToCart(product);
+                              }}
+                              title="إضافة إلى السلة"
+                            >
+                              <i
+                                className="fas fa-shopping-cart"
+                                style={{ color: "white" }}
+                              ></i>
+                            </button>
+                          ) : null;
+                        })()}
                       </div>
 
                       <div className="product-info">

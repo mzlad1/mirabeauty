@@ -85,6 +85,18 @@ const formatShortWeekday = (locale, date) => {
   return arabicDays[date.getDay()];
 };
 
+// Custom month/year formatter - displays as "شهر 9" instead of "September"
+const formatMonthYear = (locale, date) => {
+  const month = date.getMonth() + 1; // getMonth() returns 0-11
+  return `شهر ${month}`;
+};
+
+// Custom month formatter for month selection view
+const formatMonth = (locale, date) => {
+  const month = date.getMonth() + 1;
+  return `شهر ${month}`;
+};
+
 const BookingPage = ({ currentUser, userData }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -1157,6 +1169,8 @@ const BookingPage = ({ currentUser, userData }) => {
                       }
                       minDate={new Date()}
                       formatShortWeekday={formatShortWeekday}
+                      formatMonthYear={formatMonthYear}
+                      formatMonth={formatMonth}
                       tileDisabled={({ date }) => date.getDay() === 5}
                       className="booking-calendar"
                     />

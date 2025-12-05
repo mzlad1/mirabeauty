@@ -28,7 +28,7 @@ const ProductEditModal = ({
     categoryName: product?.categoryName || "",
     images: product?.images || [],
     primaryImageIndex: product?.primaryImageIndex || 0,
-    inStock: product?.inStock !== undefined ? product.inStock : true,
+    quantity: product?.quantity !== undefined ? product.quantity : 0,
     reviewsCount: product?.reviewsCount || 0,
     benefits: product?.benefits || [],
     ingredients: product?.ingredients || [],
@@ -51,7 +51,7 @@ const ProductEditModal = ({
         categoryName: product.categoryName || "",
         images: product.images || [],
         primaryImageIndex: product.primaryImageIndex || 0,
-        inStock: product.inStock !== undefined ? product.inStock : true,
+        quantity: product.quantity !== undefined ? product.quantity : 0,
         reviewsCount: product.reviewsCount || 0,
         benefits: product.benefits || [],
         ingredients: product.ingredients || [],
@@ -68,7 +68,7 @@ const ProductEditModal = ({
         categoryName: "",
         images: [],
         primaryImageIndex: 0,
-        inStock: true,
+        quantity: 0,
         reviewsCount: 0,
         benefits: [],
         ingredients: [],
@@ -563,16 +563,23 @@ const ProductEditModal = ({
           </div>
 
           <div className="product-edit-form-row">
-            <div className="product-edit-form-group product-edit-checkbox-group">
-              <label className="product-edit-checkbox-label">
-                <input
-                  type="checkbox"
-                  name="inStock"
-                  checked={formData.inStock}
-                  onChange={handleChange}
-                />
-                متوفر في المخزون
-              </label>
+            <div className="product-edit-form-group">
+              <label htmlFor="quantity">الكمية المتوفرة *</label>
+              <input
+                type="number"
+                id="quantity"
+                name="quantity"
+                value={formData.quantity}
+                onChange={handleChange}
+                required
+                className="product-edit-form-input"
+                placeholder="مثال: 50"
+                min="0"
+                step="1"
+              />
+              <small style={{ color: "#6c757d", fontSize: "0.875rem", marginTop: "4px", display: "block" }}>
+                أدخل 0 إذا كان المنتج غير متوفر
+              </small>
             </div>
           </div>
 

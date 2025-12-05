@@ -570,10 +570,11 @@ const AdminDashboardPage = ({ currentUser }) => {
 
       // Status filter
       if (productStatusFilter) {
-        if (productStatusFilter === "available" && !product.inStock) {
+        const quantity = product.quantity !== undefined ? product.quantity : (product.inStock ? 999 : 0);
+        if (productStatusFilter === "available" && quantity <= 0) {
           return false;
         }
-        if (productStatusFilter === "out_of_stock" && product.inStock) {
+        if (productStatusFilter === "out_of_stock" && quantity > 0) {
           return false;
         }
       }
@@ -2440,13 +2441,19 @@ const AdminDashboardPage = ({ currentUser }) => {
                               <td>{product.price} شيكل</td>
                               <td>{product.originalPrice || "-"}شيكل</td>
                               <td>
-                                <span
-                                  className={`status ${
-                                    product.inStock ? "confirmed" : "cancelled"
-                                  }`}
-                                >
-                                  {product.inStock ? "متوفر" : "نفذ"}
-                                </span>
+                                {(() => {
+                                  const quantity = product.quantity !== undefined ? product.quantity : (product.inStock ? "∞" : 0);
+                                  const displayQuantity = typeof quantity === 'number' ? quantity : quantity;
+                                  return (
+                                    <span
+                                      className={`status ${
+                                        (typeof quantity === 'number' ? quantity > 0 : quantity !== 0) ? "confirmed" : "cancelled"
+                                      }`}
+                                    >
+                                      {typeof quantity === 'number' ? `${quantity} قطعة` : displayQuantity}
+                                    </span>
+                                  );
+                                })()}
                               </td>
                               <td>
                                 {/* use fa-star insted of ⭐ just one star */}

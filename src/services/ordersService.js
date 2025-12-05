@@ -180,6 +180,64 @@ const generateOrderNumber = () => {
   return `ORD-${timestamp.slice(-6)}${random}`;
 };
 
+// Update product quantities when order is confirmed
+export const updateProductQuantitiesOnOrderAccept = async (orderItems) => {
+  try {
+    const PRODUCTS_COLLECTION = "products";
+    
+    // Update each product's quantity
+    for (const item of orderItems) {
+      const productRef = doc(db, PRODUCTS_COLLECTION, item.id);
+      const productDoc = await getDoc(productRef);
+      
+      if (productDoc.exists()) {
+        const currentData = productDoc.data();
+        const currentQuantity = currentData.quantity || 0;
+        const newQuantity = Math.max(0, currentQuantity - item.quantity);
+        
+        await updateDoc(productRef, {
+          quantity: newQuantity,
+          updatedAt: Timestamp.now(),
+        });
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error updating product quantities on order accept:", error);
+    throw new Error("فشل في تحديث كميات المنتجات");
+  }
+};
+
+// Update product quantities when order is cancelled (restore quantities)
+export const updateProductQuantitiesOnOrderCancel = async (orderItems) => {
+  try {
+    const PRODUCTS_COLLECTION = "products";
+    
+    // Restore each product's quantity
+    for (const item of orderItems) {
+      const productRef = doc(db, PRODUCTS_COLLECTION, item.id);
+      const productDoc = await getDoc(productRef);
+      
+      if (productDoc.exists()) {
+        const currentData = productDoc.data();
+        const currentQuantity = currentData.quantity || 0;
+        const newQuantity = currentQuantity + item.quantity;
+        
+        await updateDoc(productRef, {
+          quantity: newQuantity,
+          updatedAt: Timestamp.now(),
+        });
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error updating product quantities on order cancel:", error);
+    throw new Error("فشل في استعادة كميات المنتجات");
+  }
+};
+
 // Get order statistics (for admin dashboard)
 export const getOrderStatistics = async () => {
   try {

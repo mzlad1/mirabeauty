@@ -66,9 +66,17 @@ const CartPage = () => {
   }, [selectedDeliveryArea]);
 
   const updateQuantity = (id, newQuantity) => {
-    if (newQuantity <= 0) {
-      removeFromCart(id);
-      return;
+    if (newQuantity < 1) return;
+
+    // Get the product to check available quantity
+    const cartItem = cartItems.find(item => item.id === id);
+    if (cartItem) {
+      const availableQuantity = cartItem.stockQuantity || (cartItem.quantity !== undefined ? cartItem.quantity : (cartItem.inStock ? 999 : 0));
+      
+      // Prevent increasing beyond available stock
+      if (newQuantity > availableQuantity) {
+        return; // Don't update if exceeding stock
+      }
     }
 
     const updatedCart = cartItems.map((item) =>
@@ -83,7 +91,7 @@ const CartPage = () => {
 
   const removeFromCart = (id) => {
     const updatedCart = cartItems.filter((item) => item.id !== id);
-    setCartItems(updatedCart);
+   setCartItems(updatedCart);
     localStorage.setItem("cartItems", JSON.stringify(updatedCart));
 
     // Dispatch custom event to update cart count

@@ -134,7 +134,7 @@ export const deleteProduct = async (productId) => {
   }
 };
 
-// Update product stock status
+// Update product stock status (deprecated - use updateProductQuantity instead)
 export const updateProductStock = async (productId, inStock) => {
   try {
     const productRef = doc(db, PRODUCTS_COLLECTION, productId);
@@ -144,6 +144,20 @@ export const updateProductStock = async (productId, inStock) => {
     });
   } catch (error) {
     console.error("Error updating product stock:", error);
+    throw error;
+  }
+};
+
+// Update product quantity
+export const updateProductQuantity = async (productId, quantity) => {
+  try {
+    const productRef = doc(db, PRODUCTS_COLLECTION, productId);
+    await updateDoc(productRef, {
+      quantity: Number(quantity),
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error updating product quantity:", error);
     throw error;
   }
 };
@@ -177,17 +191,21 @@ export const searchProducts = async (searchTerm) => {
 export const getFeaturedProducts = async (limit = 6) => {
   try {
     const productsRef = collection(db, PRODUCTS_COLLECTION);
-    const q = query(
-      productsRef,
-      where("inStock", "==", true),
-      orderBy("rating", "desc")
-    );
+    // Note: Firestore doesn't support where clause with > 0 combined with orderBy on different field
+    // So we fetch all products and filter client-side
+    const q = query(productsRef, orderBy("rating", "desc"));
     const snapshot = await getDocs(q);
 
-    const products = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const products = snapshot.docs
+      .map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      .filter((product) => {
+        // Support both old inStock field and new quantity field
+        const hasQuantity = product.quantity !== undefined ? product.quantity > 0 : product.inStock === true;
+        return hasQuantity;
+      });
 
     return products.slice(0, limit);
   } catch (error) {
