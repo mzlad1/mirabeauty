@@ -17,6 +17,7 @@ import AdminAppointmentEditModal from "../components/dashboard/AdminAppointmentE
 import AppointmentDetailsModal from "../components/dashboard/AppointmentDetailsModal";
 import AppointmentCompletionModal from "../components/dashboard/AppointmentCompletionModal";
 import AdminCreateAppointmentModal from "../components/admin/AdminCreateAppointmentModal";
+import AppointmentsTimeline from "../components/admin/AppointmentsTimeline";
 import StaffSelectionModal from "../components/dashboard/StaffSelectionModal";
 import CustomModal from "../components/common/CustomModal";
 import { useModal } from "../hooks/useModal";
@@ -661,6 +662,13 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
           حجز موعد جديد
         </button>
       </div>
+
+      {/* Timeline for selected date */}
+      <AppointmentsTimeline
+        appointments={appointments}
+        selectedDate={dateFilter}
+        onAppointmentClick={handleViewAppointmentDetails}
+      />
 
       {/* Filters */}
       <div className="aap-appointments-filters">

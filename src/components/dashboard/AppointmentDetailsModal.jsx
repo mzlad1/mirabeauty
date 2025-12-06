@@ -113,7 +113,7 @@ const AppointmentDetailsModal = ({
             <div className="detail-item">
               <span className="detail-label">المدة:</span>
               <span className="detail-value">
-                {appointment.serviceDuration || appointment.duration}
+                {appointment.serviceDuration || appointment.duration} دقيقة
               </span>
             </div>
 

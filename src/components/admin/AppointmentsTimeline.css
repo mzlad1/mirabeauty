@@ -1,0 +1,311 @@
+.appointments-timeline {
+  background: var(--navy-blue, #0a1f44);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.timeline-date {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timeline-date i {
+  font-size: 24px;
+  color: var(--white, #ffffff);
+}
+
+.timeline-date h3 {
+  margin: 0;
+  font-size: 20px;
+  color: var(--white, #ffffff);
+}
+
+.timeline-count {
+  background: var(--gold, #c9a227);
+  color: var(--navy-blue, #0a1f44);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Timeline Container */
+.timeline-container {
+  position: relative;
+  min-height: 200px;
+  margin: 20px 0;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 20px;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 500px;
+}
+
+/* Time Axis */
+.timeline-axis {
+  position: relative;
+  margin-bottom: 30px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  direction: rtl;
+  height: 40px;
+}
+
+.timeline-time-slot {
+  position: absolute;
+  text-align: center;
+  transform: translateX(50%);
+}
+
+.time-label {
+  font-size: 12px;
+  color: var(--white, #ffffff);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.time-marker {
+  width: 2px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.3);
+  margin: 0 auto;
+}
+
+/* Timeline Track */
+.timeline-track {
+  position: relative;
+  min-height: 150px;
+  width: 100%;
+  direction: rtl;
+}
+
+.timeline-time-group {
+  position: absolute;
+  top: 0;
+}
+
+/* Appointment Cards */
+.timeline-appointment {
+  background: linear-gradient(
+    135deg,
+    rgba(201, 162, 39, 0.1) 0%,
+    rgba(10, 31, 68, 0.5) 100%
+  );
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-right: 4px solid var(--gold, #c9a227);
+  position: relative;
+  direction: rtl;
+  text-align: right;
+  min-width: 80px;
+  overflow: hidden;
+}
+
+.timeline-appointment:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(201, 162, 39, 0.3);
+}
+
+/* Compact Layout */
+.appointment-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--white, #ffffff);
+}
+
+.appointment-time-compact {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--gold, #c9a227);
+  white-space: nowrap;
+}
+
+.appointment-name-compact {
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--white, #ffffff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.appointment-status-compact {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  width: fit-content;
+}
+
+/* Status Colors - Based on screenshot */
+.timeline-pending {
+  border-right-color: #c9a227; /* Gold - في الانتظار */
+}
+
+.timeline-pending .appointment-status-compact {
+  background: rgba(201, 162, 39, 0.2);
+  color: #c9a227;
+}
+
+.timeline-confirmed {
+  border-right-color: #3b82f6; /* Blue - مؤكد */
+}
+
+.timeline-confirmed .appointment-status-compact {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.timeline-completed {
+  border-right-color: #10b981; /* Green - مكتمل */
+}
+
+.timeline-completed .appointment-status-compact {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.timeline-cancelled {
+  border-right-color: #ef4444; /* Red - ملغي */
+  opacity: 0.8;
+}
+
+.timeline-cancelled .appointment-status-compact {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* Empty State */
+.timeline-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.timeline-empty i {
+  font-size: 64px;
+  margin-bottom: 20px;
+  color: var(--white, #ffffff);
+  display: block;
+}
+
+.timeline-empty p {
+  font-size: 16px;
+  margin: 0;
+  color: var(--white, #ffffff);
+}
+
+/* Legend */
+.timeline-legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--white, #ffffff);
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.legend-color.timeline-pending {
+  background: #c9a227; /* Gold - في الانتظار */
+}
+
+.legend-color.timeline-confirmed {
+  background: #3b82f6; /* Blue - مؤكد */
+}
+
+.legend-color.timeline-completed {
+  background: #10b981; /* Green - مكتمل */
+}
+
+.legend-color.timeline-cancelled {
+  background: #ef4444; /* Red - ملغي */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .appointments-timeline {
+    padding: 15px;
+  }
+
+  .timeline-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .timeline-date h3 {
+    font-size: 18px;
+  }
+
+  .timeline-container {
+    padding: 15px;
+    max-height: 400px;
+  }
+
+  .timeline-appointment {
+    min-width: 180px;
+    max-width: 220px;
+    padding: 10px;
+  }
+
+  .timeline-legend {
+    gap: 12px;
+  }
+}
+
+/* Scrollbar Styling */
+.timeline-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.timeline-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb {
+  background: rgba(201, 162, 39, 0.5);
+  border-radius: 4px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb:hover {
+  background: var(--gold, #c9a227);
+}
