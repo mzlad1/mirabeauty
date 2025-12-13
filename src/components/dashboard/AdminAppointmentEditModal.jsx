@@ -16,6 +16,11 @@ const AdminAppointmentEditModal = ({
 }) => {
   const { modalState, closeModal, showError } = useModal();
   const [services, setServices] = useState([]);
+  const [staffAvailability, setStaffAvailability] = useState({
+    isChecking: false,
+    available: true,
+    conflicts: [],
+  });
   const [categories, setCategories] = useState([]);
 
   // Helper function to get specialization name by ID
@@ -230,7 +235,7 @@ const AdminAppointmentEditModal = ({
     }));
   };
 
-  const handleStaffChange = (e) => {
+  const handleStaffChange = async (e) => {
     const staffId = e.target.value;
     const selectedStaff = staff.find((s) => s.id === staffId);
 
@@ -239,7 +244,55 @@ const AdminAppointmentEditModal = ({
       staffId: staffId,
       staffName: selectedStaff ? selectedStaff.name : "",
     }));
+
+    // Check availability immediately when staff is selected
+    if (staffId && formData.date && formData.time) {
+      await checkStaffAvailability(staffId);
+    } else {
+      // Reset availability state if no staff selected
+      setStaffAvailability({
+        isChecking: false,
+        available: true,
+        conflicts: [],
+      });
+    }
   };
+
+  // Check staff availability function
+  const checkStaffAvailability = async (staffId) => {
+    if (!staffId || !formData.date || !formData.time) return;
+
+    setStaffAvailability({ isChecking: true, available: true, conflicts: [] });
+
+    try {
+      const duration =
+        appointment?.serviceDuration || appointment?.duration || 60;
+
+      const availabilityCheck = await checkStaffAvailabilityWithDuration(
+        staffId,
+        formData.date,
+        formData.time,
+        duration,
+        appointment?.id
+      );
+
+      setStaffAvailability({
+        isChecking: false,
+        available: availabilityCheck.available,
+        conflicts: availabilityCheck.conflicts || [],
+      });
+    } catch (error) {
+      console.error("Error checking staff availability:", error);
+      setStaffAvailability({ isChecking: false, available: true, conflicts: [] });
+    }
+  };
+
+  // Re-check availability when date or time changes
+  useEffect(() => {
+    if (formData.staffId && formData.date && formData.time) {
+      checkStaffAvailability(formData.staffId);
+    }
+  }, [formData.date, formData.time]);
 
   if (!isOpen) return null;
 
@@ -298,6 +351,35 @@ const AdminAppointmentEditModal = ({
                   </option>
                 ))}
               </select>
+              
+              {/* Staff Availability Warning */}
+              {staffAvailability.isChecking && (
+                <div className="staff-availability-checking">
+                  <i className="fas fa-spinner fa-spin"></i> جاري التحقق من توفر الأخصائية...
+                </div>
+              )}
+              
+              {!staffAvailability.isChecking && !staffAvailability.available && staffAvailability.conflicts.length > 0 && (
+                <div className="staff-availability-warning">
+                  <div className="warning-header">
+                    <i className="fas fa-exclamation-triangle"></i>
+                    <strong>تحذير: الأخصائية مشغولة</strong>
+                  </div>
+                  <div className="warning-content">
+                    <p>الأخصائية لديها تعارض في المواعيد التالية:</p>
+                    <ul className="conflict-list">
+                      {staffAvailability.conflicts.map((conflict, index) => (
+                        <li key={index}>
+                          {conflict.customerName} ({conflict.serviceName}) في {conflict.time}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="warning-note">
+                      <i className="fas fa-info-circle"></i> يمكنك المتابعة بالحفظ إذا كنت متأكداً من التعيين
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

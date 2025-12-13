@@ -19,6 +19,7 @@ import AppointmentCompletionModal from "../components/dashboard/AppointmentCompl
 import AdminCreateAppointmentModal from "../components/admin/AdminCreateAppointmentModal";
 import AppointmentsTimeline from "../components/admin/AppointmentsTimeline";
 import StaffSelectionModal from "../components/dashboard/StaffSelectionModal";
+import WhatsAppMessageModal from "../components/common/WhatsAppMessageModal";
 import CustomModal from "../components/common/CustomModal";
 import { useModal } from "../hooks/useModal";
 
@@ -67,6 +68,11 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
   const [isStaffSelectionModalOpen, setIsStaffSelectionModalOpen] =
     useState(false);
   const [appointmentToConfirm, setAppointmentToConfirm] = useState(null);
+  
+  // WhatsApp message modal states
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
+  const [whatsAppMessage, setWhatsAppMessage] = useState("");
+  const [whatsAppPhoneNumber, setWhatsAppPhoneNumber] = useState("");
 
   // Load appointments, staff, and specializations
   useEffect(() => {
@@ -175,10 +181,17 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
     return filtered.slice(startIndex, endIndex);
   };
 
-  // Helper function to send WhatsApp message
-  const sendWhatsAppMessage = (phoneNumber, message) => {
+  // Helper function to open WhatsApp message modal for editing
+  const openWhatsAppMessageModal = (phoneNumber, message) => {
+    setWhatsAppPhoneNumber(phoneNumber);
+    setWhatsAppMessage(message);
+    setIsWhatsAppModalOpen(true);
+  };
+  
+  // Helper function to send WhatsApp message (called after editing)
+  const sendWhatsAppMessage = (message) => {
     // Clean phone number (remove spaces, dashes, plus sign, etc.)
-    const cleanPhone = phoneNumber.replace(/[\s\-+]/g, "");
+    const cleanPhone = whatsAppPhoneNumber.replace(/[\s\-+]/g, "");
     // Check if country code is already present (972 or 970)
     const fullPhone =
       cleanPhone.startsWith("972") || cleanPhone.startsWith("970")
@@ -288,7 +301,7 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
         // Send WhatsApp cancellation message
         if (appointment.customerPhone) {
           const message = generateCancellationMessage(appointment);
-          sendWhatsAppMessage(appointment.customerPhone, message);
+          openWhatsAppMessageModal(appointment.customerPhone, message);
         }
       }
     } catch (error) {
@@ -389,7 +402,7 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
           staffName,
         };
         const message = generateConfirmationMessage(updatedAppointment);
-        sendWhatsAppMessage(appointmentToConfirm.customerPhone, message);
+        openWhatsAppMessageModal(appointmentToConfirm.customerPhone, message);
       }
     } catch (error) {
       console.error("Error confirming appointment:", error);
@@ -424,7 +437,7 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
           if (appointment.customerPhone) {
             try {
               const message = generateReminderMessage(appointment);
-              sendWhatsAppMessage(appointment.customerPhone, message);
+              openWhatsAppMessageModal(appointment.customerPhone, message);
               sentCount++;
               // Add delay between messages to avoid rate limiting
               await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -483,7 +496,7 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
           appointment,
           actualPaidAmount
         );
-        sendWhatsAppMessage(appointment.customerPhone, message);
+        openWhatsAppMessageModal(appointment.customerPhone, message);
       }
     } catch (error) {
       console.error("Error completing appointment:", error);
@@ -879,7 +892,7 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
                               if (appointment.customerPhone) {
                                 const message =
                                   generateReminderMessage(appointment);
-                                sendWhatsAppMessage(
+                                openWhatsAppMessageModal(
                                   appointment.customerPhone,
                                   message
                                 );
@@ -1028,6 +1041,15 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
         staff={staff}
         specializations={specializations}
         appointment={appointmentToConfirm}
+      />
+
+      {/* WhatsApp Message Editor Modal */}
+      <WhatsAppMessageModal
+        isOpen={isWhatsAppModalOpen}
+        onClose={() => setIsWhatsAppModalOpen(false)}
+        onSend={sendWhatsAppMessage}
+        defaultMessage={whatsAppMessage}
+        title="تحرير رسالة WhatsApp"
       />
     </div>
   );

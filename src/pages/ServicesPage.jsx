@@ -139,7 +139,7 @@ const ServicesPage = () => {
                         item.images && item.images.length > 0
                           ? item.images[item.primaryImageIndex || 0]?.url ||
                             item.images[item.primaryImageIndex || 0]
-                          : item.image || "/assets/default-service.jpg";
+                          : item.image || "/assets/default-service.png";
 
                       return (
                         <div
@@ -258,7 +258,7 @@ const ServicesPage = () => {
                       service.images && service.images.length > 0
                         ? service.images[service.primaryImageIndex || 0]?.url ||
                           service.images[service.primaryImageIndex || 0]
-                        : service.image || "/assets/default-service.jpg";
+                        : service.image ;
 
                     console.log(
                       "ServicesPage - Primary image selected:",

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./StaffSelectionModal.css";
+import { checkStaffAvailabilityWithDuration } from "../../services/appointmentsService";
 
 const StaffSelectionModal = ({
   isOpen,
@@ -11,6 +12,51 @@ const StaffSelectionModal = ({
 }) => {
   const [selectedStaffId, setSelectedStaffId] = useState("");
   const [adminNote, setAdminNote] = useState("");
+  const [staffAvailability, setStaffAvailability] = useState({
+    isChecking: false,
+    available: true,
+    conflicts: [],
+  });
+
+  // Check staff availability when selected
+  const checkStaffAvailability = async (staffId) => {
+    if (!staffId || !appointment) {
+      setStaffAvailability({ isChecking: false, available: true, conflicts: [] });
+      return;
+    }
+
+    setStaffAvailability({ isChecking: true, available: true, conflicts: [] });
+
+    try {
+      const duration = appointment?.serviceDuration || appointment?.duration || 60;
+
+      const availabilityCheck = await checkStaffAvailabilityWithDuration(
+        staffId,
+        appointment.date,
+        appointment.time,
+        duration,
+        appointment?.id // Exclude current appointment if editing
+      );
+
+      setStaffAvailability({
+        isChecking: false,
+        available: availabilityCheck.available,
+        conflicts: availabilityCheck.conflicts || [],
+      });
+    } catch (error) {
+      console.error("Error checking staff availability:", error);
+      setStaffAvailability({ isChecking: false, available: true, conflicts: [] });
+    }
+  };
+
+  // Monitor staff selection
+  useEffect(() => {
+    if (selectedStaffId) {
+      checkStaffAvailability(selectedStaffId);
+    } else {
+      setStaffAvailability({ isChecking: false, available: true, conflicts: [] });
+    }
+  }, [selectedStaffId]);
 
   if (!isOpen) return null;
 
@@ -36,6 +82,7 @@ const StaffSelectionModal = ({
   const handleCancel = () => {
     setSelectedStaffId("");
     setAdminNote("");
+    setStaffAvailability({ isChecking: false, available: true, conflicts: [] });
     onClose();
   };
 
@@ -84,6 +131,35 @@ const StaffSelectionModal = ({
                   </option>
                 ))}
               </select>
+              
+              {/* Staff Availability Warning */}
+              {staffAvailability.isChecking && (
+                <div className="staff-availability-checking">
+                  <i className="fas fa-spinner fa-spin"></i> جاري التحقق من توفر الأخصائية...
+                </div>
+              )}
+              
+              {!staffAvailability.isChecking && !staffAvailability.available && staffAvailability.conflicts.length > 0 && (
+                <div className="staff-availability-warning">
+                  <div className="warning-header">
+                    <i className="fas fa-exclamation-triangle"></i>
+                    <strong>تحذير: الأخصائية مشغولة</strong>
+                  </div>
+                  <div className="warning-content">
+                    <p>الأخصائية لديها تعارض في المواعيد التالية:</p>
+                    <ul className="conflict-list">
+                      {staffAvailability.conflicts.map((conflict, index) => (
+                        <li key={index}>
+                          {conflict.customerName} ({conflict.serviceName}) في {conflict.time}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="warning-note">
+                      <i className="fas fa-info-circle"></i> يمكنك المتابعة بالتأكيد إذا كنت متأكداً من التعيين
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="ssm-form-group">

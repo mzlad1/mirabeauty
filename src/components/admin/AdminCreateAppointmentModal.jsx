@@ -41,6 +41,11 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
   const [staffMembers, setStaffMembers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [staffAvailability, setStaffAvailability] = useState({
+    isChecking: false,
+    available: true,
+    conflicts: [],
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -215,6 +220,47 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
       categoryName.toLowerCase().includes("ليزر")
     );
   };
+
+  // Check staff availability function
+  const checkStaffAvailability = async (staffId) => {
+    if (!staffId || !formData.date || !formData.time) {
+      setStaffAvailability({ isChecking: false, available: true, conflicts: [] });
+      return;
+    }
+
+    setStaffAvailability({ isChecking: true, available: true, conflicts: [] });
+
+    try {
+      const selectedService = services.find((s) => s.id === formData.serviceId);
+      const duration = selectedService?.duration || 60;
+
+      const availabilityCheck = await checkStaffAvailabilityWithDuration(
+        staffId,
+        formData.date,
+        formData.time,
+        duration,
+        null // No appointment to exclude (new appointment)
+      );
+
+      setStaffAvailability({
+        isChecking: false,
+        available: availabilityCheck.available,
+        conflicts: availabilityCheck.conflicts || [],
+      });
+    } catch (error) {
+      console.error("Error checking staff availability:", error);
+      setStaffAvailability({ isChecking: false, available: true, conflicts: [] });
+    }
+  };
+
+  // Re-check availability when staff, date, time, or service changes
+  useEffect(() => {
+    if (formData.staffId && formData.date && formData.time && formData.serviceId) {
+      checkStaffAvailability(formData.staffId);
+    } else {
+      setStaffAvailability({ isChecking: false, available: true, conflicts: [] });
+    }
+  }, [formData.staffId, formData.date, formData.time, formData.serviceId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -502,17 +548,16 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
                         <select
                           value={formData.laserStartHour}
                           onChange={(e) => {
-                            setFormData({
+                            const hour = e.target.value;
+                            const newFormData = {
                               ...formData,
-                              laserStartHour: e.target.value,
-                            });
-                            if (e.target.value && formData.laserStartMinute) {
-                              setFormData({
-                                ...formData,
-                                laserStartHour: e.target.value,
-                                time: `${e.target.value}:${formData.laserStartMinute}`,
-                              });
+                              laserStartHour: hour,
+                            };
+                            // Update time if both hour and minute are selected
+                            if (hour && formData.laserStartMinute) {
+                              newFormData.time = `${hour}:${formData.laserStartMinute}`;
                             }
+                            setFormData(newFormData);
                           }}
                           required
                         >
@@ -533,17 +578,16 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
                         <select
                           value={formData.laserStartMinute}
                           onChange={(e) => {
-                            setFormData({
+                            const minute = e.target.value;
+                            const newFormData = {
                               ...formData,
-                              laserStartMinute: e.target.value,
-                            });
-                            if (formData.laserStartHour && e.target.value) {
-                              setFormData({
-                                ...formData,
-                                laserStartMinute: e.target.value,
-                                time: `${formData.laserStartHour}:${e.target.value}`,
-                              });
+                              laserStartMinute: minute,
+                            };
+                            // Update time if both hour and minute are selected
+                            if (formData.laserStartHour && minute) {
+                              newFormData.time = `${formData.laserStartHour}:${minute}`;
                             }
+                            setFormData(newFormData);
                           }}
                           required
                         >
@@ -562,11 +606,14 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
                         <strong>وقت البدء:</strong> {formData.time}
                         <br />
                         <strong>وقت الانتهاء المتوقع:</strong>{" "}
-                        {calculateLaserEndTime(
-                          formData.time,
-                          services.find((s) => s.id === formData.serviceId)
-                            ?.duration || 60
-                        )}
+                        {(() => {
+                          // Build time string directly from hour/minute to ensure it's properly formatted
+                          const startTime = formData.laserStartHour && formData.laserStartMinute 
+                            ? `${formData.laserStartHour}:${formData.laserStartMinute}`
+                            : formData.time;
+                          const duration = parseInt(services.find((s) => s.id === formData.serviceId)?.duration) || 60;
+                          return calculateLaserEndTime(startTime, duration);
+                        })()}
                       </div>
                     )}
                   </>
@@ -684,6 +731,35 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
                   </option>
                 ))}
               </select>
+              
+              {/* Staff Availability Warning */}
+              {staffAvailability.isChecking && (
+                <div className="staff-availability-checking">
+                  <i className="fas fa-spinner fa-spin"></i> جاري التحقق من توفر الأخصائية...
+                </div>
+              )}
+              
+              {!staffAvailability.isChecking && !staffAvailability.available && staffAvailability.conflicts.length > 0 && (
+                <div className="staff-availability-warning">
+                  <div className="warning-header">
+                    <i className="fas fa-exclamation-triangle"></i>
+                    <strong>تحذير: الأخصائية مشغولة</strong>
+                  </div>
+                  <div className="warning-content">
+                    <p>الأخصائية لديها تعارض في المواعيد التالية:</p>
+                    <ul className="conflict-list">
+                      {staffAvailability.conflicts.map((conflict, index) => (
+                        <li key={index}>
+                          {conflict.customerName} ({conflict.serviceName}) في {conflict.time}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="warning-note">
+                      <i className="fas fa-info-circle"></i> يمكنك المتابعة بإنشاء الموعد إذا كنت متأكداً من التعيين
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="form-group">

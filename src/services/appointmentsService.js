@@ -346,7 +346,7 @@ export const checkStaffAvailabilityWithDuration = async (
 
     // Calculate new appointment time range
     const newStartMinutes = timeToMinutes(startTime);
-    const newEndMinutes = newStartMinutes + durationMinutes;
+    const newEndMinutes = newStartMinutes + parseInt(durationMinutes);
 
     // Check for overlaps
     const conflicts = [];
@@ -360,8 +360,9 @@ export const checkStaffAvailabilityWithDuration = async (
 
       // Get existing appointment time range
       const existingStartMinutes = timeToMinutes(appointment.time);
-      const existingDuration =
-        appointment.serviceDuration || appointment.duration || 60;
+      const existingDuration = parseInt(
+        appointment.serviceDuration || appointment.duration
+      ) || 60;
       const existingEndMinutes = existingStartMinutes + existingDuration;
 
       // Check for overlap: new appointment overlaps if:

@@ -284,7 +284,7 @@ const ProductsPage = ({ setCurrentPage }) => {
                                     ?.url ||
                                   product.images[product.primaryImageIndex]
                                 : product.images[0]?.url || product.images[0]
-                              : product.image || "/images/placeholder.jpg"
+                              : product.image || "/assets/logo.png"
                           }
                           alt={product.name}
                         />

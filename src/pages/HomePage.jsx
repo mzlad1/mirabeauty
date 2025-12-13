@@ -218,7 +218,7 @@ const HomePage = () => {
                   service.images && service.images.length > 0
                     ? service.images[service.primaryImageIndex || 0]?.url ||
                       service.images[service.primaryImageIndex || 0]
-                    : service.icon || "/assets/default-service.jpg";
+                    : service.icon || "/assets/default-service.png";
 
                 return (
                   <div key={service.id} className="service-card card">

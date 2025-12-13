@@ -1098,7 +1098,7 @@ const BookingPage = ({ currentUser, userData }) => {
                                 ? service.images[service.primaryImageIndex || 0]
                                     ?.url ||
                                   service.images[service.primaryImageIndex || 0]
-                                : service.image || "/assets/default-service.jpg"
+                                : service.image || "/assets/default-service.png"
                             }
                             alt={service.name}
                           />
