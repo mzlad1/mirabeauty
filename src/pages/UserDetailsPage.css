@@ -488,6 +488,15 @@
     align-items: flex-start;
     gap: 0.5rem;
   }
+
+  .user-details-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-details-order-modal,
+  .user-details-appointment-modal {
+    max-height: 45vh;
+  }
 }
 
 @media (max-width: 480px) {
@@ -506,4 +515,185 @@
     flex-direction: column;
     text-align: center;
   }
+
+  .user-details-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* User Details - Click Hint */
+.click-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #e8f4fd;
+  border: 1px solid #b3d9f2;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: #0c5a8a;
+}
+
+.click-hint i {
+  color: var(--primary-color);
+  font-size: 1rem;
+}
+
+/* User Details - Clickable Row Styles */
+.user-details-page .clickable-row {
+  transition: all 0.2s ease;
+}
+
+.user-details-page .clickable-row:hover {
+  background-color: #f0f7ff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* User Details - Modal Styles */
+.user-details-order-modal,
+.user-details-appointment-modal {
+  text-align: right;
+  direction: rtl;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.user-details-modal-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.user-details-modal-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.user-details-modal-section h4 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-details-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.user-details-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.user-details-detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.user-details-detail-item label {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.user-details-detail-item span {
+  font-size: 1rem;
+  color: var(--charcoal);
+}
+
+/* Scrollbar styling for modal */
+.user-details-order-modal::-webkit-scrollbar,
+.user-details-appointment-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.user-details-order-modal::-webkit-scrollbar-track,
+.user-details-appointment-modal::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.user-details-order-modal::-webkit-scrollbar-thumb,
+.user-details-appointment-modal::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 10px;
+}
+
+.user-details-order-modal::-webkit-scrollbar-thumb:hover,
+.user-details-appointment-modal::-webkit-scrollbar-thumb:hover {
+  background: var(--charcoal);
+}
+
+/* User Details - Products List in Order Modal */
+.user-details-products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.user-details-product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.user-details-product-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-details-product-name {
+  font-weight: 600;
+  color: var(--charcoal);
+}
+
+.user-details-product-quantity {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.user-details-product-price {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+/* User Details - Financial Summary */
+.user-details-financial-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.user-details-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.user-details-summary-row.total {
+  border-top: 2px solid var(--primary-color);
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.user-details-summary-row.total span {
+  color: var(--primary-color);
 }

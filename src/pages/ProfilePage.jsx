@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ProfilePage.css";
+import { formatTimeDisplay } from "../utils/timeUtils";
 import {
   getAppointmentsByCustomer,
   cancelAppointment,
@@ -605,7 +606,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                             </span>
                             <span className="time">
                               <i className="fas fa-clock"></i>{" "}
-                              {upcomingAppointments[0].time}
+                              {formatTimeDisplay(upcomingAppointments[0].time)}
                             </span>
                           </div>
                         </div>
@@ -679,7 +680,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                             </div>
                             <div className="detail-row">
                               <span className="label">الوقت:</span>
-                              <span className="value">{appointment.time}</span>
+                              <span className="value">{formatTimeDisplay(appointment.time)}</span>
                             </div>
                             <div className="detail-row">
                               <span className="label">المدة:</span>

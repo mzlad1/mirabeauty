@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./BookingPage.css";
+import { formatTimeDisplay } from "../utils/timeUtils";
 import {
   getAllServices,
   getServicesByCategory,
@@ -1254,9 +1255,11 @@ const BookingPage = ({ currentUser, userData }) => {
                                   });
                                 }).map((hour) => {
                                   const hourStr = String(hour).padStart(2, "0");
+                                  // Convert to 12-hour format for display
+                                  const displayHour = hour > 12 ? hour - 12 : hour;
                                   return (
                                     <option key={hour} value={hour}>
-                                      {hourStr}
+                                      {displayHour}
                                     </option>
                                   );
                                 })}
@@ -1330,14 +1333,13 @@ const BookingPage = ({ currentUser, userData }) => {
                                   {selectedService?.duration || "60 دقيقة"}
                                   <br />
                                   <strong>وقت البدء:</strong>{" "}
-                                  {bookingData.laserStartHour}:
-                                  {bookingData.laserStartMinute}
+                                  {formatTimeDisplay(`${bookingData.laserStartHour}:${bookingData.laserStartMinute}`)}
                                   <br />
                                   <strong>وقت الانتهاء المتوقع:</strong>{" "}
-                                  {calculateLaserEndTime(
+                                  {formatTimeDisplay(calculateLaserEndTime(
                                     `${bookingData.laserStartHour}:${bookingData.laserStartMinute}`,
                                     parseInt(selectedService?.duration) || 60
-                                  )}
+                                  ))}
                                 </div>
                                 <button
                                   type="button"
@@ -1410,7 +1412,7 @@ const BookingPage = ({ currentUser, userData }) => {
                                   setStep(3);
                                 }}
                               >
-                                {time}
+                                {formatTimeDisplay(time)}
                               </button>
                             ))}
                           </div>
@@ -1524,7 +1526,7 @@ const BookingPage = ({ currentUser, userData }) => {
                                     );
                                   }}
                                 >
-                                  {time}
+                                  {formatTimeDisplay(time)}
                                 </button>
                               ))}
                             </div>
@@ -1560,17 +1562,17 @@ const BookingPage = ({ currentUser, userData }) => {
                     <div className="summary-item">
                       <span className="label">الوقت:</span>
                       <span className="value">
-                        {bookingData.time}
+                        {formatTimeDisplay(bookingData.time)}
                         {isLaserService(bookingData.serviceId) &&
                           bookingData.time && (
                             <span /*{ style={{ fontSize: "0.9em", color: "#666" }} }*/
                             >
                               {" "}
                               إلى{" "}
-                              {calculateLaserEndTime(
+                              {formatTimeDisplay(calculateLaserEndTime(
                                 bookingData.time,
                                 bookingData.laserDuration
-                              )}
+                              ))}
                             </span>
                           )}
                         {isSkinService(bookingData.serviceId) &&
@@ -1579,7 +1581,7 @@ const BookingPage = ({ currentUser, userData }) => {
                             <span /*{ style={{ fontSize: "0.9em", color: "#666" }} }*/
                             >
                               {" "}
-                              إلى {bookingData.customEndTime}
+                              إلى {formatTimeDisplay(bookingData.customEndTime)}
                             </span>
                           )}
                       </span>

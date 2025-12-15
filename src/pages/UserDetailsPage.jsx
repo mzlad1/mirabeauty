@@ -8,6 +8,8 @@ import {
   getAppointmentsByStaff,
 } from "../services/appointmentsService";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+import CustomModal from "../components/common/CustomModal";
+import { formatTimeDisplay } from "../utils/timeUtils";
 
 const UserDetailsPage = ({ currentUser, userData }) => {
   const navigate = useNavigate();
@@ -17,6 +19,10 @@ const UserDetailsPage = ({ currentUser, userData }) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview"); // overview, orders, appointments
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
 
   // Check if user is admin
   useEffect(() => {
@@ -119,6 +125,29 @@ const UserDetailsPage = ({ currentUser, userData }) => {
       default:
         return <span className="role-badge customer">عميل</span>;
     }
+  };
+
+  // Handler for opening order details modal
+  const handleOrderClick = (order) => {
+    setSelectedOrder(order);
+    setIsOrderModalOpen(true);
+  };
+
+  // Handler for opening appointment details modal
+  const handleAppointmentClick = (appointment) => {
+    setSelectedAppointment(appointment);
+    setIsAppointmentModalOpen(true);
+  };
+
+  // Close modals
+  const closeOrderModal = () => {
+    setIsOrderModalOpen(false);
+    setSelectedOrder(null);
+  };
+
+  const closeAppointmentModal = () => {
+    setIsAppointmentModalOpen(false);
+    setSelectedAppointment(null);
   };
 
   // Calculate statistics based on user role
@@ -412,7 +441,12 @@ const UserDetailsPage = ({ currentUser, userData }) => {
                   <p>لا توجد طلبات لهذا المستخدم</p>
                 </div>
               ) : (
-                <div className="table-card">
+                <>
+                  <div className="click-hint">
+                    <i className="fas fa-info-circle"></i>
+                    <span>اضغط على أي طلب لعرض التفاصيل الكاملة</span>
+                  </div>
+                  <div className="table-card">
                   <table className="data-table">
                     <thead>
                       <tr>
@@ -426,7 +460,12 @@ const UserDetailsPage = ({ currentUser, userData }) => {
                     </thead>
                     <tbody>
                       {orders.map((order, index) => (
-                        <tr key={order.id}>
+                        <tr 
+                          key={order.id} 
+                          onClick={() => handleOrderClick(order)}
+                          style={{ cursor: 'pointer' }}
+                          className="clickable-row"
+                        >
                           <td>{index + 1}</td>
                           <td>
                             <strong>
@@ -444,6 +483,7 @@ const UserDetailsPage = ({ currentUser, userData }) => {
                     </tbody>
                   </table>
                 </div>
+                </>
               )}
             </div>
           )}
@@ -461,7 +501,12 @@ const UserDetailsPage = ({ currentUser, userData }) => {
                   </p>
                 </div>
               ) : (
-                <div className="table-card">
+                <>
+                  <div className="click-hint">
+                    <i className="fas fa-info-circle"></i>
+                    <span>اضغط على أي موعد لعرض التفاصيل الكاملة</span>
+                  </div>
+                  <div className="table-card">
                   <table className="data-table">
                     <thead>
                       <tr>
@@ -476,13 +521,18 @@ const UserDetailsPage = ({ currentUser, userData }) => {
                     </thead>
                     <tbody>
                       {appointments.map((apt, index) => (
-                        <tr key={apt.id}>
+                        <tr 
+                          key={apt.id}
+                          onClick={() => handleAppointmentClick(apt)}
+                          style={{ cursor: 'pointer' }}
+                          className="clickable-row"
+                        >
                           <td>{index + 1}</td>
                           <td>
                             <strong>{apt.serviceName}</strong>
                           </td>
                           <td>{apt.date}</td>
-                          <td>{apt.time}</td>
+                          <td>{formatTimeDisplay(apt.time)}</td>
                           <td>
                             <strong>{apt.servicePrice || apt.price}</strong>
                           </td>
@@ -493,11 +543,227 @@ const UserDetailsPage = ({ currentUser, userData }) => {
                     </tbody>
                   </table>
                 </div>
+                </>
               )}
             </div>
           )}
         </div>
       </div>
+
+      {/* Order Details Modal */}
+      {selectedOrder && (
+        <CustomModal
+          isOpen={isOrderModalOpen}
+          onClose={closeOrderModal}
+          type="info"
+          title={`تفاصيل الطلب #${selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}`}
+          showCancel={false}
+          confirmText="إغلاق"
+          onConfirm={closeOrderModal}
+          message={
+            <div className="user-details-order-modal">
+              <div className="user-details-modal-section">
+                <h4>معلومات الطلب</h4>
+                <div className="user-details-detail-grid">
+                  <div className="user-details-detail-item">
+                    <label>رقم الطلب:</label>
+                    <span>#{selectedOrder.orderNumber || selectedOrder.id.slice(0, 8)}</span>
+                  </div>
+                  <div className="user-details-detail-item">
+                    <label>التاريخ:</label>
+                    <span>{formatDate(selectedOrder.createdAt)}</span>
+                  </div>
+                  <div className="user-details-detail-item">
+                    <label>الحالة:</label>
+                    <span>{getOrderStatusBadge(selectedOrder.status)}</span>
+                  </div>
+                  <div className="user-details-detail-item">
+                    <label>منطقة التوصيل:</label>
+                    <span>{selectedOrder.deliveryArea || "غير محدد"}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="user-details-modal-section">
+                <h4>معلومات العميل</h4>
+                <div className="user-details-detail-grid">
+                  <div className="user-details-detail-item">
+                    <label>الاسم:</label>
+                    <span>{selectedOrder.customerInfo?.name || "غير محدد"}</span>
+                  </div>
+                  <div className="user-details-detail-item">
+                    <label>الهاتف:</label>
+                    <span>{selectedOrder.customerInfo?.phone || "غير محدد"}</span>
+                  </div>
+                  <div className="user-details-detail-item">
+                    <label>العنوان:</label>
+                    <span>{selectedOrder.customerInfo?.address || "غير محدد"}</span>
+                  </div>
+                  {selectedOrder.customerInfo?.note && (
+                    <div className="user-details-detail-item full-width">
+                      <label>ملاحظات العميل:</label>
+                      <span>{selectedOrder.customerInfo.note}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="user-details-modal-section">
+                <h4>المنتجات</h4>
+                <div className="user-details-products-list">
+                  {selectedOrder.items?.map((item, index) => (
+                    <div key={index} className="user-details-product-item">
+                      <div className="user-details-product-info">
+                        <span className="user-details-product-name">{item.name}</span>
+                        <span className="user-details-product-quantity">× {item.quantity}</span>
+                      </div>
+                      <span className="user-details-product-price">{item.price} ₪</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="user-details-modal-section">
+                <h4>الملخص المالي</h4>
+                <div className="user-details-financial-summary">
+                  <div className="user-details-summary-row">
+                    <span>المجموع الفرعي:</span>
+                    <span>{selectedOrder.subtotal} ₪</span>
+                  </div>
+                  <div className="user-details-summary-row">
+                    <span>رسوم التوصيل:</span>
+                    <span>{selectedOrder.deliveryPrice} ₪</span>
+                  </div>
+                  <div className="user-details-summary-row total">
+                    <span>المجموع الكلي:</span>
+                    <span><strong>{selectedOrder.total} ₪</strong></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        />
+      )}
+
+      {/* Appointment Details Modal */}
+      {selectedAppointment && (
+        <CustomModal
+          isOpen={isAppointmentModalOpen}
+          onClose={closeAppointmentModal}
+          type="info"
+          title={`تفاصيل الموعد - ${selectedAppointment.serviceName}`}
+          showCancel={false}
+          confirmText="إغلاق"
+          onConfirm={closeAppointmentModal}
+          message={
+            <div className="user-details-appointment-modal">
+              <div className="user-details-modal-section">
+                <h4>معلومات الموعد</h4>
+                <div className="user-details-detail-grid">
+                  <div className="user-details-detail-item">
+                    <label>الخدمة:</label>
+                    <span>{selectedAppointment.serviceName}</span>
+                  </div>
+                  <div className="user-details-detail-item">
+                    <label>التاريخ:</label>
+                    <span>{selectedAppointment.date}</span>
+                  </div>
+                  <div className="user-details-detail-item">
+                    <label>الوقت:</label>
+                    <span>{formatTimeDisplay(selectedAppointment.time)}</span>
+                  </div>
+                  <div className="user-details-detail-item">
+                    <label>المدة:</label>
+                    <span>{selectedAppointment.serviceDuration || selectedAppointment.duration || "غير محدد"} دقيقة</span>
+                  </div>
+                  {selectedAppointment.endTime && (
+                    <div className="user-details-detail-item">
+                      <label>وقت الانتهاء:</label>
+                      <span>{formatTimeDisplay(selectedAppointment.endTime)}</span>
+                    </div>
+                  )}
+                  <div className="user-details-detail-item">
+                    <label>الحالة:</label>
+                    <span>{getAppointmentStatusBadge(selectedAppointment.status)}</span>
+                  </div>
+                  <div className="user-details-detail-item">
+                    <label>السعر:</label>
+                    <span><strong>{selectedAppointment.servicePrice || selectedAppointment.price}</strong></span>
+                  </div>
+                  {selectedAppointment.actualPaidAmount && (
+                    <div className="user-details-detail-item">
+                      <label>المبلغ المدفوع:</label>
+                      <span><strong>{selectedAppointment.actualPaidAmount} شيكل</strong></span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="user-details-modal-section">
+                <h4>معلومات العميل</h4>
+                <div className="user-details-detail-grid">
+                  <div className="user-details-detail-item">
+                    <label>الاسم:</label>
+                    <span>{selectedAppointment.customerName}</span>
+                  </div>
+                  <div className="user-details-detail-item">
+                    <label>الهاتف:</label>
+                    <span>{selectedAppointment.customerPhone}</span>
+                  </div>
+                  <div className="user-details-detail-item">
+                    <label>البريد الإلكتروني:</label>
+                    <span>{selectedAppointment.customerEmail || "غير محدد"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {selectedAppointment.staffName && (
+                <div className="user-details-modal-section">
+                  <h4>معلومات الموظف</h4>
+                  <div className="user-details-detail-grid">
+                    <div className="user-details-detail-item">
+                      <label>الموظف المسؤول:</label>
+                      <span>{selectedAppointment.staffName}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(selectedAppointment.notes || selectedAppointment.adminNote || selectedAppointment.staffNoteToCustomer || selectedAppointment.cancellationReason) && (
+                <div className="user-details-modal-section">
+                  <h4>الملاحظات</h4>
+                  <div className="user-details-detail-grid">
+                    {selectedAppointment.notes && (
+                      <div className="user-details-detail-item full-width">
+                        <label>ملاحظات العميل:</label>
+                        <span>{selectedAppointment.notes}</span>
+                      </div>
+                    )}
+                    {selectedAppointment.adminNote && (
+                      <div className="user-details-detail-item full-width">
+                        <label>ملاحظة الإدارة:</label>
+                        <span>{selectedAppointment.adminNote}</span>
+                      </div>
+                    )}
+                    {selectedAppointment.staffNoteToCustomer && (
+                      <div className="user-details-detail-item full-width">
+                        <label>ملاحظة الموظف للعميل:</label>
+                        <span>{selectedAppointment.staffNoteToCustomer}</span>
+                      </div>
+                    )}
+                    {selectedAppointment.cancellationReason && (
+                      <div className="user-details-detail-item full-width">
+                        <label>سبب الإلغاء:</label>
+                        <span style={{ color: '#dc3545' }}>{selectedAppointment.cancellationReason}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          }
+        />
+      )}
     </div>
   );
 };
