@@ -1,90 +1,227 @@
-# MiraBeauty
+# 💅 MiraBeauty Clinic
 
-MiraBeauty is a modern beauty salon and e-commerce web application. It offers a seamless experience for customers, staff, and administrators, featuring online booking, product shopping, user profiles, and dashboards.
+A comprehensive beauty clinic management system built with React and Firebase. This modern web application streamlines appointment booking, product sales, and client management for beauty clinics and spas.
 
-## Features
+![React](https://img.shields.io/badge/React-18.2.0-blue.svg)
+![Firebase](https://img.shields.io/badge/Firebase-12.4.0-orange.svg)
+![Vite](https://img.shields.io/badge/Vite-5.0.0-purple.svg)
 
-### 1. User Authentication
-- Register and login for customers and staff
-- Secure authentication with local storage
-- Account settings and profile management
+## ✨ Features
 
-### 2. Customer Experience
-- **Home Page:** Promotional banners, featured products, and services
-- **Booking:** Book appointments for beauty services with date/time selection
-- **Product Shopping:** Browse, view details, and add products to cart
-- **Cart:** Overlay and dedicated cart page for managing purchases
-- **Booking History:** View past and upcoming appointments
-- **Testimonials:** Customer reviews and feedback
-- **FAQ:** Frequently asked questions
+### 👥 Multi-Role System
 
-### 3. Staff & Admin Dashboards
-- **Admin Dashboard:**
-  - View and manage all appointments
-  - Customer management
-  - Statistics and analytics cards
-- **Staff Dashboard:**
-  - View assigned appointments
-  - Access to customer details
+- **Customer Portal**: Book appointments, browse products, manage orders
+- **Staff Dashboard**: View and manage assigned appointments
+- **Admin Panel**: Complete control over services, products, users, and analytics
 
-### 4. Product & Service Management
-- Product and service cards with details
-- Responsive product and service listing pages
-- Product details page with add-to-cart functionality
+### 📅 Appointment Management
 
-### 5. Common Components
-- Header and navigation bar
-- Footer with contact and social links
-- Loading spinner for async actions
-- Responsive promotional banners
+- Real-time appointment booking with calendar integration
+- Drag-and-drop timeline view for admin/staff
+- Service selection with duration and pricing
+- Staff specialization matching
+- Appointment status tracking (pending, confirmed, completed, cancelled)
 
-### 6. Responsive Design
-- Fully responsive layout for desktop, tablet, and mobile
-- RTL (Right-to-Left) support for languages like Arabic
-- Custom fonts and modern UI
+### 🛍️ E-Commerce Features
 
-### 7. Utilities & Helpers
-- Local storage hooks for persistent state
-- Date helpers for formatting and calculations
-- Constants for configuration
+- Product catalog with categories and filtering
+- Shopping cart functionality
+- Order management and tracking
+- Product image uploads and management
+- Inventory control
 
-## Project Structure
+### 💬 Customer Engagement
 
-- `src/components/` — Reusable UI components (auth, common, customer, dashboard, profile)
-- `src/pages/` — Main pages (Home, Booking, Products, Cart, Profile, Admin/Staff Dashboards, FAQ)
-- `src/data/` — Sample data for products, services, users, etc.
-- `src/hooks/` — Custom React hooks
-- `src/utils/` — Utility functions (auth, date helpers, constants)
-- `src/styles/` — Global, responsive, RTL, and variable CSS
-- `public/` — Static assets (fonts, images)
+- FAQ system with categories
+- Customer feedback and ratings
+- User consultations and skin type recommendations
+- Service reviews
 
-## Getting Started
+### 📊 Admin Features
 
-1. **Install dependencies:**
-   ```sh
+- Comprehensive dashboard with analytics
+- User management (customers and staff)
+- Service and product CRUD operations
+- Order and appointment tracking
+- Revenue reports and statistics
+- Feedback monitoring
+
+### 🔐 Authentication & Security
+
+- Firebase Authentication
+- Role-based access control (Customer, Staff, Admin)
+- Protected routes
+- Secure profile management
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+- Firebase account
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd mirabeauty
+   ```
+
+2. **Install dependencies**
+
+   ```bash
    npm install
    ```
-2. **Run the development server:**
-   ```sh
+
+3. **Configure Firebase**
+
+   Update [src/config/firebase.js](src/config/firebase.js) with your Firebase credentials:
+
+   ```javascript
+   const firebaseConfig = {
+     apiKey: "your-api-key",
+     authDomain: "your-auth-domain",
+     projectId: "your-project-id",
+     storageBucket: "your-storage-bucket",
+     messagingSenderId: "your-messaging-sender-id",
+     appId: "your-app-id",
+     measurementId: "your-measurement-id",
+   };
+   ```
+
+4. **Start the development server**
+
+   ```bash
    npm run dev
    ```
-3. **Open in browser:**
-   Visit [http://localhost:5173](http://localhost:5173)
 
-## Tech Stack
-- React (Vite)
-- CSS Modules
-- Local Storage
-- Modern JavaScript (ES6+)
+5. **Open your browser**
 
-## Customization
-- Update sample data in `src/data/`
-- Modify styles in `src/styles/`
-- Add or edit components in `src/components/`
+   Navigate to `http://localhost:5173`
 
-## Deployment
-- Ready for deployment on Vercel (see `vercel.json`)
+## 📦 Build for Production
 
----
+```bash
+npm run build
+```
 
-**MiraBeauty** — A complete solution for beauty salons and online beauty product sales.
+The optimized production build will be in the `dist` folder.
+
+## 🛠️ Technology Stack
+
+### Frontend
+
+- **React 18.2** - UI framework
+- **React Router DOM 6.20** - Navigation and routing
+- **React Calendar 6.0** - Calendar component for bookings
+- **@dnd-kit** - Drag and drop functionality
+
+### Backend & Services
+
+- **Firebase 12.4** - Backend-as-a-Service
+  - Authentication
+  - Firestore Database
+  - Storage
+  - Hosting (optional)
+
+### Build Tools
+
+- **Vite 5.0** - Fast build tool and dev server
+- **ESLint** - Code linting
+
+## 📁 Project Structure
+
+```
+mirabeauty/
+├── public/              # Static assets
+├── src/
+│   ├── components/      # React components
+│   │   ├── admin/      # Admin-specific components
+│   │   ├── auth/       # Authentication forms
+│   │   ├── common/     # Shared components
+│   │   ├── customer/   # Customer-specific components
+│   │   ├── dashboard/  # Dashboard components
+│   │   └── profile/    # Profile components
+│   ├── config/         # Configuration files
+│   │   └── firebase.js # Firebase setup
+│   ├── hooks/          # Custom React hooks
+│   │   ├── useAuth.jsx
+│   │   ├── useLoading.jsx
+│   │   └── useModal.jsx
+│   ├── pages/          # Page components
+│   ├── services/       # API service layers
+│   │   ├── appointmentsService.js
+│   │   ├── authService.js
+│   │   ├── productsService.js
+│   │   └── ...
+│   ├── styles/         # Global styles
+│   │   ├── responsive.css
+│   │   ├── rtl.css
+│   │   └── variables.css
+│   ├── utils/          # Utility functions
+│   ├── App.jsx         # Main app component
+│   └── main.jsx        # Entry point
+├── index.html
+├── package.json
+└── vite.config.js
+```
+
+## 🎨 Key Components
+
+### Pages
+
+- **HomePage**: Landing page with featured services
+- **ServicesPage**: Browse available beauty services
+- **ProductsPage**: Product catalog and shopping
+- **BookingPage**: Appointment booking interface
+- **ProfilePage**: User profile and order history
+- **AdminDashboardPage**: Admin analytics and overview
+- **StaffDashboardPage**: Staff appointments view
+
+### Services Layer
+
+- `appointmentsService.js` - Appointment CRUD operations
+- `productsService.js` - Product management
+- `ordersService.js` - Order processing
+- `userService.js` - User data management
+- `authService.js` - Authentication operations
+
+## 🔑 User Roles
+
+1. **Customer**
+
+   - Browse services and products
+   - Book appointments
+   - Make purchases
+   - View order history
+   - Leave feedback
+
+2. **Staff**
+
+   - View assigned appointments
+   - Update appointment status
+   - Access limited dashboard
+
+3. **Admin**
+   - Full system access
+   - Manage users, services, and products
+   - View analytics and reports
+   - Handle all appointments and orders
+   - Configure system settings
+
+## 📱 Responsive Design
+
+The application is fully responsive and supports:
+
+- Desktop (1200px+)
+- Tablet (768px - 1199px)
+- Mobile (< 768px)
+
+RTL (Right-to-Left) support is also included for Arabic and other RTL languages.
+
+## 📄 License
+
+This project is private and proprietary.
