@@ -221,7 +221,3 @@ The application is fully responsive and supports:
 - Mobile (< 768px)
 
 RTL (Right-to-Left) support is also included for Arabic and other RTL languages.
-
-## 📄 License
-
-This project is private and proprietary.
