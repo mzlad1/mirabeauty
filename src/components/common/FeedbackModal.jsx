@@ -194,7 +194,9 @@ const FeedbackModal = ({
             </div>
 
             <div className="feedback-form-group">
-              <label htmlFor="phone">رقم الهاتف (اختياري)</label>
+              <label htmlFor="phone">
+                رقم الهاتف <span className="required">*</span>
+              </label>
               <input
                 type="tel"
                 id="phone"
@@ -207,6 +209,7 @@ const FeedbackModal = ({
                     handleChange(e);
                   }
                 }}
+                required
                 placeholder="+972501234567"
                 maxLength="18"
                 disabled={!!currentUser && !!userData?.phone}

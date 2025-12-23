@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./Footer.css";
 import { useNavigationLoading } from "../../hooks/useNavigationLoading";
 import { useAuth } from "../../hooks/useAuth";
@@ -72,29 +72,35 @@ const Footer = () => {
               <h4>روابط سريعة</h4>
               <ul className="footer-links">
                 <li>
-                  <button onClick={() => handleNavigation("/")}>
+                  <Link to="/" onClick={() => handleNavigation("/")}>
                     الرئيسية
-                  </button>
+                  </Link>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigation("/services")}>
+                  <Link
+                    to="/services"
+                    onClick={() => handleNavigation("/services")}
+                  >
                     الخدمات
-                  </button>
+                  </Link>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigation("/products")}>
+                  <Link
+                    to="/products"
+                    onClick={() => handleNavigation("/products")}
+                  >
                     المنتجات
-                  </button>
+                  </Link>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigation("/book")}>
+                  <Link to="/book" onClick={() => handleNavigation("/book")}>
                     احجز الآن
-                  </button>
+                  </Link>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigation("/faq")}>
+                  <Link to="/faq" onClick={() => handleNavigation("/faq")}>
                     الأسئلة الشائعة
-                  </button>
+                  </Link>
                 </li>
               </ul>
             </div>

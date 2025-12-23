@@ -17,6 +17,7 @@ import FAQPage from "./pages/FAQPage";
 import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminOrdersPage from "./pages/AdminOrdersPage";
 import AdminAppointmentsPage from "./pages/AdminAppointmentsPage";
@@ -223,6 +224,14 @@ const AppContent = () => {
               element={
                 <AuthRoute>
                   <RegisterPage />
+                </AuthRoute>
+              }
+            />
+            <Route
+              path="/reset-password"
+              element={
+                <AuthRoute>
+                  <ResetPasswordPage />
                 </AuthRoute>
               }
             />

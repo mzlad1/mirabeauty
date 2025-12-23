@@ -60,13 +60,13 @@ const WhatsAppMessageModal = ({ isOpen, onClose, onSend, defaultMessage, title =
 
         <div className="whatsapp-modal-actions">
           <button
-            className="whatsapp-btn whatsapp-btn-cancel"
+            className="mowhatsapp-btn whatsapp-btn-cancel"
             onClick={handleCancel}
           >
             إلغاء
           </button>
           <button
-            className="whatsapp-btn whatsapp-btn-send"
+            className="mowhatsapp-btn whatsapp-btn-send"
             onClick={handleSend}
             disabled={!message.trim()}
           >

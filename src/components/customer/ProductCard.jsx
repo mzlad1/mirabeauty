@@ -59,24 +59,39 @@ const ProductCard = ({ product, onAddToCart }) => {
           </div>
         )}
         {(() => {
-          const quantity = product.quantity !== undefined ? product.quantity : (product.inStock ? 999 : 0);
+          const quantity =
+            product.quantity !== undefined
+              ? product.quantity
+              : product.inStock
+              ? 999
+              : 0;
           return quantity <= 0 ? (
             <div className="product-card-out-of-stock">نفد المخزون</div>
           ) : null;
         })()}
         {(() => {
-          const quantity = product.quantity !== undefined ? product.quantity : (product.inStock ? 999 : 0);
+          const quantity =
+            product.quantity !== undefined
+              ? product.quantity
+              : product.inStock
+              ? 999
+              : 0;
           return quantity > 0 ? (
             <button
               className="product-card-add-to-cart-icon"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                onAddToCart(product);
+                if (onAddToCart) {
+                  onAddToCart(product);
+                }
               }}
               title="إضافة إلى السلة"
             >
-              <i className="fas fa-shopping-cart" style={{ color: "white" }}></i>
+              <i
+                className="fas fa-shopping-cart"
+                style={{ color: "white" }}
+              ></i>
             </button>
           ) : null;
         })()}

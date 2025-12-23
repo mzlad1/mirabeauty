@@ -101,7 +101,9 @@ const LoginPage = () => {
 
               {errors.general && (
                 // <div className="login-error-message">{errors.general}</div>
-                <div className="login-error-message">الايميل او كلمة المرور خاطئة, حاول مرة اخرى</div>
+                <div className="login-error-message">
+                  الايميل او كلمة المرور خاطئة, حاول مرة اخرى
+                </div>
               )}
 
               <form onSubmit={handleSubmit} className="login-page-form">
@@ -152,7 +154,11 @@ const LoginPage = () => {
                     <input type="checkbox" />
                     <span>تذكريني</span>
                   </label>
-                  <button type="button" className="login-forgot-password">
+                  <button
+                    type="button"
+                    className="login-forgot-password"
+                    onClick={() => navigate("/reset-password")}
+                  >
                     نسيت كلمة المرور؟
                   </button>
                 </div>

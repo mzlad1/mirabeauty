@@ -147,8 +147,13 @@ const ProductDetailsPage = () => {
   };
 
   const handleAddToCart = () => {
-    const availableQuantity = product.quantity !== undefined  ? product.quantity : (product.inStock ? 999 : 0);
-    
+    const availableQuantity =
+      product.quantity !== undefined
+        ? product.quantity
+        : product.inStock
+        ? 999
+        : 0;
+
     if (product && availableQuantity > 0 && !isAddingToCart) {
       setIsAddingToCart(true);
 
@@ -162,10 +167,7 @@ const ProductDetailsPage = () => {
         // Check if adding more would exceed available quantity
         const newTotal = existingItem.quantity + quantity;
         if (newTotal > availableQuantity) {
-          showToast(
-            `عذراً، الكمية المتوفرة ${availableQuantity} فقط`,
-            "error"
-          );
+          showToast(`عذراً، الكمية المتوفرة ${availableQuantity} فقط`, "error");
           setIsAddingToCart(false);
           return;
         }
@@ -176,10 +178,10 @@ const ProductDetailsPage = () => {
         );
       } else {
         // Store stock quantity separately so cart can validate against it
-        updatedCart = [...cartItems, {  ...product, 
-          quantity: quantity,
-          stockQuantity: availableQuantity 
-        }];
+        updatedCart = [
+          ...cartItems,
+          { ...product, quantity: quantity, stockQuantity: availableQuantity },
+        ];
       }
 
       localStorage.setItem("cartItems", JSON.stringify(updatedCart));
@@ -200,7 +202,12 @@ const ProductDetailsPage = () => {
   };
 
   const handleQuantityChange = (newQuantity) => {
-    const availableQuantity = product?.quantity !== undefined ? product.quantity : (product?.inStock ? 999 : 0);
+    const availableQuantity =
+      product?.quantity !== undefined
+        ? product.quantity
+        : product?.inStock
+        ? 999
+        : 0;
     if (newQuantity >= 1 && newQuantity <= availableQuantity) {
       setQuantity(newQuantity);
     }
@@ -323,7 +330,12 @@ const ProductDetailsPage = () => {
                   </div>
                 )}
                 {(() => {
-                  const quantity = product.quantity !== undefined ? product.quantity : (product.inStock ? 999 : 0);
+                  const quantity =
+                    product.quantity !== undefined
+                      ? product.quantity
+                      : product.inStock
+                      ? 999
+                      : 0;
                   return quantity <= 0 ? (
                     <div className="product-details-out-of-stock-overlay">
                       <span>نفذ من المخزن</span>
@@ -401,7 +413,12 @@ const ProductDetailsPage = () => {
                       onClick={() => handleQuantityChange(quantity + 1)}
                       className="product-details-quantity-btn"
                       disabled={(() => {
-                        const availableQuantity = product?.quantity !== undefined ? product.quantity : (product?.inStock ? 999 : 0);
+                        const availableQuantity =
+                          product?.quantity !== undefined
+                            ? product.quantity
+                            : product?.inStock
+                            ? 999
+                            : 0;
                         return quantity >= availableQuantity;
                       })()}
                     >
@@ -411,15 +428,23 @@ const ProductDetailsPage = () => {
                 </div>
 
                 <button
-                  className={`product-details-add-to-cart-btn ${
-                    (() => {
-                      const quantity = product.quantity !== undefined ? product.quantity : (product.inStock ? 999 : 0);
-                      return quantity <= 0 ? "disabled" : "";
-                    })()
-                  } ${isAddingToCart ? "adding" : ""}`}
+                  className={`product-details-add-to-cart-btn ${(() => {
+                    const quantity =
+                      product.quantity !== undefined
+                        ? product.quantity
+                        : product.inStock
+                        ? 999
+                        : 0;
+                    return quantity <= 0 ? "disabled" : "";
+                  })()} ${isAddingToCart ? "adding" : ""}`}
                   onClick={handleAddToCart}
                   disabled={(() => {
-                    const quantity = product.quantity !== undefined ? product.quantity : (product.inStock ? 999 : 0);
+                    const quantity =
+                      product.quantity !== undefined
+                        ? product.quantity
+                        : product.inStock
+                        ? 999
+                        : 0;
                     return quantity <= 0 || isAddingToCart;
                   })()}
                 >
@@ -428,10 +453,17 @@ const ProductDetailsPage = () => {
                       <i className="fas fa-spinner fa-spin"></i>
                       <span>جاري الإضافة...</span>
                     </>
-                  ) : (() => {
-                    const quantity = product.quantity !== undefined ? product.quantity : (product.inStock ? 999 : 0);
-                    return quantity > 0 ? `أضف للسلة - ${product.price} شيكل` : "غير متوفر";
-                  })()}
+                  ) : (
+                    (() => {
+                      const quantity =
+                        product.quantity !== undefined
+                          ? product.quantity
+                          : product.inStock
+                          ? 999
+                          : 0;
+                      return quantity > 0 ? `أضف للسلة` : "غير متوفر";
+                    })()
+                  )}
                 </button>
               </div>
 

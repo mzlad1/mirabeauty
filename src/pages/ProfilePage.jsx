@@ -407,7 +407,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
   const totalSpent = pastAppointments
     .filter((apt) => apt.status === "مكتمل") // Only count completed appointments for spending
     .reduce((sum, apt) => {
-      const price = parsePrice(apt.servicePrice || apt.price);
+      const price = parsePrice(apt.actualPaidAmount);
       return sum + price;
     }, 0);
   const loyaltyPoints = Math.floor(totalSpent / 10);
@@ -680,13 +680,16 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                             </div>
                             <div className="detail-row">
                               <span className="label">الوقت:</span>
-                              <span className="value">{formatTimeDisplay(appointment.time)}</span>
+                              <span className="value">
+                                {formatTimeDisplay(appointment.time)}
+                              </span>
                             </div>
                             <div className="detail-row">
                               <span className="label">المدة:</span>
                               <span className="value">
                                 {appointment.serviceDuration ||
-                                  appointment.duration}
+                                  appointment.duration}{" "}
+                                دقيقة
                               </span>
                             </div>
                             {/* Price will be visible only if the status is confirmed or done*/}
@@ -803,7 +806,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                                   className="fas fa-exclamation-triangle"
                                   style={{ marginLeft: "0.5rem" }}
                                 ></i>
-                                لا يمكن الإلغاء (أقل من 12 ساعة)
+                                لا يمكن الإلغاء إلا قبل 12 ساعة من الموعد
                               </div>
                             )}
                             {/* <button
@@ -975,8 +978,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                           <div className="history-details">
                             <p>الأخصائية: {appointment.staffName}</p>
                             <p>
-                              السعر:{" "}
-                              {appointment.servicePrice || appointment.price}{" "}
+                              السعر: {formatPrice(appointment.actualPaidAmount)}
                             </p>
                             {appointment.rating && (
                               <div className="rating">
@@ -1170,30 +1172,20 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                   <div className="settings-section">
                     <div className="profile-section-header">
                       <h3>المعلومات الشخصية</h3>
-                      {!editMode ? (
-                        <button
-                          className="btn-secondary"
-                          onClick={() => setEditMode(true)}
-                        >
-                          تعديل
-                        </button>
-                      ) : (
-                        <div className="edit-actions">
-                          <button
-                            className="btn-secondary"
-                            onClick={handleCancelEdit}
-                          >
-                            إلغاء
-                          </button>
-                          <button
-                            className="btn-primary"
-                            onClick={handleSaveProfile}
-                            disabled={submitting}
-                          >
-                            {submitting ? "جاري الحفظ..." : "حفظ"}
-                          </button>
-                        </div>
-                      )}
+                    </div>
+                    <div className="info-note">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                      </svg>
+                      <span>
+                        لتعديل أي معلومات في ملفك الشخصي، يرجى التواصل مع
+                        الإدارة
+                      </span>
                     </div>
 
                     <div className="settings-form">

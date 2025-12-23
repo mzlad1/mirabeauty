@@ -8,6 +8,7 @@ import PromotionalBanner from "../components/common/PromotionalBanner";
 import ProductCard from "../components/customer/ProductCard";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import FeedbackModal from "../components/common/FeedbackModal";
+import CartOverlay from "../components/common/CartOverlay";
 import { useNavigationLoading } from "../hooks/useNavigationLoading";
 import { useLoading } from "../hooks/useLoading";
 import { useAuth } from "../hooks/useAuth";
@@ -42,6 +43,10 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cartItemsCount, setCartItemsCount] = useState(0);
+  const [cartItems, setCartItems] = useState([]);
+  const [cartOpenedFromAdd, setCartOpenedFromAdd] = useState(false);
 
   // Load products and services from Firebase with real progress tracking
   const loadData = async () => {
@@ -97,8 +102,64 @@ const HomePage = () => {
     }
   };
 
+  const updateCartData = () => {
+    const savedCart = localStorage.getItem("cartItems");
+    if (savedCart) {
+      const items = JSON.parse(savedCart);
+      setCartItems(items);
+      const totalCount = items.reduce((sum, item) => sum + item.quantity, 0);
+      setCartItemsCount(totalCount);
+    } else {
+      setCartItems([]);
+      setCartItemsCount(0);
+    }
+  };
+
+  const addToCart = (product) => {
+    const savedCart = localStorage.getItem("cartItems");
+    const cartItems = savedCart ? JSON.parse(savedCart) : [];
+
+    const availableQuantity =
+      product.quantity !== undefined
+        ? product.quantity
+        : product.inStock
+        ? 999
+        : 0;
+
+    const existingItem = cartItems.find((item) => item.id === product.id);
+    let updatedCart;
+
+    if (existingItem) {
+      updatedCart = cartItems.map((item) =>
+        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      );
+    } else {
+      updatedCart = [
+        ...cartItems,
+        { ...product, quantity: 1, stockQuantity: availableQuantity },
+      ];
+    }
+
+    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+    window.dispatchEvent(new Event("cartUpdated"));
+
+    // Open cart overlay after adding item with animation flag
+    setTimeout(() => {
+      setCartOpenedFromAdd(true);
+      setIsCartOpen(true);
+    }, 500);
+  };
+
   useEffect(() => {
+    updateCartData();
     loadData();
+
+    const handleCartUpdate = () => {
+      updateCartData();
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdate);
+    return () => window.removeEventListener("cartUpdated", handleCartUpdate);
   }, []);
 
   // Auto-slide functionality
@@ -293,10 +354,7 @@ const HomePage = () => {
                   <ProductCard
                     key={product.id}
                     product={product}
-                    onAddToCart={(product) => {
-                      // Handle add to cart functionality
-                      console.log("Added to cart:", product.name);
-                    }}
+                    onAddToCart={addToCart}
                   />
                 ))
             )}
@@ -433,6 +491,18 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Cart Overlay */}
+      <CartOverlay
+        isOpen={isCartOpen}
+        onClose={() => {
+          setIsCartOpen(false);
+          setCartOpenedFromAdd(false);
+        }}
+        cartItems={cartItems}
+        onUpdateCart={updateCartData}
+        openedFromAdd={cartOpenedFromAdd}
+      />
     </div>
   );
 };

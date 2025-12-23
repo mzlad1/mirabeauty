@@ -100,7 +100,7 @@
   gap: 0.75rem;
 }
 
-.footer-links button {
+.footer-links a {
   background: none;
   border: none;
   color: var(--white);
@@ -110,9 +110,11 @@
   padding: 0.5rem;
   transition: all 0.3s ease;
   opacity: 0.8;
+  text-decoration: none;
+  display: inline-block;
 }
 
-.footer-links button:hover {
+.footer-links a:hover {
   color: var(--gold);
   opacity: 1;
   transform: translateX(-5px);
@@ -157,6 +159,7 @@
   opacity: 0.9;
   line-height: 1.4;
   font-size: 0.9rem;
+  direction: ltr;
 }
 
 /* Floating WhatsApp Button */

@@ -258,7 +258,7 @@ const ServicesPage = () => {
                       service.images && service.images.length > 0
                         ? service.images[service.primaryImageIndex || 0]?.url ||
                           service.images[service.primaryImageIndex || 0]
-                        : service.image ;
+                        : service.image;
 
                     console.log(
                       "ServicesPage - Primary image selected:",
@@ -266,7 +266,19 @@ const ServicesPage = () => {
                     );
 
                     return (
-                      <div key={service.id} className="services-page-card">
+                      <div
+                        key={service.id}
+                        className="services-page-card"
+                        onClick={() =>
+                          navigate("/book", {
+                            state: {
+                              selectedService: service,
+                              fromServicesPage: true,
+                            },
+                          })
+                        }
+                        style={{ cursor: "pointer" }}
+                      >
                         <div className="services-page-image">
                           <img src={primaryImage} alt={service.name} />
                           {service.originalPrice && (
@@ -334,14 +346,15 @@ const ServicesPage = () => {
                           <div className="services-page-actions">
                             <button
                               className="services-page-book-btn"
-                              onClick={() =>
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 navigate("/book", {
                                   state: {
                                     selectedService: service,
                                     fromServicesPage: true,
                                   },
-                                })
-                              }
+                                });
+                              }}
                             >
                               احجز الآن
                             </button>

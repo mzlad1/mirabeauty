@@ -154,7 +154,7 @@
   border-top: 2px solid #e0e0e0;
 }
 
-.whatsapp-btn {
+.mowhatsapp-btn {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 10px;
@@ -222,7 +222,7 @@
     padding: 1.25rem;
   }
 
-  .whatsapp-btn {
+  .mowhatsapp-btn {
     width: 100%;
     justify-content: center;
   }
