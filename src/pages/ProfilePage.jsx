@@ -733,7 +733,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                                   }}
                                 >
                                   <i className="fas fa-user-shield"></i> ملاحظة
-                                  من الإدارة عند الحجز:
+                                  من الإدارة:
                                 </span>
                                 <span
                                   className="value"
@@ -1029,7 +1029,7 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                                   }}
                                 >
                                   <i className="fas fa-user-shield"></i> ملاحظة
-                                  من الإدارة عند الحجز:
+                                  من الإدارة:
                                 </strong>
                                 <p style={{ color: "#071626", margin: 0 }}>
                                   {appointment.adminNote}

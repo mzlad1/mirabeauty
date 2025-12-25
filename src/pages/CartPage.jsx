@@ -69,12 +69,21 @@ const CartPage = () => {
     if (newQuantity < 1) return;
 
     // Get the product to check available quantity
-    const cartItem = cartItems.find(item => item.id === id);
+    const cartItem = cartItems.find((item) => item.id === id);
     if (cartItem) {
-      const availableQuantity = cartItem.stockQuantity || (cartItem.quantity !== undefined ? cartItem.quantity : (cartItem.inStock ? 999 : 0));
-      
+      // Use stockQuantity if available, otherwise fall back to product quantity
+      const availableQuantity =
+        cartItem.stockQuantity !== undefined
+          ? cartItem.stockQuantity
+          : cartItem.quantity !== undefined
+          ? cartItem.quantity
+          : cartItem.inStock
+          ? 999
+          : 0;
+
       // Prevent increasing beyond available stock
       if (newQuantity > availableQuantity) {
+        console.warn(`عذراً، الكمية المتوفرة ${availableQuantity} فقط`);
         return; // Don't update if exceeding stock
       }
     }
@@ -91,7 +100,7 @@ const CartPage = () => {
 
   const removeFromCart = (id) => {
     const updatedCart = cartItems.filter((item) => item.id !== id);
-   setCartItems(updatedCart);
+    setCartItems(updatedCart);
     localStorage.setItem("cartItems", JSON.stringify(updatedCart));
 
     // Dispatch custom event to update cart count

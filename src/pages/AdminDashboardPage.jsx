@@ -315,6 +315,24 @@ const AdminDashboardPage = ({ currentUser }) => {
     return dateB - dateA;
   });
 
+  // Calculate statistics for filtered appointments
+  const getFilteredAppointmentStats = () => {
+    const filtered = getFilteredAppointments();
+    return {
+      total: filtered.length,
+      pending: filtered.filter((apt) => apt.status === "في الانتظار").length,
+      confirmed: filtered.filter((apt) => apt.status === "مؤكد").length,
+      completed: filtered.filter((apt) => apt.status === "مكتمل").length,
+      cancelled: filtered.filter((apt) => apt.status === "ملغي").length,
+      revenue: filtered
+        .filter((apt) => apt.status === "مكتمل")
+        .reduce((sum, apt) => {
+          const price = parsePrice(apt.servicePrice || apt.price);
+          return sum + price;
+        }, 0),
+    };
+  };
+
   // Firebase data loading functions
   const loadCustomers = async () => {
     try {
@@ -570,7 +588,12 @@ const AdminDashboardPage = ({ currentUser }) => {
 
       // Status filter
       if (productStatusFilter) {
-        const quantity = product.quantity !== undefined ? product.quantity : (product.inStock ? 999 : 0);
+        const quantity =
+          product.quantity !== undefined
+            ? product.quantity
+            : product.inStock
+            ? 999
+            : 0;
         if (productStatusFilter === "available" && quantity <= 0) {
           return false;
         }
@@ -869,6 +892,7 @@ const AdminDashboardPage = ({ currentUser }) => {
       loadStaff(); // Load staff data for consultation assignment
     } else if (activeTab === "services") {
       loadServices();
+      loadServiceCategories(); // Load service categories for filtering
     } else if (activeTab === "products") {
       loadProducts();
     } else if (activeTab === "categories") {
@@ -1827,6 +1851,34 @@ const AdminDashboardPage = ({ currentUser }) => {
                     <button className="btn-primary">حجز موعد جديد</button>
                   </div>
 
+                  {/* Filtered Appointments Statistics */}
+                  <div className="appointments-stats">
+                    <div className="stat-box">
+                      <div className="stat-value">{getFilteredAppointmentStats().total}</div>
+                      <div className="stat-label">إجمالي المواعيد</div>
+                    </div>
+                    <div className="stat-box pending">
+                      <div className="stat-value">{getFilteredAppointmentStats().pending}</div>
+                      <div className="stat-label">في الانتظار</div>
+                    </div>
+                    <div className="stat-box confirmed">
+                      <div className="stat-value">{getFilteredAppointmentStats().confirmed}</div>
+                      <div className="stat-label">مؤكد</div>
+                    </div>
+                    <div className="stat-box completed">
+                      <div className="stat-value">{getFilteredAppointmentStats().completed}</div>
+                      <div className="stat-label">مكتمل</div>
+                    </div>
+                    <div className="stat-box cancelled">
+                      <div className="stat-value">{getFilteredAppointmentStats().cancelled}</div>
+                      <div className="stat-label">ملغي</div>
+                    </div>
+                    <div className="stat-box revenue">
+                      <div className="stat-value">{getFilteredAppointmentStats().revenue.toFixed(0)} ₪</div>
+                      <div className="stat-label">إجمالي الإيرادات</div>
+                    </div>
+                  </div>
+
                   <div className="appointments-filters">
                     <select
                       className="filter-select"
@@ -2215,7 +2267,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                         setCurrentServicePage(1);
                       }}
                     >
-                      <option value="">جميع الفئات</option>
+                      <option value="">جميع التصنيفات</option>
                       {serviceCategories.map((category) => (
                         <option key={category.id} value={category.name}>
                           {category.name}
@@ -2364,7 +2416,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                         setCurrentProductPage(1);
                       }}
                     >
-                      <option value="">جميع الفئات</option>
+                      <option value="">جميع التصنيفات</option>
                       {productCategories.map((category) => (
                         <option key={category.id} value={category.name}>
                           {category.name}
@@ -2442,15 +2494,31 @@ const AdminDashboardPage = ({ currentUser }) => {
                               <td>{product.originalPrice || "-"}شيكل</td>
                               <td>
                                 {(() => {
-                                  const quantity = product.quantity !== undefined ? product.quantity : (product.inStock ? "∞" : 0);
-                                  const displayQuantity = typeof quantity === 'number' ? quantity : quantity;
+                                  const quantity =
+                                    product.quantity !== undefined
+                                      ? product.quantity
+                                      : product.inStock
+                                      ? "∞"
+                                      : 0;
+                                  const displayQuantity =
+                                    typeof quantity === "number"
+                                      ? quantity
+                                      : quantity;
                                   return (
                                     <span
                                       className={`status ${
-                                        (typeof quantity === 'number' ? quantity > 0 : quantity !== 0) ? "confirmed" : "cancelled"
+                                        (
+                                          typeof quantity === "number"
+                                            ? quantity > 0
+                                            : quantity !== 0
+                                        )
+                                          ? "confirmed"
+                                          : "cancelled"
                                       }`}
                                     >
-                                      {typeof quantity === 'number' ? `${quantity} قطعة` : displayQuantity}
+                                      {typeof quantity === "number"
+                                        ? `${quantity} قطعة`
+                                        : displayQuantity}
                                     </span>
                                   );
                                 })()}

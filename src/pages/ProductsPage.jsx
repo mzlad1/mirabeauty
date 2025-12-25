@@ -97,19 +97,38 @@ const ProductsPage = ({ setCurrentPage }) => {
   const addToCart = (product) => {
     const savedCart = localStorage.getItem("cartItems");
     const cartItems = savedCart ? JSON.parse(savedCart) : [];
-    
-    const availableQuantity = product.quantity !== undefined ? product.quantity : (product.inStock ? 999 : 0);
+
+    const availableQuantity =
+      product.quantity !== undefined
+        ? product.quantity
+        : product.inStock
+        ? 999
+        : 0;
 
     const existingItem = cartItems.find((item) => item.id === product.id);
     let updatedCart;
 
     if (existingItem) {
+      // Check if adding more would exceed available quantity
+      const newTotal = existingItem.quantity + 1;
+      if (newTotal > availableQuantity) {
+        showToast(`عذراً، الكمية المتوفرة ${availableQuantity} فقط`, "error");
+        return; // Don't add if exceeds stock
+      }
       updatedCart = cartItems.map((item) =>
         item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
       );
       showToast(`تم زيادة كمية ${product.name} في السلة`, "success");
     } else {
-      updatedCart = [...cartItems, { ...product, quantity: 1, stockQuantity: availableQuantity }];
+      // Check if initial quantity exceeds stock
+      if (1 > availableQuantity) {
+        showToast(`عذراً، المنتج غير متوفر في المخزون`, "error");
+        return;
+      }
+      updatedCart = [
+        ...cartItems,
+        { ...product, quantity: 1, stockQuantity: availableQuantity },
+      ];
       showToast(`تم إضافة ${product.name} للسلة بنجاح`, "success");
     }
 
@@ -301,7 +320,12 @@ const ProductsPage = ({ setCurrentPage }) => {
                           </div>
                         )}
                         {(() => {
-                          const quantity = product.quantity !== undefined ? product.quantity : (product.inStock ? 999 : 0);
+                          const quantity =
+                            product.quantity !== undefined
+                              ? product.quantity
+                              : product.inStock
+                              ? 999
+                              : 0;
                           return quantity <= 0 ? (
                             <div className="out-of-stock-badge">
                               نفذ من المخزن
@@ -309,7 +333,12 @@ const ProductsPage = ({ setCurrentPage }) => {
                           ) : null;
                         })()}
                         {(() => {
-                          const quantity = product.quantity !== undefined ? product.quantity : (product.inStock ? 999 : 0);
+                          const quantity =
+                            product.quantity !== undefined
+                              ? product.quantity
+                              : product.inStock
+                              ? 999
+                              : 0;
                           return quantity > 0 ? (
                             <button
                               className="product-add-to-cart-icon"

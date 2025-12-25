@@ -129,47 +129,65 @@ const AdminOrdersPage = () => {
   const handleOrderStatusUpdate = async (orderId, newStatus) => {
     try {
       setSubmitting(true);
-      
+
       // Get the current order to access its items and previous status
-      const currentOrder = orders.find(o => o.id === orderId);
+      const currentOrder = orders.find((o) => o.id === orderId);
       const previousStatus = currentOrder?.status;
-      
+
       // Update order status in database
       await updateOrderStatus(orderId, newStatus);
-      
+
       // Handle product quantity updates based on status changes
       if (currentOrder?.items) {
         // When confirming an order (pending -> confirmed), decrease quantities
-        if (previousStatus !== ORDER_STATUS.CONFIRMED && newStatus === ORDER_STATUS.CONFIRMED) {
+        if (
+          previousStatus !== ORDER_STATUS.CONFIRMED &&
+          newStatus === ORDER_STATUS.CONFIRMED
+        ) {
           try {
             await updateProductQuantitiesOnOrderAccept(currentOrder.items);
           } catch (error) {
-            console.error("Error updating product quantities on confirm:", error);
+            console.error(
+              "Error updating product quantities on confirm:",
+              error
+            );
             // Continue even if quantity update fails
           }
         }
-        
+
         // When cancelling a previously confirmed order, restore quantities
-        if (previousStatus === ORDER_STATUS.CONFIRMED && newStatus === ORDER_STATUS.CANCELLED) {
+        if (
+          previousStatus === ORDER_STATUS.CONFIRMED &&
+          newStatus === ORDER_STATUS.CANCELLED
+        ) {
           try {
             await updateProductQuantitiesOnOrderCancel(currentOrder.items);
           } catch (error) {
-            console.error("Error restoring product quantities on cancel:", error);
+            console.error(
+              "Error restoring product quantities on cancel:",
+              error
+            );
             // Continue even if quantity update fails
           }
         }
-        
+
         // When changing a confirmed order back to pending, restore quantities
-        if (previousStatus === ORDER_STATUS.CONFIRMED && newStatus === ORDER_STATUS.PENDING) {
+        if (
+          previousStatus === ORDER_STATUS.CONFIRMED &&
+          newStatus === ORDER_STATUS.PENDING
+        ) {
           try {
             await updateProductQuantitiesOnOrderCancel(currentOrder.items);
           } catch (error) {
-            console.error("Error restoring product quantities when reverting to pending:", error);
+            console.error(
+              "Error restoring product quantities when reverting to pending:",
+              error
+            );
             // Continue even if quantity update fails
           }
         }
       }
-      
+
       await loadOrders();
 
       // Update the selected order with new status
@@ -402,7 +420,6 @@ const AdminOrdersPage = () => {
                                 className="fas fa-eye"
                                 style={{ color: "white" }}
                               ></i>{" "}
-                              عرض
                             </button>
                             <button
                               className="btn-delete"

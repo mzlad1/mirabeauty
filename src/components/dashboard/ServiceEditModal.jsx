@@ -38,6 +38,7 @@ const ServiceEditModal = ({
   const [uploadingImages, setUploadingImages] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [categories, setCategories] = useState(serviceCategories);
+  const [imageError, setImageError] = useState("");
 
   useEffect(() => {
     if (service) {
@@ -73,7 +74,8 @@ const ServiceEditModal = ({
       });
       setSelectedFiles([]);
     }
-  }, [service]);
+    setImageError(""); // Reset image error
+  }, [service, isOpen]);
 
   // Update categories when serviceCategories prop changes
   useEffect(() => {
@@ -129,9 +131,13 @@ const ServiceEditModal = ({
 
       // Ensure we have at least one image for new services
       if (!service && finalFormData.images.length === 0) {
-        showError("يجب إضافة صورة واحدة على الأقل");
+        setImageError("يجب إضافة صورة واحدة على الأقل");
+        setLoading(false);
         return;
       }
+
+      // Clear any previous image errors
+      setImageError("");
 
       await onSubmit(finalFormData);
       onClose();
@@ -157,7 +163,10 @@ const ServiceEditModal = ({
       }
     }
 
-    setSelectedFiles((prev) => [...prev, ...validFiles]);
+    if (validFiles.length > 0) {
+      setSelectedFiles((prev) => [...prev, ...validFiles]);
+      setImageError(""); // Clear error when files are added
+    }
   };
 
   const removeSelectedFile = (index) => {
@@ -345,6 +354,24 @@ const ServiceEditModal = ({
                   </svg>
                 </label>
               </div>
+
+              {/* Image Error Message */}
+              {imageError && (
+                <div
+                  className="image-error-message"
+                  style={{
+                    color: "#e74c3c",
+                    fontSize: "0.9rem",
+                    marginTop: "0.5rem",
+                    padding: "0.5rem",
+                    backgroundColor: "#fee",
+                    borderRadius: "4px",
+                    border: "1px solid #e74c3c",
+                  }}
+                >
+                  {imageError}
+                </div>
+              )}
 
               {/* Selected Files Preview */}
               {selectedFiles.length > 0 && (

@@ -22,6 +22,32 @@ const AppointmentDetailsModal = ({
     return `${priceStr} شيكل`;
   };
 
+  // Helper function to format Firebase Timestamp to readable date
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return "غير متوفر";
+    
+    let date;
+    if (timestamp.seconds) {
+      // Firebase Timestamp object
+      date = new Date(timestamp.seconds * 1000);
+    } else if (timestamp instanceof Date) {
+      date = timestamp;
+    } else {
+      // Try to parse as string
+      date = new Date(timestamp);
+    }
+    
+    if (isNaN(date.getTime())) return "غير متوفر";
+    
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const handleClose = () => {
     onClose();
   };
@@ -90,6 +116,12 @@ const AppointmentDetailsModal = ({
 
         <div className="appointment-details-content">
           <div className="appointment-details-grid">
+            {/* add the creation date in small font */}
+            <div className="detail-item creation-date">
+              <span className="detail-label">تاريخ الإنشاء:</span>
+              <span className="detail-value">{formatTimestamp(appointment.createdAt)}</span>
+            </div>
+
             <div className="detail-item">
               <span className="detail-label">العميل:</span>
               <span className="detail-value">{appointment.customerName}</span>
@@ -101,12 +133,12 @@ const AppointmentDetailsModal = ({
             </div>
 
             <div className="detail-item">
-              <span className="detail-label">التاريخ:</span>
+              <span className="detail-label">تاريخ الجلسة:</span>
               <span className="detail-value">{appointment.date}</span>
             </div>
 
             <div className="detail-item">
-              <span className="detail-label">الوقت:</span>
+              <span className="detail-label">وقت بدأ الجلسة:</span>
               <span className="detail-value">{appointment.time}</span>
             </div>
 
@@ -151,12 +183,12 @@ const AppointmentDetailsModal = ({
               </div>
             )}
 
-            {appointment.notes && (
+            {/* {appointment.notes && (
               <div className="detail-item full-width">
                 <span className="detail-label">ملاحظات الحجز:</span>
                 <span className="detail-value">{appointment.notes}</span>
               </div>
-            )}
+            )} */}
           </div>
 
           {/* Notes Section */}
@@ -205,7 +237,7 @@ const AppointmentDetailsModal = ({
             )}
 
             {/* Editable internal note for staff/admin when appointment completed */}
-            {(userRole === "staff" || userRole === "admin") &&
+            {/* {(userRole === "staff" || userRole === "admin") &&
               appointment.status === "مكتمل" && (
                 <div className="note-item staff-internal-note-edit">
                   <h4>
@@ -260,9 +292,9 @@ const AppointmentDetailsModal = ({
                     هذه الملاحظة خاصة بالموظفين والإدارة ولن تُعرض للعميل.
                   </small>
                 </div>
-              )}
+              )} */}
 
-            {!appointment.note &&
+            {!appointment.notes &&
               !appointment.adminNote &&
               !appointment.staffNoteToCustomer &&
               !appointment.staffInternalNote && (

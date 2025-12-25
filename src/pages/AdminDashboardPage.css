@@ -439,6 +439,81 @@
 }
 
 /* Appointments Filters */
+.appointments-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.appointments-stats .stat-box {
+  background: var(--white);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.appointments-stats .stat-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.appointments-stats .stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--navy-blue);
+  margin-bottom: 0.5rem;
+}
+
+.appointments-stats .stat-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.appointments-stats .stat-box.pending {
+  border-color: #f39c12;
+}
+
+.appointments-stats .stat-box.pending .stat-value {
+  color: #f39c12;
+}
+
+.appointments-stats .stat-box.confirmed {
+  border-color: #3498db;
+}
+
+.appointments-stats .stat-box.confirmed .stat-value {
+  color: #3498db;
+}
+
+.appointments-stats .stat-box.completed {
+  border-color: #27ae60;
+}
+
+.appointments-stats .stat-box.completed .stat-value {
+  color: #27ae60;
+}
+
+.appointments-stats .stat-box.cancelled {
+  border-color: #e74c3c;
+}
+
+.appointments-stats .stat-box.cancelled .stat-value {
+  color: #e74c3c;
+}
+
+.appointments-stats .stat-box.revenue {
+  border-color: var(--gold);
+}
+
+.appointments-stats .stat-box.revenue .stat-value {
+  color: var(--gold);
+  font-size: 1.5rem;
+}
+
 .appointments-filters {
   display: flex;
   gap: 1rem;

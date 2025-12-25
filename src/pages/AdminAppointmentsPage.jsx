@@ -68,7 +68,7 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
   const [isStaffSelectionModalOpen, setIsStaffSelectionModalOpen] =
     useState(false);
   const [appointmentToConfirm, setAppointmentToConfirm] = useState(null);
-  
+
   // WhatsApp message modal states
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const [whatsAppMessage, setWhatsAppMessage] = useState("");
@@ -181,13 +181,41 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
     return filtered.slice(startIndex, endIndex);
   };
 
+  // Get filtered appointment statistics
+  const getFilteredAppointmentStats = () => {
+    const filtered = getFilteredAppointments();
+    const parsePrice = (priceString) => {
+      if (!priceString) return 0;
+      const cleanPrice = priceString.toString().replace(/[^0-9.-]/g, "");
+      return parseFloat(cleanPrice) || 0;
+    };
+
+    return {
+      total: filtered.length,
+      pending: filtered.filter((apt) => apt.status === "في الانتظار").length,
+      confirmed: filtered.filter((apt) => apt.status === "مؤكد").length,
+      completed: filtered.filter((apt) => apt.status === "مكتمل").length,
+      cancelled: filtered.filter((apt) => apt.status === "ملغي").length,
+      revenue: filtered
+        .filter((apt) => apt.status === "مكتمل")
+        .reduce(
+          (sum, apt) =>
+            sum +
+            parsePrice(
+              apt.actualPaidAmount || apt.servicePrice || apt.price || 0
+            ),
+          0
+        ),
+    };
+  };
+
   // Helper function to open WhatsApp message modal for editing
   const openWhatsAppMessageModal = (phoneNumber, message) => {
     setWhatsAppPhoneNumber(phoneNumber);
     setWhatsAppMessage(message);
     setIsWhatsAppModalOpen(true);
   };
-  
+
   // Helper function to send WhatsApp message (called after editing)
   const sendWhatsAppMessage = (message) => {
     // Clean phone number (remove spaces, dashes, plus sign, etc.)
@@ -733,7 +761,7 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
 
       {/* Statistics */}
       <div className="aap-appointments-stats">
-        <div className="aap-stat-card">
+        <div className="aap-stat-card aap-stat-total">
           <div className="aap-stat-icon">
             <i
               className="fas fa-calendar-alt"
@@ -741,25 +769,20 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
             ></i>
           </div>
           <div className="aap-stat-content">
-            <h3>{appointments.length}</h3>
+            <h3>{getFilteredAppointmentStats().total}</h3>
             <p>إجمالي المواعيد</p>
           </div>
         </div>
-        <div className="aap-stat-card">
+        <div className="aap-stat-card aap-stat-pending">
           <div className="aap-stat-icon">
             <i className="fas fa-clock" style={{ color: "var(--white)" }}></i>
           </div>
           <div className="aap-stat-content">
-            <h3>
-              {
-                appointments.filter((apt) => apt.status === "في الانتظار")
-                  .length
-              }
-            </h3>
+            <h3>{getFilteredAppointmentStats().pending}</h3>
             <p>في الانتظار</p>
           </div>
         </div>
-        <div className="aap-stat-card">
+        <div className="aap-stat-card aap-stat-confirmed">
           <div className="aap-stat-icon">
             <i
               className="fas fa-check-circle"
@@ -767,13 +790,11 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
             ></i>
           </div>
           <div className="aap-stat-content">
-            <h3>
-              {appointments.filter((apt) => apt.status === "مؤكد").length}
-            </h3>
+            <h3>{getFilteredAppointmentStats().confirmed}</h3>
             <p>مؤكد</p>
           </div>
         </div>
-        <div className="aap-stat-card">
+        <div className="aap-stat-card aap-stat-completed">
           <div className="aap-stat-icon">
             <i
               className="fas fa-check-double"
@@ -781,10 +802,32 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
             ></i>
           </div>
           <div className="aap-stat-content">
-            <h3>
-              {appointments.filter((apt) => apt.status === "مكتمل").length}
-            </h3>
+            <h3>{getFilteredAppointmentStats().completed}</h3>
             <p>مكتمل</p>
+          </div>
+        </div>
+        <div className="aap-stat-card aap-stat-cancelled">
+          <div className="aap-stat-icon">
+            <i
+              className="fas fa-times-circle"
+              style={{ color: "var(--white)" }}
+            ></i>
+          </div>
+          <div className="aap-stat-content">
+            <h3>{getFilteredAppointmentStats().cancelled}</h3>
+            <p>ملغي</p>
+          </div>
+        </div>
+        <div className="aap-stat-card aap-stat-revenue">
+          <div className="aap-stat-icon">
+            <i
+              className="fas fa-shekel-sign"
+              style={{ color: "var(--white)" }}
+            ></i>
+          </div>
+          <div className="aap-stat-content">
+            <h3>{getFilteredAppointmentStats().revenue.toFixed(2)}</h3>
+            <p>الإيرادات (₪)</p>
           </div>
         </div>
       </div>

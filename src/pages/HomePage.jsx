@@ -130,10 +130,22 @@ const HomePage = () => {
     let updatedCart;
 
     if (existingItem) {
+      // Check if adding more would exceed available quantity
+      const newTotal = existingItem.quantity + 1;
+      if (newTotal > availableQuantity) {
+        // Show error toast (if you have a toast function)
+        console.warn(`عذراً، الكمية المتوفرة ${availableQuantity} فقط`);
+        return; // Don't add if exceeds stock
+      }
       updatedCart = cartItems.map((item) =>
         item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
       );
     } else {
+      // Check if initial quantity exceeds stock
+      if (1 > availableQuantity) {
+        console.warn(`عذراً، المنتج غير متوفر في المخزون`);
+        return;
+      }
       updatedCart = [
         ...cartItems,
         { ...product, quantity: 1, stockQuantity: availableQuantity },

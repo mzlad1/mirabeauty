@@ -130,56 +130,155 @@ const AppointmentsTimeline = ({
         </div>
 
         {/* Appointments track */}
-        <div className="timeline-track">
-          {filteredAppointments.map((appointment, index) => {
-            const startPosition = getAppointmentPosition(appointment.time);
-            // Get duration from serviceDuration field or default to 30
-            const duration =
-              appointment.serviceDuration || appointment.duration || 30;
-            const width = getAppointmentWidth(duration);
+        <div
+          className="timeline-track"
+          style={{
+            minHeight: `${Math.max(
+              150,
+              filteredAppointments.length > 0
+                ? (() => {
+                    // Calculate number of rows needed
+                    const rows = [];
+                    const sortedAppointments = [...filteredAppointments].sort(
+                      (a, b) => {
+                        return (
+                          getAppointmentPosition(a.time) -
+                          getAppointmentPosition(b.time)
+                        );
+                      }
+                    );
 
-            // Calculate how many appointments at the same time slot (for stacking)
-            const sameTimeAppts = filteredAppointments.filter(
-              (apt) => apt.time === appointment.time
-            );
-            const stackIndex = sameTimeAppts.findIndex(
-              (apt) => apt.id === appointment.id
+                    sortedAppointments.forEach((appointment) => {
+                      const startPosition = getAppointmentPosition(
+                        appointment.time
+                      );
+                      const duration =
+                        appointment.serviceDuration ||
+                        appointment.duration ||
+                        30;
+                      const width = getAppointmentWidth(duration);
+                      const endPosition = startPosition + width;
+
+                      let placedInRow = false;
+                      for (let i = 0; i < rows.length; i++) {
+                        const row = rows[i];
+                        const hasOverlap = row.some((apt) => {
+                          const aptStart = getAppointmentPosition(apt.time);
+                          const aptDuration =
+                            apt.serviceDuration || apt.duration || 30;
+                          const aptEnd =
+                            aptStart + getAppointmentWidth(aptDuration);
+                          return (
+                            startPosition < aptEnd && endPosition > aptStart
+                          );
+                        });
+
+                        if (!hasOverlap) {
+                          row.push(appointment);
+                          placedInRow = true;
+                          break;
+                        }
+                      }
+
+                      if (!placedInRow) {
+                        rows.push([appointment]);
+                      }
+                    });
+
+                    return rows.length * 85 + 20; // 85px per row (68px card + 17px gap) + 20px padding
+                  })()
+                : 150
+            )}px`,
+          }}
+        >
+          {(() => {
+            // Algorithm to distribute appointments into rows without overlap
+            const rows = [];
+            const sortedAppointments = [...filteredAppointments].sort(
+              (a, b) => {
+                return (
+                  getAppointmentPosition(a.time) -
+                  getAppointmentPosition(b.time)
+                );
+              }
             );
 
-            return (
-              <div
-                key={appointment.id}
-                className={`timeline-appointment ${getStatusColor(
-                  appointment.status
-                )}`}
-                onClick={() =>
-                  onAppointmentClick && onAppointmentClick(appointment)
+            sortedAppointments.forEach((appointment) => {
+              const startPosition = getAppointmentPosition(appointment.time);
+              const duration =
+                appointment.serviceDuration || appointment.duration || 30;
+              const width = getAppointmentWidth(duration);
+              const endPosition = startPosition + width;
+
+              // Find a row where this appointment fits (no overlap)
+              let placedInRow = false;
+              for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const hasOverlap = row.some((apt) => {
+                  const aptStart = getAppointmentPosition(apt.time);
+                  const aptDuration = apt.serviceDuration || apt.duration || 30;
+                  const aptEnd = aptStart + getAppointmentWidth(aptDuration);
+                  // Check if appointments overlap
+                  return startPosition < aptEnd && endPosition > aptStart;
+                });
+
+                if (!hasOverlap) {
+                  row.push(appointment);
+                  placedInRow = true;
+                  break;
                 }
-                style={{
-                  right: `${startPosition}%`,
-                  width: `${width}%`,
-                  top: `${stackIndex * 60}px`,
-                }}
-                title={`${appointment.time} - ${appointment.customerName} - ${appointment.serviceName} (${duration} دقيقة)`}
-              >
-                <div className="appointment-compact">
-                  <div className="appointment-time-compact">
-                    {appointment.time}
-                  </div>
-                  <div className="appointment-name-compact">
-                    {appointment.customerName}
-                  </div>
+              }
+
+              // If no suitable row found, create a new row
+              if (!placedInRow) {
+                rows.push([appointment]);
+              }
+            });
+
+            // Render appointments with row index
+            return rows.flatMap((row, rowIndex) =>
+              row.map((appointment) => {
+                const startPosition = getAppointmentPosition(appointment.time);
+                const duration =
+                  appointment.serviceDuration || appointment.duration || 30;
+                const width = getAppointmentWidth(duration);
+
+                return (
                   <div
-                    className={`appointment-status-compact ${getStatusColor(
+                    key={appointment.id}
+                    className={`timeline-appointment ${getStatusColor(
                       appointment.status
                     )}`}
+                    onClick={() =>
+                      onAppointmentClick && onAppointmentClick(appointment)
+                    }
+                    style={{
+                      right: `${startPosition}%`,
+                      width: `${width}%`,
+                      top: `${rowIndex * 85}px`,
+                    }}
+                    title={`${appointment.time} - ${appointment.customerName} - ${appointment.serviceName} (${duration} دقيقة)`}
                   >
-                    {appointment.status}
+                    <div className="appointment-compact">
+                      <div className="appointment-time-compact">
+                        {appointment.time}
+                      </div>
+                      <div className="appointment-name-compact">
+                        {appointment.customerName} - {appointment.serviceName}
+                      </div>
+                      <div
+                        className={`appointment-status-compact ${getStatusColor(
+                          appointment.status
+                        )}`}
+                      >
+                        {appointment.status}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                );
+              })
             );
-          })}
+          })()}
         </div>
       </div>
 

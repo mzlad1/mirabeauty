@@ -44,14 +44,12 @@
 /* Timeline Container */
 .timeline-container {
   position: relative;
-  min-height: 200px;
+  min-height: 400px;
   margin: 20px 0;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   padding: 20px;
   overflow-x: auto;
-  overflow-y: auto;
-  max-height: 500px;
 }
 
 /* Time Axis */
@@ -88,9 +86,10 @@
 /* Timeline Track */
 .timeline-track {
   position: relative;
-  min-height: 150px;
+  min-height: 80px;
   width: 100%;
   direction: rtl;
+  padding-bottom: 10px;
 }
 
 .timeline-time-group {
@@ -107,15 +106,15 @@
   );
   border-radius: 8px;
   padding: 8px 10px;
-  margin-bottom: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   transition: all 0.3s ease;
   border-right: 4px solid var(--gold, #c9a227);
-  position: relative;
+  position: absolute;
   direction: rtl;
   text-align: right;
   min-width: 80px;
+  min-height: 68px;
   overflow: hidden;
 }
 

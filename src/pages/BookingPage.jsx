@@ -111,6 +111,7 @@ const BookingPage = ({ currentUser, userData }) => {
   } = useModal();
   const [step, setStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState(""); // إضافة حالة لنوع الجلسة
+  const [selectedFixedTime, setSelectedFixedTime] = useState(""); // For fixed time slot preview
   const [bookingData, setBookingData] = useState({
     serviceId: "",
     date: "",
@@ -301,6 +302,31 @@ const BookingPage = ({ currentUser, userData }) => {
     return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
   };
 
+  // Helper function to check if time has passed (for same day bookings)
+  const isTimePassed = (dateStr, timeStr) => {
+    const now = new Date();
+    const selectedDate = new Date(dateStr);
+
+    // If not today, allow all times
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const selected = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate()
+    );
+
+    if (selected.getTime() !== today.getTime()) {
+      return false; // Not today, so time hasn't passed
+    }
+
+    // For today, check if time has passed
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    const timeInMinutes = hours * 60 + minutes;
+    const nowInMinutes = now.getHours() * 60 + now.getMinutes();
+
+    return timeInMinutes <= nowInMinutes;
+  };
+
   // Helper function to calculate end time for Laser
   const calculateLaserEndTime = (startTime, durationMinutes) => {
     const startMinutes = timeToMinutes(startTime);
@@ -353,6 +379,87 @@ const BookingPage = ({ currentUser, userData }) => {
       durationMinutes,
       bookingData.serviceId
     );
+  };
+
+  // Check availability for Fixed Time slots
+  const checkFixedTimeAvailability = async (date, time, serviceId) => {
+    try {
+      const dateAppointments = await getAppointmentsByDate(date);
+      const category = getServiceCategory(serviceId);
+      const bookingLimit = category?.bookingLimit || 999;
+      const selectedService = services.find((s) => s.id === serviceId);
+      const serviceDuration = selectedService?.duration || 60;
+
+      // Helper to convert time to minutes
+      const timeToMinutes = (timeStr) => {
+        const [hours, minutes] = timeStr.split(":").map(Number);
+        return hours * 60 + minutes;
+      };
+
+      // Calculate new appointment time range
+      const newStartMinutes = timeToMinutes(time);
+      const newEndMinutes = newStartMinutes + serviceDuration;
+
+      // Get all appointments for same category (excluding cancelled)
+      const categoryAppointments = dateAppointments.filter((apt) => {
+        if (apt.status === "ملغي") return false;
+
+        // Check if same category
+        const aptCategoryId = apt.serviceCategoryId || apt.serviceCategory;
+        const serviceCategoryId = category?.id;
+        return aptCategoryId === serviceCategoryId;
+      });
+
+      // Add the new appointment to the list for checking
+      const allAppointments = [
+        ...categoryAppointments.map((apt) => ({
+          start: timeToMinutes(apt.time),
+          end:
+            timeToMinutes(apt.time) +
+            (apt.serviceDuration || apt.duration || 60),
+        })),
+        {
+          start: newStartMinutes,
+          end: newEndMinutes,
+        },
+      ];
+
+      // Find maximum concurrent appointments at any point in time
+      // Collect all time points (start and end)
+      const timePoints = [];
+      allAppointments.forEach((apt) => {
+        timePoints.push({ time: apt.start, type: "start" });
+        timePoints.push({ time: apt.end, type: "end" });
+      });
+
+      // Sort by time, if same time, process 'end' before 'start'
+      timePoints.sort((a, b) => {
+        if (a.time !== b.time) return a.time - b.time;
+        return a.type === "end" ? -1 : 1;
+      });
+
+      // Sweep through time points and track concurrent count
+      let currentCount = 0;
+      let maxCount = 0;
+
+      timePoints.forEach((point) => {
+        if (point.type === "start") {
+          currentCount++;
+          maxCount = Math.max(maxCount, currentCount);
+        } else {
+          currentCount--;
+        }
+      });
+
+      return {
+        available: maxCount <= bookingLimit,
+        current: maxCount - 1, // Subtract the new appointment
+        limit: bookingLimit,
+      };
+    } catch (error) {
+      console.error("Error checking fixed time availability:", error);
+      return { available: true, current: 0, limit: 999 };
+    }
   };
 
   // Check for overlapping Laser appointments
@@ -1328,7 +1435,8 @@ const BookingPage = ({ currentUser, userData }) => {
                             <div className="laser-time-preview">
                               <div className="preview-info">
                                 <strong>المدة:</strong>{" "}
-                                {selectedService?.duration || "60 دقيقة"}
+                                {selectedService?.duration || "غير متوفرة"}{" "}
+                                دقيقة
                                 <br />
                                 <strong>وقت البدء:</strong>{" "}
                                 {formatTimeDisplay(
@@ -1397,27 +1505,97 @@ const BookingPage = ({ currentUser, userData }) => {
 
                         {/* Fixed time slots from category configuration */}
                         <div className="time-slots">
-                          {getCategoryFixedTimeSlots(bookingData.serviceId).map(
-                            (time) => (
+                          {getCategoryFixedTimeSlots(bookingData.serviceId)
+                            .filter((time) => {
+                              // Filter out past times for today
+                              if (
+                                bookingData.date &&
+                                isTimePassed(bookingData.date, time)
+                              ) {
+                                return false;
+                              }
+                              return true;
+                            })
+                            .map((time) => (
                               <button
                                 key={time}
                                 className={`time-slot ${
-                                  bookingData.time === time ? "selected" : ""
+                                  selectedFixedTime === time ? "selected" : ""
                                 }`}
                                 onClick={() => {
-                                  setBookingData({
-                                    ...bookingData,
-                                    time,
-                                    useCustomTime: false,
-                                  });
-                                  setStep(3);
+                                  setSelectedFixedTime(time);
                                 }}
                               >
                                 {formatTimeDisplay(time)}
                               </button>
-                            )
-                          )}
+                            ))}
                         </div>
+
+                        {/* Fixed time preview and confirmation */}
+                        {selectedFixedTime && !bookingData.useCustomTime && (
+                          <div className="laser-time-preview">
+                            <div className="preview-info">
+                              <strong>المدة:</strong>{" "}
+                              {selectedService?.duration || "غير متوفرة"} دقيقة
+                              <br />
+                              <strong>وقت البدء:</strong>{" "}
+                              {formatTimeDisplay(selectedFixedTime)}
+                              <br />
+                              <strong>وقت الانتهاء المتوقع:</strong>{" "}
+                              {formatTimeDisplay(
+                                calculateLaserEndTime(
+                                  selectedFixedTime,
+                                  parseInt(selectedService?.duration) || 60
+                                )
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              className="btn-primary"
+                              onClick={async () => {
+                                // Check if time has passed (for today)
+                                if (
+                                  isTimePassed(
+                                    bookingData.date,
+                                    selectedFixedTime
+                                  )
+                                ) {
+                                  showError(
+                                    "الوقت المختار قد انتهى، يرجى اختيار وقت آخر"
+                                  );
+                                  setSelectedFixedTime("");
+                                  return;
+                                }
+
+                                // Check availability
+                                const availability =
+                                  await checkFixedTimeAvailability(
+                                    bookingData.date,
+                                    selectedFixedTime,
+                                    bookingData.serviceId
+                                  );
+
+                                if (!availability.available) {
+                                  showError(
+                                    `تم الوصول للحد الأقصى من الحجوزات في هذا الوقت (${availability.current}/${availability.limit})`
+                                  );
+                                  setSelectedFixedTime("");
+                                  return;
+                                }
+
+                                // All validations passed
+                                setBookingData({
+                                  ...bookingData,
+                                  time: selectedFixedTime,
+                                  useCustomTime: false,
+                                });
+                                setStep(3);
+                              }}
+                            >
+                              تأكيد الوقت والمتابعة
+                            </button>
+                          </div>
+                        )}
 
                         {/* Admin-only custom time option */}
                         {isAdmin && (
@@ -1515,19 +1693,33 @@ const BookingPage = ({ currentUser, userData }) => {
                           </p>
                         ) : (
                           <div className="time-slots">
-                            {availableTimeSlots.map((time) => (
-                              <button
-                                key={time}
-                                className={`time-slot ${
-                                  bookingData.time === time ? "selected" : ""
-                                }`}
-                                onClick={() => {
-                                  handleDateTimeSelect(bookingData.date, time);
-                                }}
-                              >
-                                {formatTimeDisplay(time)}
-                              </button>
-                            ))}
+                            {availableTimeSlots
+                              .filter((time) => {
+                                // Filter out past times for today
+                                if (
+                                  bookingData.date &&
+                                  isTimePassed(bookingData.date, time)
+                                ) {
+                                  return false;
+                                }
+                                return true;
+                              })
+                              .map((time) => (
+                                <button
+                                  key={time}
+                                  className={`time-slot ${
+                                    bookingData.time === time ? "selected" : ""
+                                  }`}
+                                  onClick={() => {
+                                    handleDateTimeSelect(
+                                      bookingData.date,
+                                      time
+                                    );
+                                  }}
+                                >
+                                  {formatTimeDisplay(time)}
+                                </button>
+                              ))}
                           </div>
                         )}
                       </div>

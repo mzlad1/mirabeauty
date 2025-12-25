@@ -96,7 +96,9 @@ const AdminAppointmentEditModal = ({
         staffName: appointment.staffName || "",
         status: appointment.status || "مؤكد",
         adminNote: appointment.adminNote || "",
-        flexibleStartHour: hour || "",
+        flexibleStartHour: hour
+          ? String(parseInt(hour, 10)).padStart(2, "0")
+          : "",
         flexibleStartMinute: minute || "",
         useTimeInput: false,
       });
@@ -177,6 +179,94 @@ const AdminAppointmentEditModal = ({
     try {
       // Find selected staff member
       const selectedStaff = staff.find((s) => s.id === formData.staffId);
+
+      // Check booking limit for fixed time services
+      if (
+        isFixedTimeService() &&
+        (formData.date !== appointment?.date ||
+          formData.time !== appointment?.time)
+      ) {
+        const category = getCategoryFromAppointment();
+        const bookingLimit = category?.bookingLimit || 999;
+
+        // Import getAppointmentsByDate
+        const { getAppointmentsByDate } = await import(
+          "../../services/appointmentsService"
+        );
+        const dateAppointments = await getAppointmentsByDate(formData.date);
+
+        // Helper to convert time to minutes
+        const timeToMinutes = (timeStr) => {
+          const [hours, minutes] = timeStr.split(":").map(Number);
+          return hours * 60 + minutes;
+        };
+
+        // Calculate new appointment time range
+        const newStartMinutes = timeToMinutes(formData.time);
+        const newDuration =
+          appointment?.serviceDuration || appointment?.duration || 60;
+        const newEndMinutes = newStartMinutes + newDuration;
+
+        // Get all appointments for same category (excluding current and cancelled)
+        const categoryAppointments = dateAppointments.filter((apt) => {
+          if (apt.id === appointment?.id) return false; // Exclude current appointment
+          if (apt.status === "ملغي") return false;
+
+          // Check if same category
+          const aptCategoryId = apt.serviceCategoryId || apt.serviceCategory;
+          const serviceCategoryId = category?.id;
+          return aptCategoryId === serviceCategoryId;
+        });
+
+        // Add the new appointment to the list for checking
+        const allAppointments = [
+          ...categoryAppointments.map((apt) => ({
+            start: timeToMinutes(apt.time),
+            end:
+              timeToMinutes(apt.time) +
+              (apt.serviceDuration || apt.duration || 60),
+          })),
+          {
+            start: newStartMinutes,
+            end: newEndMinutes,
+          },
+        ];
+
+        // Find maximum concurrent appointments at any point in time
+        // Collect all time points (start and end)
+        const timePoints = [];
+        allAppointments.forEach((apt) => {
+          timePoints.push({ time: apt.start, type: "start" });
+          timePoints.push({ time: apt.end, type: "end" });
+        });
+
+        // Sort by time, if same time, process 'end' before 'start'
+        timePoints.sort((a, b) => {
+          if (a.time !== b.time) return a.time - b.time;
+          return a.type === "end" ? -1 : 1;
+        });
+
+        // Sweep through time points and track concurrent count
+        let currentCount = 0;
+        let maxCount = 0;
+
+        timePoints.forEach((point) => {
+          if (point.type === "start") {
+            currentCount++;
+            maxCount = Math.max(maxCount, currentCount);
+          } else {
+            currentCount--;
+          }
+        });
+
+        if (maxCount > bookingLimit) {
+          showError(
+            `تجاوز الحد الأقصى للحجوزات (${bookingLimit}). في بعض الأوقات سيكون هناك ${maxCount} حجوزات متزامنة.`
+          );
+          setLoading(false);
+          return;
+        }
+      }
 
       // Check for staff conflicts if staff is assigned and time/date changed
       if (
@@ -283,7 +373,11 @@ const AdminAppointmentEditModal = ({
       });
     } catch (error) {
       console.error("Error checking staff availability:", error);
-      setStaffAvailability({ isChecking: false, available: true, conflicts: [] });
+      setStaffAvailability({
+        isChecking: false,
+        available: true,
+        conflicts: [],
+      });
     }
   };
 
@@ -351,35 +445,40 @@ const AdminAppointmentEditModal = ({
                   </option>
                 ))}
               </select>
-              
+
               {/* Staff Availability Warning */}
               {staffAvailability.isChecking && (
                 <div className="staff-availability-checking">
-                  <i className="fas fa-spinner fa-spin"></i> جاري التحقق من توفر الأخصائية...
+                  <i className="fas fa-spinner fa-spin"></i> جاري التحقق من توفر
+                  الأخصائية...
                 </div>
               )}
-              
-              {!staffAvailability.isChecking && !staffAvailability.available && staffAvailability.conflicts.length > 0 && (
-                <div className="staff-availability-warning">
-                  <div className="warning-header">
-                    <i className="fas fa-exclamation-triangle"></i>
-                    <strong>تحذير: الأخصائية مشغولة</strong>
+
+              {!staffAvailability.isChecking &&
+                !staffAvailability.available &&
+                staffAvailability.conflicts.length > 0 && (
+                  <div className="staff-availability-warning">
+                    <div className="warning-header">
+                      <i className="fas fa-exclamation-triangle"></i>
+                      <strong>تحذير: الأخصائية مشغولة</strong>
+                    </div>
+                    <div className="warning-content">
+                      <p>الأخصائية لديها تعارض في المواعيد التالية:</p>
+                      <ul className="conflict-list">
+                        {staffAvailability.conflicts.map((conflict, index) => (
+                          <li key={index}>
+                            {conflict.customerName} ({conflict.serviceName}) في{" "}
+                            {conflict.time}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="warning-note">
+                        <i className="fas fa-info-circle"></i> يمكنك المتابعة
+                        بالحفظ إذا كنت متأكداً من التعيين
+                      </p>
+                    </div>
                   </div>
-                  <div className="warning-content">
-                    <p>الأخصائية لديها تعارض في المواعيد التالية:</p>
-                    <ul className="conflict-list">
-                      {staffAvailability.conflicts.map((conflict, index) => (
-                        <li key={index}>
-                          {conflict.customerName} ({conflict.serviceName}) في {conflict.time}
-                        </li>
-                      ))}
-                    </ul>
-                    <p className="warning-note">
-                      <i className="fas fa-info-circle"></i> يمكنك المتابعة بالحفظ إذا كنت متأكداً من التعيين
-                    </p>
-                  </div>
-                </div>
-              )}
+                )}
             </div>
           </div>
 

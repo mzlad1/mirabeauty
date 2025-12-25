@@ -148,7 +148,9 @@ const ReportsPage = ({ currentUser, userData }) => {
       case "custom":
         if (customStartDate && customEndDate) {
           startDate = new Date(customStartDate);
+          startDate.setHours(0, 0, 0, 0); // Start of day
           const endDate = new Date(customEndDate);
+          endDate.setHours(23, 59, 59, 999); // End of day
           return data.filter((item) => {
             const itemDate = item[dateField]?.seconds
               ? new Date(item[dateField].seconds * 1000)
@@ -380,14 +382,17 @@ const ReportsPage = ({ currentUser, userData }) => {
   const monthlyRevenue = getMonthlyRevenue();
 
   const handlePrint = () => {
-    const printDate = new Date().toLocaleDateString("en-GB", {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    }).replace("am", "AM").replace("pm", "PM");
+    const printDate = new Date()
+      .toLocaleDateString("en-GB", {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })
+      .replace("am", "AM")
+      .replace("pm", "PM");
 
     // Helper function to format currency
     const formatCurrency = (amount) => `${parseFloat(amount).toFixed(2)} ₪`;
