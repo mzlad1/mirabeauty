@@ -14,7 +14,6 @@ import CustomModal from "../common/CustomModal";
 // Constants (fallback defaults)
 const LASER_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16];
 const LASER_MINUTES = ["00", "15", "30", "45"];
-const DEFAULT_LASER_LIMIT = 3;
 
 const AdminCreateAppointmentModal = ({
   isOpen,
@@ -168,40 +167,61 @@ const AdminCreateAppointmentModal = ({
       const startMinutes = timeToMinutes(startTime);
       const endMinutes = timeToMinutes(endTime);
 
-      const overlapping = dateAppointments.filter((apt) => {
+      // Get all appointments for the same category
+      const selectedService = services.find((s) => s.id === formData.serviceId);
+      const serviceCategoryId =
+        selectedService?.categoryId || selectedService?.category || "";
+
+      const sameCategoryAppointments = dateAppointments.filter((apt) => {
         if (apt.status === "ملغي") return false;
 
-        const selectedService = services.find(
-          (s) => s.id === formData.serviceId
-        );
-        const serviceCategoryName =
-          selectedService?.categoryName || selectedService?.category || "";
-        const aptCategoryName =
-          apt.serviceCategoryName || apt.serviceCategory || "";
+        // Check if same category
+        const aptCategoryId =
+          apt.serviceCategory || apt.serviceCategoryName || "";
 
-        if (
-          !serviceCategoryName.toLowerCase().includes("laser") &&
-          !serviceCategoryName.toLowerCase().includes("ليزر")
-        ) {
-          return false;
-        }
-        if (
-          !aptCategoryName.toLowerCase().includes("laser") &&
-          !aptCategoryName.toLowerCase().includes("ليزر")
-        ) {
-          return false;
-        }
+        return aptCategoryId === serviceCategoryId;
+      });
 
+      // Create time events for all appointments
+      const events = [];
+
+      // Add new booking events
+      events.push({ time: startMinutes, type: "start" });
+      events.push({ time: endMinutes, type: "end" });
+
+      // Add existing appointments events
+      sameCategoryAppointments.forEach((apt) => {
         const aptStartMinutes = timeToMinutes(apt.time);
         const aptDuration = apt.serviceDuration || 60;
         const aptEndMinutes = aptStartMinutes + aptDuration;
 
-        return startMinutes < aptEndMinutes && endMinutes > aptStartMinutes;
+        events.push({ time: aptStartMinutes, type: "start" });
+        events.push({ time: aptEndMinutes, type: "end" });
       });
 
-      return overlapping.length;
+      // Sort events by time, with "end" events before "start" at same time
+      events.sort((a, b) => {
+        if (a.time !== b.time) return a.time - b.time;
+        return a.type === "end" ? -1 : 1;
+      });
+
+      // Calculate maximum concurrent appointments
+      let currentCount = 0;
+      let maxConcurrent = 0;
+
+      events.forEach((event) => {
+        if (event.type === "start") {
+          currentCount++;
+          maxConcurrent = Math.max(maxConcurrent, currentCount);
+        } else {
+          currentCount--;
+        }
+      });
+
+      // Return max concurrent minus 1 (to exclude the new booking itself)
+      return maxConcurrent - 1;
     } catch (error) {
-      console.error("Error checking Laser overlapping:", error);
+      console.error("Error checking overlapping:", error);
       return 0;
     }
   };
@@ -402,19 +422,44 @@ const AdminCreateAppointmentModal = ({
   ) => {
     try {
       // For flexible services, check overlapping
-      if (isFlexibleTimeService(formData.serviceId) && validation) {
+      if (isFlexibleTimeService(formData.serviceId)) {
+        // Get booking limit from category
+        const selectedService = services.find(
+          (s) => s.id === formData.serviceId
+        );
+        const serviceCategory = categories.find(
+          (cat) =>
+            cat.id === selectedService?.categoryId ||
+            cat.id === selectedService?.category
+        );
+        const bookingLimit = serviceCategory?.bookingLimit || 999;
+
+        const endTime = validation?.endTime || appointmentEndTime;
         const overlapping = await checkLaserOverlapping(
           formData.date,
           formData.time,
-          validation.endTime
+          endTime
         );
 
-        if (overlapping >= DEFAULT_LASER_LIMIT) {
-          setError(
-            `تم الوصول للحد الأقصى من الحجوزات المتداخلة في هذا الوقت (${overlapping}/${DEFAULT_LASER_LIMIT})`
+        if (overlapping >= bookingLimit) {
+          console.log("🔔 Overlap limit reached, showing confirmation...");
+          // Show warning but allow admin to proceed
+          const confirmed = await showConfirm(
+            `تحذير: تم الوصول للحد الأقصى من الحجوزات المتداخلة (${overlapping}/${bookingLimit}). هل تريد المتابعة؟`,
+            "تأكيد الحجز",
+            "نعم، متابعة",
+            "إلغاء"
           );
-          setLoading(false);
-          return;
+
+          console.log("🎯 Confirmation result:", confirmed);
+
+          if (!confirmed) {
+            console.log("❌ User cancelled, resetting loading...");
+            setLoading(false);
+            return;
+          }
+
+          console.log("✅ User confirmed, continuing...");
         }
       }
 
@@ -736,37 +781,50 @@ const AdminCreateAppointmentModal = ({
                       </label>
 
                       {formData.useCustomTime && (
-                        <div className="form-grid-2">
+                        <>
+                          <div className="info-box">
+                            <strong>مدة الخدمة:</strong>{" "}
+                            {services.find((s) => s.id === formData.serviceId)
+                              ?.duration || 60}{" "}
+                            دقيقة
+                          </div>
                           <div className="form-group">
                             <label>وقت البدء *</label>
                             <input
                               type="time"
                               value={formData.customStartTime}
                               onChange={(e) => {
+                                const startTime = e.target.value;
+                                const duration =
+                                  parseInt(
+                                    services.find(
+                                      (s) => s.id === formData.serviceId
+                                    )?.duration
+                                  ) || 60;
+                                const endTime = calculateLaserEndTime(
+                                  startTime,
+                                  duration
+                                );
                                 setFormData({
                                   ...formData,
-                                  customStartTime: e.target.value,
-                                  time: e.target.value,
+                                  customStartTime: startTime,
+                                  time: startTime,
+                                  customEndTime: endTime,
                                 });
                               }}
                               required
                             />
                           </div>
-                          <div className="form-group">
-                            <label>وقت الانتهاء *</label>
-                            <input
-                              type="time"
-                              value={formData.customEndTime}
-                              onChange={(e) => {
-                                setFormData({
-                                  ...formData,
-                                  customEndTime: e.target.value,
-                                });
-                              }}
-                              required
-                            />
-                          </div>
-                        </div>
+                          {formData.customStartTime && (
+                            <div className="time-preview">
+                              <strong>وقت البدء:</strong>{" "}
+                              {formData.customStartTime}
+                              <br />
+                              <strong>وقت الانتهاء المتوقع:</strong>{" "}
+                              {formData.customEndTime}
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   </>

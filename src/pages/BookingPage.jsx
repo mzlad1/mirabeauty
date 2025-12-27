@@ -42,9 +42,6 @@ const LASER_MINUTES = ["00", "15", "30", "45"];
 // Laser max end time
 const LASER_MAX_END_TIME = "16:30";
 
-// Default booking limit for overlapping sessions
-const DEFAULT_LASER_LIMIT = 3;
-
 // Available time slots (legacy - for consultation/other)
 const timeSlots = [
   "09:00",
@@ -475,44 +472,62 @@ const BookingPage = ({ currentUser, userData }) => {
       const startMinutes = timeToMinutes(startTime);
       const endMinutes = timeToMinutes(endTime);
 
-      // Count overlapping Laser appointments
-      const overlapping = dateAppointments.filter((apt) => {
+      // Get all appointments for the same category
+      const selectedService = services.find(
+        (s) => s.id === bookingData.serviceId
+      );
+      const serviceCategoryId =
+        selectedService?.categoryId || selectedService?.category || "";
+
+      const sameCategoryAppointments = dateAppointments.filter((apt) => {
         if (apt.id === excludeAppointmentId) return false;
         if (apt.status === "ملغي") return false;
 
-        // Only check Laser category appointments
-        const selectedService = services.find(
-          (s) => s.id === bookingData.serviceId
-        );
-        const serviceCategoryName =
-          selectedService?.categoryName || selectedService?.category || "";
-        const aptCategoryName =
-          apt.serviceCategoryName || apt.serviceCategory || "";
+        // Check if same category
+        const aptCategoryId =
+          apt.serviceCategory || apt.serviceCategoryName || "";
 
-        // Check if both are Laser appointments
-        if (
-          !serviceCategoryName.toLowerCase().includes("laser") &&
-          !serviceCategoryName.toLowerCase().includes("ليزر")
-        ) {
-          return false;
-        }
-        if (
-          !aptCategoryName.toLowerCase().includes("laser") &&
-          !aptCategoryName.toLowerCase().includes("ليزر")
-        ) {
-          return false;
-        }
+        return aptCategoryId === serviceCategoryId;
+      });
 
-        // Get appointment time range
+      // Create time events for all appointments
+      const events = [];
+
+      // Add new booking events
+      events.push({ time: startMinutes, type: "start" });
+      events.push({ time: endMinutes, type: "end" });
+
+      // Add existing appointments events
+      sameCategoryAppointments.forEach((apt) => {
         const aptStartMinutes = timeToMinutes(apt.time);
         const aptDuration = apt.serviceDuration || 60;
         const aptEndMinutes = aptStartMinutes + aptDuration;
 
-        // Check for overlap
-        return startMinutes < aptEndMinutes && endMinutes > aptStartMinutes;
+        events.push({ time: aptStartMinutes, type: "start" });
+        events.push({ time: aptEndMinutes, type: "end" });
       });
 
-      return overlapping.length;
+      // Sort events by time, with "end" events before "start" at same time
+      events.sort((a, b) => {
+        if (a.time !== b.time) return a.time - b.time;
+        return a.type === "end" ? -1 : 1;
+      });
+
+      // Calculate maximum concurrent appointments
+      let currentCount = 0;
+      let maxConcurrent = 0;
+
+      events.forEach((event) => {
+        if (event.type === "start") {
+          currentCount++;
+          maxConcurrent = Math.max(maxConcurrent, currentCount);
+        } else {
+          currentCount--;
+        }
+      });
+
+      // Return max concurrent minus 1 (to exclude the new booking itself)
+      return maxConcurrent - 1;
     } catch (error) {
       console.error("Error checking Laser overlapping:", error);
       return 0;
@@ -639,6 +654,9 @@ const BookingPage = ({ currentUser, userData }) => {
       );
       const bookingLimit = serviceCategory?.bookingLimit || 999; // Default high number if not set
 
+      const serviceCategoryId =
+        selectedService.categoryId || selectedService.category;
+
       // Get all appointments for the selected date
       const dateAppointments = await getAppointmentsByDate(selectedDate);
 
@@ -649,10 +667,9 @@ const BookingPage = ({ currentUser, userData }) => {
         // Only count confirmed and pending appointments
         if (apt.status === "مؤكد" || apt.status === "في الانتظار") {
           // Check if appointment is for same category
-          if (
-            apt.serviceCategory === selectedService.category ||
-            apt.serviceCategory === selectedService.categoryId
-          ) {
+          const aptCategoryId = apt.serviceCategory || apt.serviceCategoryName;
+
+          if (aptCategoryId === serviceCategoryId) {
             if (!timeSlotsBookingCount[apt.time]) {
               timeSlotsBookingCount[apt.time] = 0;
             }
@@ -1470,6 +1487,19 @@ const BookingPage = ({ currentUser, userData }) => {
                                         return;
                                       }
 
+                                      // Get booking limit from service category
+                                      const serviceCategory = categories.find(
+                                        (cat) =>
+                                          cat.id ===
+                                            selectedService.categoryId ||
+                                          cat.id === selectedService.category
+                                      );
+                                      const bookingLimit =
+                                        serviceCategory?.bookingLimit ||
+                                        console.log(
+                                          "Booking limit not set, defaulting to 5"
+                                        );
+
                                       // Check for overlapping
                                       const overlapping =
                                         await checkLaserOverlapping(
@@ -1478,9 +1508,9 @@ const BookingPage = ({ currentUser, userData }) => {
                                           validation.endTime
                                         );
 
-                                      if (overlapping >= DEFAULT_LASER_LIMIT) {
+                                      if (overlapping >= bookingLimit) {
                                         showError(
-                                          `تم الوصول للحد الأقصى من الحجوزات المتداخلة في هذا الوقت (${overlapping}/${DEFAULT_LASER_LIMIT})`
+                                          `تم الوصول للحد الأقصى من الحجوزات المتداخلة في هذا الوقت (${overlapping}/${bookingLimit})`
                                         );
                                         return;
                                       }
