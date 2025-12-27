@@ -606,6 +606,10 @@ const BookingPage = ({ currentUser, userData }) => {
   };
 
   const handleDateTimeSelect = (date, time) => {
+    if (!date || !time) {
+      showError("يرجى اختيار التاريخ والوقت أولاً");
+      return;
+    }
     setBookingData({ ...bookingData, date, time });
     setStep(3);
   };
@@ -688,25 +692,6 @@ const BookingPage = ({ currentUser, userData }) => {
     }
   };
 
-  // Check for duplicate bookings
-  const checkDuplicateBooking = (serviceId, date, time) => {
-    const selectedService = services.find((s) => s.id === serviceId);
-
-    // Allow multiple bookings of same service on same day
-    // Only prevent booking at exact same time
-    const sameServiceSameDay = false; // Removed restriction
-
-    // Check if user has any appointment at same date and time
-    const sameDateTime = userAppointments.some(
-      (apt) =>
-        apt.date === date &&
-        apt.time === time &&
-        (apt.status === "في الانتظار" || apt.status === "مؤكد")
-    );
-
-    return { sameServiceSameDay, sameDateTime };
-  };
-
   // Get minimum date for booking (today)
   const getMinDate = () => {
     const today = new Date();
@@ -787,18 +772,7 @@ const BookingPage = ({ currentUser, userData }) => {
       }
 
       // Handle regular appointment booking
-      // Check for duplicate bookings at same time only
-      const { sameDateTime } = checkDuplicateBooking(
-        bookingData.serviceId,
-        bookingData.date,
-        bookingData.time
-      );
-
-      if (sameDateTime) {
-        showError("لديك حجز مسبق في نفس التاريخ والوقت. يرجى اختيار وقت آخر.");
-        setSubmitting(false);
-        return;
-      }
+      // Allow multiple bookings at same time (for booking for friends/family)
 
       // Calculate duration based on service type
       let appointmentDuration = selectedService?.duration || 60;
@@ -1295,401 +1269,484 @@ const BookingPage = ({ currentUser, userData }) => {
                       /* FLEXIBLE TIME SELECTION (Laser-like services) */
                       <div className="laser-time-selection">
                         <h3>حددي الوقت</h3>
-                        <p
-                          className="info-text"
-                          style={{
-                            fontSize: "0.9rem",
-                            color: "#666",
-                            marginBottom: "1rem",
-                          }}
-                        >
-                          ملاحظة: يتم عرض الأوقات المتاحة فقط بناءً على مدة
-                          الخدمة وأوقات العمل
-                        </p>
-
-                        <div className="laser-time-inputs">
-                          <div className="form-group">
-                            <label className="form-label">الساعة</label>
-                            <select
-                              className="form-input"
-                              value={bookingData.laserStartHour}
-                              onChange={(e) => {
-                                setBookingData({
-                                  ...bookingData,
-                                  laserStartHour: e.target.value,
-                                  laserStartMinute: "", // Reset minute when hour changes
-                                  time: "", // Reset combined time
-                                });
+                        {!bookingData.date ? (
+                          <p
+                            className="info-message"
+                            style={{
+                              textAlign: "center",
+                              color: "#999",
+                              padding: "2rem",
+                            }}
+                          >
+                            يرجى اختيار التاريخ أولاً لعرض الأوقات المتاحة
+                          </p>
+                        ) : (
+                          <>
+                            <p
+                              className="info-text"
+                              style={{
+                                fontSize: "0.9rem",
+                                color: "#666",
+                                marginBottom: "1rem",
                               }}
                             >
-                              <option value="">اختر الساعة</option>
-                              {LASER_HOURS.filter((hour) => {
-                                // Check if at least one valid minute exists for this hour
-                                const serviceDuration =
-                                  parseInt(selectedService?.duration) || 60;
-                                const maxEndTime = getCategoryMaxEndTime(
-                                  bookingData.serviceId
-                                );
-                                const maxEndMinutes = timeToMinutes(maxEndTime);
+                              ملاحظة: يتم عرض الأوقات المتاحة فقط بناءً على مدة
+                              الخدمة وأوقات العمل
+                            </p>
 
-                                // Check if any minute combination is valid for this hour
-                                return LASER_MINUTES.some((minute) => {
-                                  const timeStr = `${String(hour).padStart(
-                                    2,
-                                    "0"
-                                  )}:${minute}`;
-
-                                  // Check forbidden times
-                                  if (
-                                    isStartTimeForbidden(
-                                      timeStr,
+                            <div className="laser-time-inputs">
+                              <div className="form-group">
+                                <label className="form-label">الساعة</label>
+                                <select
+                                  className="form-input"
+                                  value={bookingData.laserStartHour}
+                                  onChange={(e) => {
+                                    setBookingData({
+                                      ...bookingData,
+                                      laserStartHour: e.target.value,
+                                      laserStartMinute: "", // Reset minute when hour changes
+                                      time: "", // Reset combined time
+                                    });
+                                  }}
+                                >
+                                  <option value="">اختر الساعة</option>
+                                  {LASER_HOURS.filter((hour) => {
+                                    // Check if at least one valid minute exists for this hour
+                                    const serviceDuration =
+                                      parseInt(selectedService?.duration) || 60;
+                                    const maxEndTime = getCategoryMaxEndTime(
                                       bookingData.serviceId
-                                    )
-                                  ) {
-                                    return false;
-                                  }
+                                    );
+                                    const maxEndMinutes =
+                                      timeToMinutes(maxEndTime);
 
-                                  // Check maxEndTime
-                                  const endTime = calculateLaserEndTime(
-                                    timeStr,
-                                    serviceDuration
-                                  );
-                                  const endMinutes = timeToMinutes(endTime);
+                                    // Check if any minute combination is valid for this hour
+                                    return LASER_MINUTES.some((minute) => {
+                                      const timeStr = `${String(hour).padStart(
+                                        2,
+                                        "0"
+                                      )}:${minute}`;
 
-                                  return endMinutes <= maxEndMinutes;
-                                });
-                              }).map((hour) => {
-                                const hourStr = String(hour).padStart(2, "0");
-                                // Convert to 12-hour format for display
-                                const displayHour =
-                                  hour > 12 ? hour - 12 : hour;
-                                return (
-                                  <option key={hour} value={hour}>
-                                    {displayHour}
-                                  </option>
-                                );
-                              })}
-                            </select>
-                          </div>
+                                      // Check forbidden times
+                                      if (
+                                        isStartTimeForbidden(
+                                          timeStr,
+                                          bookingData.serviceId
+                                        )
+                                      ) {
+                                        return false;
+                                      }
 
-                          <div className="form-group">
-                            <label className="form-label">الدقائق</label>
-                            <select
-                              className="form-input"
-                              value={bookingData.laserStartMinute}
-                              onChange={(e) => {
-                                setBookingData({
-                                  ...bookingData,
-                                  laserStartMinute: e.target.value,
-                                  time: "", // Reset combined time
-                                });
-                              }}
-                            >
-                              <option value="">اختر الدقائق</option>
-                              {LASER_MINUTES.filter((minute) => {
-                                // Filter out forbidden time combinations and times that exceed maxEndTime
-                                if (!bookingData.laserStartHour) return true;
-                                const timeStr = `${String(
-                                  bookingData.laserStartHour
-                                ).padStart(2, "0")}:${minute}`;
+                                      // Check maxEndTime
+                                      const endTime = calculateLaserEndTime(
+                                        timeStr,
+                                        serviceDuration
+                                      );
+                                      const endMinutes = timeToMinutes(endTime);
 
-                                // Check forbidden start times
-                                if (
-                                  isStartTimeForbidden(
-                                    timeStr,
-                                    bookingData.serviceId
-                                  )
-                                ) {
-                                  return false;
-                                }
-
-                                // Check if end time would exceed maxEndTime
-                                const serviceDuration =
-                                  parseInt(selectedService?.duration) || 60;
-                                const endTime = calculateLaserEndTime(
-                                  timeStr,
-                                  serviceDuration
-                                );
-                                const maxEndTime = getCategoryMaxEndTime(
-                                  bookingData.serviceId
-                                );
-                                const maxEndMinutes = timeToMinutes(maxEndTime);
-                                const endMinutes = timeToMinutes(endTime);
-
-                                if (endMinutes > maxEndMinutes) {
-                                  return false;
-                                }
-
-                                return true;
-                              }).map((minute) => (
-                                <option key={minute} value={minute}>
-                                  {minute}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-
-                        {bookingData.laserStartHour &&
-                          bookingData.laserStartMinute && (
-                            <div className="laser-time-preview">
-                              <div className="preview-info">
-                                <strong>المدة:</strong>{" "}
-                                {selectedService?.duration || "غير متوفرة"}{" "}
-                                دقيقة
-                                <br />
-                                <strong>وقت البدء:</strong>{" "}
-                                {formatTimeDisplay(
-                                  `${bookingData.laserStartHour}:${bookingData.laserStartMinute}`
-                                )}
-                                <br />
-                                <strong>وقت الانتهاء المتوقع:</strong>{" "}
-                                {formatTimeDisplay(
-                                  calculateLaserEndTime(
-                                    `${bookingData.laserStartHour}:${bookingData.laserStartMinute}`,
-                                    parseInt(selectedService?.duration) || 60
-                                  )
-                                )}
+                                      return endMinutes <= maxEndMinutes;
+                                    });
+                                  }).map((hour) => {
+                                    const hourStr = String(hour).padStart(
+                                      2,
+                                      "0"
+                                    );
+                                    // Convert to 12-hour format for display
+                                    const displayHour =
+                                      hour > 12 ? hour - 12 : hour;
+                                    return (
+                                      <option key={hour} value={hour}>
+                                        {displayHour}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
                               </div>
-                              <button
-                                type="button"
-                                className="btn-primary"
-                                onClick={async () => {
-                                  const startTime = `${bookingData.laserStartHour}:${bookingData.laserStartMinute}`;
-                                  const serviceDuration =
-                                    parseInt(selectedService?.duration) || 60;
-                                  const validation = validateFlexibleTime(
-                                    startTime,
-                                    serviceDuration,
-                                    bookingData.serviceId
-                                  );
 
-                                  if (!validation.valid) {
-                                    showError(validation.message);
-                                    return;
-                                  }
+                              <div className="form-group">
+                                <label className="form-label">الدقائق</label>
+                                <select
+                                  className="form-input"
+                                  value={bookingData.laserStartMinute}
+                                  onChange={(e) => {
+                                    setBookingData({
+                                      ...bookingData,
+                                      laserStartMinute: e.target.value,
+                                      time: "", // Reset combined time
+                                    });
+                                  }}
+                                >
+                                  <option value="">اختر الدقائق</option>
+                                  {LASER_MINUTES.filter((minute) => {
+                                    // Filter out forbidden time combinations and times that exceed maxEndTime
+                                    if (!bookingData.laserStartHour)
+                                      return true;
+                                    const timeStr = `${String(
+                                      bookingData.laserStartHour
+                                    ).padStart(2, "0")}:${minute}`;
 
-                                  // Check for overlapping
-                                  const overlapping =
-                                    await checkLaserOverlapping(
-                                      bookingData.date,
-                                      startTime,
-                                      validation.endTime
+                                    // Check forbidden start times
+                                    if (
+                                      isStartTimeForbidden(
+                                        timeStr,
+                                        bookingData.serviceId
+                                      )
+                                    ) {
+                                      return false;
+                                    }
+
+                                    // Check if end time would exceed maxEndTime
+                                    const serviceDuration =
+                                      parseInt(selectedService?.duration) || 60;
+                                    const endTime = calculateLaserEndTime(
+                                      timeStr,
+                                      serviceDuration
                                     );
-
-                                  if (overlapping >= DEFAULT_LASER_LIMIT) {
-                                    showError(
-                                      `تم الوصول للحد الأقصى من الحجوزات المتداخلة في هذا الوقت (${overlapping}/${DEFAULT_LASER_LIMIT})`
+                                    const maxEndTime = getCategoryMaxEndTime(
+                                      bookingData.serviceId
                                     );
-                                    return;
-                                  }
+                                    const maxEndMinutes =
+                                      timeToMinutes(maxEndTime);
+                                    const endMinutes = timeToMinutes(endTime);
 
-                                  // All validations passed
-                                  setBookingData({
-                                    ...bookingData,
-                                    time: startTime,
-                                    laserDuration: serviceDuration,
-                                  });
-                                  setStep(3);
-                                }}
-                              >
-                                تأكيد الوقت والمتابعة
-                              </button>
+                                    if (endMinutes > maxEndMinutes) {
+                                      return false;
+                                    }
+
+                                    return true;
+                                  }).map((minute) => (
+                                    <option key={minute} value={minute}>
+                                      {minute}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
                             </div>
-                          )}
+
+                            {bookingData.laserStartHour &&
+                              bookingData.laserStartMinute && (
+                                <div className="laser-time-preview">
+                                  <div className="preview-info">
+                                    <strong>المدة:</strong>{" "}
+                                    {selectedService?.duration || "غير متوفرة"}{" "}
+                                    دقيقة
+                                    <br />
+                                    <strong>وقت البدء:</strong>{" "}
+                                    {formatTimeDisplay(
+                                      `${bookingData.laserStartHour}:${bookingData.laserStartMinute}`
+                                    )}
+                                    <br />
+                                    <strong>وقت الانتهاء المتوقع:</strong>{" "}
+                                    {formatTimeDisplay(
+                                      calculateLaserEndTime(
+                                        `${bookingData.laserStartHour}:${bookingData.laserStartMinute}`,
+                                        parseInt(selectedService?.duration) ||
+                                          60
+                                      )
+                                    )}
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="btn-primary"
+                                    onClick={async () => {
+                                      // Validate date is selected
+                                      if (!bookingData.date) {
+                                        showError("يرجى اختيار التاريخ أولاً");
+                                        return;
+                                      }
+
+                                      const startTime = `${bookingData.laserStartHour}:${bookingData.laserStartMinute}`;
+                                      const serviceDuration =
+                                        parseInt(selectedService?.duration) ||
+                                        60;
+                                      const validation = validateFlexibleTime(
+                                        startTime,
+                                        serviceDuration,
+                                        bookingData.serviceId
+                                      );
+
+                                      if (!validation.valid) {
+                                        showError(validation.message);
+                                        return;
+                                      }
+
+                                      // Check for overlapping
+                                      const overlapping =
+                                        await checkLaserOverlapping(
+                                          bookingData.date,
+                                          startTime,
+                                          validation.endTime
+                                        );
+
+                                      if (overlapping >= DEFAULT_LASER_LIMIT) {
+                                        showError(
+                                          `تم الوصول للحد الأقصى من الحجوزات المتداخلة في هذا الوقت (${overlapping}/${DEFAULT_LASER_LIMIT})`
+                                        );
+                                        return;
+                                      }
+
+                                      // All validations passed
+                                      setBookingData({
+                                        ...bookingData,
+                                        time: startTime,
+                                        laserDuration: serviceDuration,
+                                      });
+                                      setStep(3);
+                                    }}
+                                  >
+                                    تأكيد الوقت والمتابعة
+                                  </button>
+                                </div>
+                              )}
+                          </>
+                        )}
                       </div>
                     ) : isFixedTimeService(bookingData.serviceId) ? (
                       /* FIXED TIME SELECTION (Skin-like services) */
                       <div className="skin-time-selection">
                         <h3>اختاري الوقت</h3>
 
-                        {/* Fixed time slots from category configuration */}
-                        <div className="time-slots">
-                          {getCategoryFixedTimeSlots(bookingData.serviceId)
-                            .filter((time) => {
-                              // Filter out past times for today
-                              if (
-                                bookingData.date &&
-                                isTimePassed(bookingData.date, time)
-                              ) {
-                                return false;
-                              }
-                              return true;
-                            })
-                            .map((time) => (
-                              <button
-                                key={time}
-                                className={`time-slot ${
-                                  selectedFixedTime === time ? "selected" : ""
-                                }`}
-                                onClick={() => {
-                                  setSelectedFixedTime(time);
-                                }}
-                              >
-                                {formatTimeDisplay(time)}
-                              </button>
-                            ))}
-                        </div>
-
-                        {/* Fixed time preview and confirmation */}
-                        {selectedFixedTime && !bookingData.useCustomTime && (
-                          <div className="laser-time-preview">
-                            <div className="preview-info">
-                              <strong>المدة:</strong>{" "}
-                              {selectedService?.duration || "غير متوفرة"} دقيقة
-                              <br />
-                              <strong>وقت البدء:</strong>{" "}
-                              {formatTimeDisplay(selectedFixedTime)}
-                              <br />
-                              <strong>وقت الانتهاء المتوقع:</strong>{" "}
-                              {formatTimeDisplay(
-                                calculateLaserEndTime(
-                                  selectedFixedTime,
-                                  parseInt(selectedService?.duration) || 60
-                                )
-                              )}
-                            </div>
-                            <button
-                              type="button"
-                              className="btn-primary"
-                              onClick={async () => {
-                                // Check if time has passed (for today)
+                        {!bookingData.date ? (
+                          <p
+                            className="info-message"
+                            style={{
+                              textAlign: "center",
+                              color: "#999",
+                              padding: "2rem",
+                            }}
+                          >
+                            يرجى اختيار التاريخ أولاً لعرض الأوقات المتاحة
+                          </p>
+                        ) : (
+                          <>
+                            {/* Fixed time slots from category configuration */}
+                            {(() => {
+                              const availableSlots = getCategoryFixedTimeSlots(
+                                bookingData.serviceId
+                              ).filter((time) => {
+                                // Filter out past times for today
                                 if (
-                                  isTimePassed(
-                                    bookingData.date,
-                                    selectedFixedTime
-                                  )
+                                  bookingData.date &&
+                                  isTimePassed(bookingData.date, time)
                                 ) {
-                                  showError(
-                                    "الوقت المختار قد انتهى، يرجى اختيار وقت آخر"
-                                  );
-                                  setSelectedFixedTime("");
-                                  return;
+                                  return false;
                                 }
+                                return true;
+                              });
 
-                                // Check availability
-                                const availability =
-                                  await checkFixedTimeAvailability(
-                                    bookingData.date,
-                                    selectedFixedTime,
-                                    bookingData.serviceId
-                                  );
+                              return availableSlots.length === 0 ? (
+                                <p className="no-slots-message">
+                                  لا توجد أوقات متاحة في هذا التاريخ. جميع
+                                  الأوقات محجوزة بالكامل. يرجى اختيار تاريخ آخر.
+                                </p>
+                              ) : (
+                                <div className="time-slots">
+                                  {availableSlots.map((time) => (
+                                    <button
+                                      key={time}
+                                      className={`time-slot ${
+                                        selectedFixedTime === time
+                                          ? "selected"
+                                          : ""
+                                      }`}
+                                      onClick={() => {
+                                        setSelectedFixedTime(time);
+                                      }}
+                                    >
+                                      {formatTimeDisplay(time)}
+                                    </button>
+                                  ))}
+                                </div>
+                              );
+                            })()}
 
-                                if (!availability.available) {
-                                  showError(
-                                    `تم الوصول للحد الأقصى من الحجوزات في هذا الوقت (${availability.current}/${availability.limit})`
-                                  );
-                                  setSelectedFixedTime("");
-                                  return;
-                                }
+                            {/* Fixed time preview and confirmation */}
+                            {selectedFixedTime &&
+                              !bookingData.useCustomTime && (
+                                <div className="laser-time-preview">
+                                  <div className="preview-info">
+                                    <strong>المدة:</strong>{" "}
+                                    {selectedService?.duration || "غير متوفرة"}{" "}
+                                    دقيقة
+                                    <br />
+                                    <strong>وقت البدء:</strong>{" "}
+                                    {formatTimeDisplay(selectedFixedTime)}
+                                    <br />
+                                    <strong>وقت الانتهاء المتوقع:</strong>{" "}
+                                    {formatTimeDisplay(
+                                      calculateLaserEndTime(
+                                        selectedFixedTime,
+                                        parseInt(selectedService?.duration) ||
+                                          60
+                                      )
+                                    )}
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="btn-primary"
+                                    onClick={async () => {
+                                      // Validate date is selected
+                                      if (!bookingData.date) {
+                                        showError("يرجى اختيار التاريخ أولاً");
+                                        return;
+                                      }
 
-                                // All validations passed
-                                setBookingData({
-                                  ...bookingData,
-                                  time: selectedFixedTime,
-                                  useCustomTime: false,
-                                });
-                                setStep(3);
-                              }}
-                            >
-                              تأكيد الوقت والمتابعة
-                            </button>
-                          </div>
-                        )}
+                                      // Check if time has passed (for today)
+                                      if (
+                                        isTimePassed(
+                                          bookingData.date,
+                                          selectedFixedTime
+                                        )
+                                      ) {
+                                        showError(
+                                          "الوقت المختار قد انتهى، يرجى اختيار وقت آخر"
+                                        );
+                                        setSelectedFixedTime("");
+                                        return;
+                                      }
 
-                        {/* Admin-only custom time option */}
-                        {isAdmin && (
-                          <div className="admin-custom-time">
-                            <div className="custom-time-toggle">
-                              <label className="checkbox-item">
-                                <input
-                                  type="checkbox"
-                                  checked={bookingData.useCustomTime}
-                                  onChange={(e) => {
-                                    setBookingData({
-                                      ...bookingData,
-                                      useCustomTime: e.target.checked,
-                                      time: e.target.checked
-                                        ? ""
-                                        : bookingData.time,
-                                      customStartTime: "",
-                                      customEndTime: "",
-                                    });
-                                  }}
-                                />
-                                استخدام وقت مخصص (Admin)
-                              </label>
-                            </div>
+                                      // Check availability
+                                      const availability =
+                                        await checkFixedTimeAvailability(
+                                          bookingData.date,
+                                          selectedFixedTime,
+                                          bookingData.serviceId
+                                        );
 
-                            {bookingData.useCustomTime && (
-                              <div className="custom-time-inputs">
-                                <div className="form-group">
-                                  <label className="form-label">
-                                    وقت البدء
-                                  </label>
-                                  <input
-                                    type="time"
-                                    className="form-input"
-                                    value={bookingData.customStartTime}
-                                    onChange={(e) => {
+                                      if (!availability.available) {
+                                        showError(
+                                          `تم الوصول للحد الأقصى من الحجوزات في هذا الوقت (${availability.current}/${availability.limit})`
+                                        );
+                                        setSelectedFixedTime("");
+                                        return;
+                                      }
+
+                                      // All validations passed
                                       setBookingData({
                                         ...bookingData,
-                                        customStartTime: e.target.value,
+                                        time: selectedFixedTime,
+                                        useCustomTime: false,
                                       });
+                                      setStep(3);
                                     }}
-                                  />
+                                  >
+                                    تأكيد الوقت والمتابعة
+                                  </button>
                                 </div>
-                                <div className="form-group">
-                                  <label className="form-label">
-                                    وقت الانتهاء
+                              )}
+
+                            {/* Admin-only custom time option */}
+                            {isAdmin && (
+                              <div className="admin-custom-time">
+                                <div className="custom-time-toggle">
+                                  <label className="checkbox-item">
+                                    <input
+                                      type="checkbox"
+                                      checked={bookingData.useCustomTime}
+                                      onChange={(e) => {
+                                        setBookingData({
+                                          ...bookingData,
+                                          useCustomTime: e.target.checked,
+                                          time: e.target.checked
+                                            ? ""
+                                            : bookingData.time,
+                                          customStartTime: "",
+                                          customEndTime: "",
+                                        });
+                                      }}
+                                    />
+                                    استخدام وقت مخصص (Admin)
                                   </label>
-                                  <input
-                                    type="time"
-                                    className="form-input"
-                                    value={bookingData.customEndTime}
-                                    onChange={(e) => {
-                                      setBookingData({
-                                        ...bookingData,
-                                        customEndTime: e.target.value,
-                                      });
-                                    }}
-                                  />
                                 </div>
-                                <button
-                                  type="button"
-                                  className="btn-primary"
-                                  onClick={() => {
-                                    if (
-                                      !bookingData.customStartTime ||
-                                      !bookingData.customEndTime
-                                    ) {
-                                      showError(
-                                        "يرجى تحديد وقت البدء والانتهاء"
-                                      );
-                                      return;
-                                    }
-                                    setBookingData({
-                                      ...bookingData,
-                                      time: bookingData.customStartTime,
-                                    });
-                                    setStep(3);
-                                  }}
-                                >
-                                  تأكيد الوقت المخصص
-                                </button>
+
+                                {bookingData.useCustomTime && (
+                                  <div className="custom-time-inputs">
+                                    <div className="form-group">
+                                      <label className="form-label">
+                                        وقت البدء
+                                      </label>
+                                      <input
+                                        type="time"
+                                        className="form-input"
+                                        value={bookingData.customStartTime}
+                                        onChange={(e) => {
+                                          setBookingData({
+                                            ...bookingData,
+                                            customStartTime: e.target.value,
+                                          });
+                                        }}
+                                      />
+                                    </div>
+                                    <div className="form-group">
+                                      <label className="form-label">
+                                        وقت الانتهاء
+                                      </label>
+                                      <input
+                                        type="time"
+                                        className="form-input"
+                                        value={bookingData.customEndTime}
+                                        onChange={(e) => {
+                                          setBookingData({
+                                            ...bookingData,
+                                            customEndTime: e.target.value,
+                                          });
+                                        }}
+                                      />
+                                    </div>
+                                    <button
+                                      type="button"
+                                      className="btn-primary"
+                                      onClick={() => {
+                                        if (!bookingData.date) {
+                                          showError(
+                                            "يرجى اختيار التاريخ أولاً"
+                                          );
+                                          return;
+                                        }
+                                        if (
+                                          !bookingData.customStartTime ||
+                                          !bookingData.customEndTime
+                                        ) {
+                                          showError(
+                                            "يرجى تحديد وقت البدء والانتهاء"
+                                          );
+                                          return;
+                                        }
+                                        setBookingData({
+                                          ...bookingData,
+                                          time: bookingData.customStartTime,
+                                        });
+                                        setStep(3);
+                                      }}
+                                    >
+                                      تأكيد الوقت المخصص
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             )}
-                          </div>
+                          </>
                         )}
                       </div>
                     ) : (
                       /* DEFAULT TIME SELECTION (for other services) */
                       <div className="time-selection">
                         <h3>اختاري الوقت المتاح</h3>
-                        {availableTimeSlots.length === 0 ? (
+                        {!bookingData.date ? (
+                          <p
+                            className="info-message"
+                            style={{
+                              textAlign: "center",
+                              color: "#999",
+                              padding: "2rem",
+                            }}
+                          >
+                            يرجى اختيار التاريخ أولاً لعرض الأوقات المتاحة
+                          </p>
+                        ) : availableTimeSlots.length === 0 ? (
                           <p className="no-slots-message">
-                            لا توجد أوقات متاحة في هذا التاريخ. يرجى اختيار
-                            تاريخ آخر.
+                            لا توجد أوقات متاحة في هذا التاريخ. جميع الأوقات
+                            محجوزة بالكامل. يرجى اختيار تاريخ آخر.
                           </p>
                         ) : (
                           <div className="time-slots">
@@ -1781,19 +1838,30 @@ const BookingPage = ({ currentUser, userData }) => {
                     <div className="summary-item">
                       <span className="label">المدة:</span>
                       <span className="value">
-                        {isLaserService(bookingData.serviceId)
-                          ? `${bookingData.laserDuration} دقيقة`
-                          : isSkinService(bookingData.serviceId) &&
+                        {(() => {
+                          if (isLaserService(bookingData.serviceId)) {
+                            return `${bookingData.laserDuration} دقيقة`;
+                          }
+
+                          if (
+                            isSkinService(bookingData.serviceId) &&
                             bookingData.useCustomTime &&
                             bookingData.customStartTime &&
                             bookingData.customEndTime
-                          ? `${Math.round(
+                          ) {
+                            const diff =
                               timeToMinutes(bookingData.customEndTime) -
-                                timeToMinutes(bookingData.customStartTime)
-                            )} دقيقة`
-                          : selectedService?.duration || "60 دقيقة"}
+                              timeToMinutes(bookingData.customStartTime);
+
+                            return `${Math.round(diff)} دقيقة`;
+                          }
+
+                          // default
+                          return `${selectedService?.duration || 60} دقيقة`;
+                        })()}
                       </span>
                     </div>
+
                     {/* <div className="summary-item price-item">
                       <span className="label">السعر:</span>
                       <span className="value">{selectedService?.price}</span>

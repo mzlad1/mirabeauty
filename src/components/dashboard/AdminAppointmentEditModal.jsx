@@ -419,12 +419,6 @@ const AdminAppointmentEditModal = ({
               <span className="label">الخدمة:</span>
               <span className="value">{appointment?.serviceName}</span>
             </div>
-            <div className="admin-appointment-edit-info-item">
-              <span className="label">السعر:</span>
-              <span className="value">
-                {formatPrice(appointment?.servicePrice || appointment?.price)}
-              </span>
-            </div>
           </div>
 
           <div className="admin-appointment-edit-form-row">

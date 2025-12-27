@@ -845,7 +845,6 @@
 }
 
 .booking-calendar .react-calendar__tile--now {
-  background-color: var(--gold);
   color: white;
   font-weight: 600;
 }

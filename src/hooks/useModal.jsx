@@ -79,11 +79,13 @@ export const useModal = () => {
 
   const showConfirm = (
     message,
+    onConfirmCallback = null,
     title = "تأكيد العملية",
     confirmText = "تأكيد",
     cancelText = "إلغاء"
   ) => {
-    return new Promise((resolve) => {
+    // If second parameter is a function, use callback style
+    if (typeof onConfirmCallback === "function") {
       setModalState({
         isOpen: true,
         type: "confirm",
@@ -91,6 +93,32 @@ export const useModal = () => {
         message,
         confirmText,
         cancelText,
+        showCancel: true,
+        onConfirm: () => {
+          closeModal();
+          onConfirmCallback();
+        },
+        onCancel: () => {
+          closeModal();
+        },
+      });
+      return;
+    }
+
+    // Otherwise, use Promise style (backward compatibility)
+    // In this case, onConfirmCallback is actually the title
+    const actualTitle = onConfirmCallback || "تأكيد العملية";
+    const actualConfirmText = title || "تأكيد";
+    const actualCancelText = confirmText || "إلغاء";
+
+    return new Promise((resolve) => {
+      setModalState({
+        isOpen: true,
+        type: "confirm",
+        title: actualTitle,
+        message,
+        confirmText: actualConfirmText,
+        cancelText: actualCancelText,
         showCancel: true,
         onConfirm: () => {
           resolve(true);

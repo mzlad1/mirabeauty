@@ -860,15 +860,38 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
               getPaginatedAppointments().map((appointment) => (
                 <tr key={appointment.id}>
                   <td>
-                    <div
-                      className="aap-customer-info"
-                      onClick={() =>
-                        handleNavigateToCustomer(appointment.customerId)
-                      }
-                      style={{ cursor: "pointer" }}
-                      title="عرض ملف العميل"
-                    >
-                      <strong>{appointment.customerName}</strong>
+                    <div className="aap-customer-info">
+                      {appointment.customerId ? (
+                        <a
+                          href={`/admin/users/${appointment.customerId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: "inherit",
+                            textDecoration: "none",
+                            fontWeight: "bold",
+                          }}
+                          title="عرض ملف العميل"
+                        >
+                          {appointment.customerName}
+                        </a>
+                      ) : appointment.createdBy ? (
+                        <a
+                          href={`/admin/users/${appointment.createdBy}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: "inherit",
+                            textDecoration: "none",
+                            fontWeight: "bold",
+                          }}
+                          title="عرض ملف المسؤول"
+                        >
+                          {appointment.customerName}
+                        </a>
+                      ) : (
+                        <strong>{appointment.customerName}</strong>
+                      )}
                       <span>{appointment.customerPhone}</span>
                     </div>
                   </td>
@@ -1071,6 +1094,8 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={handleCreateSuccess}
+        currentUser={currentUser}
+        userData={userData}
       />
 
       {/* Staff Selection Modal */}

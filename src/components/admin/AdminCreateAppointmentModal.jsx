@@ -8,13 +8,22 @@ import {
   checkStaffAvailabilityWithDuration,
 } from "../../services/appointmentsService";
 import { getAllServiceCategories } from "../../services/categoriesService";
+import { useModal } from "../../hooks/useModal";
+import CustomModal from "../common/CustomModal";
 
 // Constants (fallback defaults)
 const LASER_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16];
 const LASER_MINUTES = ["00", "15", "30", "45"];
 const DEFAULT_LASER_LIMIT = 3;
 
-const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
+const AdminCreateAppointmentModal = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  currentUser,
+  userData,
+}) => {
+  const { modalState, closeModal, showConfirm } = useModal();
   const [formData, setFormData] = useState({
     // Customer info (optional - admin can leave blank)
     customerName: "",
@@ -121,7 +130,9 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
 
   const calculateLaserEndTime = (startTime, durationMinutes) => {
     const startMinutes = timeToMinutes(startTime);
-    const endMinutes = startMinutes + durationMinutes;
+    // Ensure durationMinutes is a number to prevent string concatenation
+    const duration = parseInt(durationMinutes, 10) || 0;
+    const endMinutes = startMinutes + duration;
     return minutesToTime(endMinutes);
   };
 
@@ -131,12 +142,7 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   const validateFlexibleTime = (startTime, durationMinutes, serviceId) => {
-    if (isStartTimeForbidden(startTime, serviceId)) {
-      return {
-        valid: false,
-        message: `وقت البدء ${startTime} غير مسموح`,
-      };
-    }
+    // Admin can use any start time - skip forbidden time check
 
     const endTime = calculateLaserEndTime(startTime, durationMinutes);
     const maxEndTime = getCategoryMaxEndTime(serviceId);
@@ -145,8 +151,10 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
 
     if (endMinutes > maxEndMinutes) {
       return {
-        valid: false,
-        message: `الجلسة ستنتهي في ${endTime} وهذا يتجاوز الحد الأقصى (${maxEndTime})`,
+        valid: true, // Allow with warning
+        warning: true,
+        endTime,
+        message: `تحذير: الجلسة ستنتهي في ${endTime} وهذا يتجاوز الحد الأقصى (${maxEndTime}). هل أنت متأكد من المتابعة؟`,
       };
     }
 
@@ -224,7 +232,11 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
   // Check staff availability function
   const checkStaffAvailability = async (staffId) => {
     if (!staffId || !formData.date || !formData.time) {
-      setStaffAvailability({ isChecking: false, available: true, conflicts: [] });
+      setStaffAvailability({
+        isChecking: false,
+        available: true,
+        conflicts: [],
+      });
       return;
     }
 
@@ -249,16 +261,29 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
       });
     } catch (error) {
       console.error("Error checking staff availability:", error);
-      setStaffAvailability({ isChecking: false, available: true, conflicts: [] });
+      setStaffAvailability({
+        isChecking: false,
+        available: true,
+        conflicts: [],
+      });
     }
   };
 
   // Re-check availability when staff, date, time, or service changes
   useEffect(() => {
-    if (formData.staffId && formData.date && formData.time && formData.serviceId) {
+    if (
+      formData.staffId &&
+      formData.date &&
+      formData.time &&
+      formData.serviceId
+    ) {
       checkStaffAvailability(formData.staffId);
     } else {
-      setStaffAvailability({ isChecking: false, available: true, conflicts: [] });
+      setStaffAvailability({
+        isChecking: false,
+        available: true,
+        conflicts: [],
+      });
     }
   }, [formData.staffId, formData.date, formData.time, formData.serviceId]);
 
@@ -289,7 +314,7 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
 
       if (isFlexibleTimeService(formData.serviceId)) {
         // Use service duration for flexible time services
-        appointmentDuration = selectedService.duration || 60;
+        appointmentDuration = parseInt(selectedService.duration, 10) || 60;
         appointmentEndTime = calculateLaserEndTime(
           formData.time,
           appointmentDuration
@@ -307,7 +332,77 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
           return;
         }
 
-        // Check overlapping
+        // If there's a warning, ask for confirmation
+        if (validation.warning) {
+          setLoading(false);
+          showConfirm(
+            validation.message,
+            async () => {
+              // User confirmed, continue with appointment creation
+              setLoading(true);
+              try {
+                await processAppointmentCreation(
+                  selectedService,
+                  appointmentDuration,
+                  appointmentEndTime,
+                  validation
+                );
+              } catch (err) {
+                console.error("Error creating appointment:", err);
+                setError("فشل في إنشاء الموعد");
+                setLoading(false);
+              }
+            },
+            "تحذير",
+            "متابعة",
+            "إلغاء"
+          );
+          return;
+        }
+
+        // No warning, continue normally
+        await processAppointmentCreation(
+          selectedService,
+          appointmentDuration,
+          appointmentEndTime,
+          validation
+        );
+      } else {
+        // For non-flexible services
+        if (
+          isFixedTimeService(formData.serviceId) &&
+          formData.useCustomTime &&
+          formData.customEndTime
+        ) {
+          appointmentDuration =
+            timeToMinutes(formData.customEndTime) -
+            timeToMinutes(formData.time);
+          appointmentEndTime = formData.customEndTime;
+        }
+
+        await processAppointmentCreation(
+          selectedService,
+          appointmentDuration,
+          appointmentEndTime,
+          null
+        );
+      }
+    } catch (err) {
+      console.error("Error creating appointment:", err);
+      setError("فشل في إنشاء الموعد");
+      setLoading(false);
+    }
+  };
+
+  const processAppointmentCreation = async (
+    selectedService,
+    appointmentDuration,
+    appointmentEndTime,
+    validation
+  ) => {
+    try {
+      // For flexible services, check overlapping
+      if (isFlexibleTimeService(formData.serviceId) && validation) {
         const overlapping = await checkLaserOverlapping(
           formData.date,
           formData.time,
@@ -321,44 +416,14 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
           setLoading(false);
           return;
         }
-      } else if (
-        isFixedTimeService(formData.serviceId) &&
-        formData.useCustomTime &&
-        formData.customEndTime
-      ) {
-        appointmentDuration =
-          timeToMinutes(formData.customEndTime) - timeToMinutes(formData.time);
-        appointmentEndTime = formData.customEndTime;
       }
 
-      // Get staff name if staff is assigned and check for conflicts
+      // Get staff name if staff is assigned
+      // Note: Admin can proceed even if staff has conflicts (warning is shown in UI)
       let staffName = null;
       if (formData.staffId) {
         const staff = staffMembers.find((s) => s.id === formData.staffId);
         staffName = staff?.name || null;
-
-        // Check for staff time conflicts
-        const availabilityCheck = await checkStaffAvailabilityWithDuration(
-          formData.staffId,
-          formData.date,
-          formData.time,
-          appointmentDuration,
-          null // No appointment to exclude (new appointment)
-        );
-
-        if (!availabilityCheck.available) {
-          const conflictDetails = availabilityCheck.conflicts
-            .map((c) => `- ${c.customerName} (${c.serviceName}) في ${c.time}`)
-            .join("\n");
-
-          setError(
-            `الأخصائية ${
-              staffName || "المحددة"
-            } لديها تعارض في المواعيد:\n\n${conflictDetails}\n\nالرجاء اختيار وقت آخر أو أخصائية أخرى.`
-          );
-          setLoading(false);
-          return;
-        }
       }
 
       // Create appointment data
@@ -382,6 +447,7 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
         notes: formData.notes || "",
         status: "مؤكد", // Admin-created appointments are confirmed by default
         createdByAdmin: true, // Flag to indicate admin creation
+        createdBy: currentUser?.uid || null, // Store admin ID who created this
       };
 
       await createAppointment(appointmentData);
@@ -403,13 +469,14 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
         customEndTime: "",
       });
 
+      setLoading(false);
       onSuccess();
       onClose();
     } catch (err) {
-      console.error("Error creating appointment:", err);
+      console.error("Error in processAppointmentCreation:", err);
       setError("فشل في إنشاء الموعد");
-    } finally {
       setLoading(false);
+      throw err;
     }
   };
 
@@ -608,10 +675,15 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
                         <strong>وقت الانتهاء المتوقع:</strong>{" "}
                         {(() => {
                           // Build time string directly from hour/minute to ensure it's properly formatted
-                          const startTime = formData.laserStartHour && formData.laserStartMinute 
-                            ? `${formData.laserStartHour}:${formData.laserStartMinute}`
-                            : formData.time;
-                          const duration = parseInt(services.find((s) => s.id === formData.serviceId)?.duration) || 60;
+                          const startTime =
+                            formData.laserStartHour && formData.laserStartMinute
+                              ? `${formData.laserStartHour}:${formData.laserStartMinute}`
+                              : formData.time;
+                          const duration =
+                            parseInt(
+                              services.find((s) => s.id === formData.serviceId)
+                                ?.duration
+                            ) || 60;
                           return calculateLaserEndTime(startTime, duration);
                         })()}
                       </div>
@@ -731,35 +803,40 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
                   </option>
                 ))}
               </select>
-              
+
               {/* Staff Availability Warning */}
               {staffAvailability.isChecking && (
                 <div className="staff-availability-checking">
-                  <i className="fas fa-spinner fa-spin"></i> جاري التحقق من توفر الأخصائية...
+                  <i className="fas fa-spinner fa-spin"></i> جاري التحقق من توفر
+                  الأخصائية...
                 </div>
               )}
-              
-              {!staffAvailability.isChecking && !staffAvailability.available && staffAvailability.conflicts.length > 0 && (
-                <div className="staff-availability-warning">
-                  <div className="warning-header">
-                    <i className="fas fa-exclamation-triangle"></i>
-                    <strong>تحذير: الأخصائية مشغولة</strong>
+
+              {!staffAvailability.isChecking &&
+                !staffAvailability.available &&
+                staffAvailability.conflicts.length > 0 && (
+                  <div className="staff-availability-warning">
+                    <div className="warning-header">
+                      <i className="fas fa-exclamation-triangle"></i>
+                      <strong>تحذير: الأخصائية مشغولة</strong>
+                    </div>
+                    <div className="warning-content">
+                      <p>الأخصائية لديها تعارض في المواعيد التالية:</p>
+                      <ul className="conflict-list">
+                        {staffAvailability.conflicts.map((conflict, index) => (
+                          <li key={index}>
+                            {conflict.customerName} ({conflict.serviceName}) في{" "}
+                            {conflict.time}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="warning-note">
+                        <i className="fas fa-info-circle"></i> يمكنك المتابعة
+                        بإنشاء الموعد إذا كنت متأكداً من التعيين
+                      </p>
+                    </div>
                   </div>
-                  <div className="warning-content">
-                    <p>الأخصائية لديها تعارض في المواعيد التالية:</p>
-                    <ul className="conflict-list">
-                      {staffAvailability.conflicts.map((conflict, index) => (
-                        <li key={index}>
-                          {conflict.customerName} ({conflict.serviceName}) في {conflict.time}
-                        </li>
-                      ))}
-                    </ul>
-                    <p className="warning-note">
-                      <i className="fas fa-info-circle"></i> يمكنك المتابعة بإنشاء الموعد إذا كنت متأكداً من التعيين
-                    </p>
-                  </div>
-                </div>
-              )}
+                )}
             </div>
 
             <div className="form-group">
@@ -790,6 +867,20 @@ const AdminCreateAppointmentModal = ({ isOpen, onClose, onSuccess }) => {
           </div>
         </form>
       </div>
+
+      {/* Custom Modal for confirmation dialogs */}
+      <CustomModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        type={modalState.type}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        showCancel={modalState.showCancel}
+        onConfirm={modalState.onConfirm}
+        onCancel={modalState.onCancel}
+      />
     </div>
   );
 };

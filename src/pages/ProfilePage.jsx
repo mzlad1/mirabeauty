@@ -595,22 +595,33 @@ const ProfilePage = ({ currentUser, userData, setCurrentUser = () => {} }) => {
                   {upcomingAppointments.length > 0 && (
                     <div className="next-appointment">
                       <h3>الموعد القادم</h3>
-                      <div className="appointment-card">
-                        <div className="appointment-info">
-                          <h4>{upcomingAppointments[0].serviceName}</h4>
-                          <p>الأخصائية: {upcomingAppointments[0].staffName}</p>
-                          <div className="appointment-meta">
-                            <span className="date">
-                              <i className="fas fa-calendar"></i>{" "}
-                              {upcomingAppointments[0].date}
-                            </span>
-                            <span className="time">
-                              <i className="fas fa-clock"></i>{" "}
-                              {formatTimeDisplay(upcomingAppointments[0].time)}
-                            </span>
+                      {upcomingAppointments
+                        .filter(
+                          (apt) =>
+                            apt.date === upcomingAppointments[0].date &&
+                            apt.time === upcomingAppointments[0].time
+                        )
+                        .map((appointment) => (
+                          <div
+                            key={appointment.id}
+                            className="appointment-card"
+                          >
+                            <div className="appointment-info">
+                              <h4>{appointment.serviceName}</h4>
+                              <p>الأخصائية: {appointment.staffName}</p>
+                              <div className="appointment-meta">
+                                <span className="date">
+                                  <i className="fas fa-calendar"></i>{" "}
+                                  {appointment.date}
+                                </span>
+                                <span className="time">
+                                  <i className="fas fa-clock"></i>{" "}
+                                  {formatTimeDisplay(appointment.time)}
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
+                        ))}
                     </div>
                   )}
 
