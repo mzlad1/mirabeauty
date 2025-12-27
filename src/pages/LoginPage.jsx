@@ -6,7 +6,7 @@ import { useAuth } from "../hooks/useAuth.jsx";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { refreshUserData } = useAuth();
+  const { refreshUserData, waitForAuth } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -60,11 +60,8 @@ const LoginPage = () => {
         formData.password
       );
 
-      // Force refresh user data in auth context
-      await refreshUserData();
-
-      // Small delay to ensure auth state is updated
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      // Wait for auth state to fully propagate
+      await waitForAuth();
 
       // Redirect based on user role
       if (userData.role === "admin" || userData.role === "staff") {

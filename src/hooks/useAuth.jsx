@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChange(async (user) => {
@@ -20,26 +21,46 @@ export const AuthProvider = ({ children }) => {
 
       if (user) {
         try {
-          // Get user data from Firestore
-          const userDoc = await getCurrentUserData(user.uid);
+          // Get user data from Firestore with retry logic
+          // (handles race condition where auth user is created before Firestore doc)
+          let userDoc = await getCurrentUserData(user.uid);
+          let retries = 0;
+          const maxRetries = 5;
+
+          // If document doesn't exist, retry a few times with delay
+          while (!userDoc && retries < maxRetries) {
+            console.log(
+              `User document not found, retrying... (${
+                retries + 1
+              }/${maxRetries})`
+            );
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            userDoc = await getCurrentUserData(user.uid);
+            retries++;
+          }
+
           console.log("User data fetched:", userDoc);
 
           if (userDoc) {
             setCurrentUser(user);
             setUserData(userDoc);
+            setAuthReady(true);
           } else {
-            console.error("No user document found in Firestore");
+            console.error("No user document found in Firestore after retries");
             setCurrentUser(null);
             setUserData(null);
+            setAuthReady(true);
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
           setCurrentUser(null);
           setUserData(null);
+          setAuthReady(true);
         }
       } else {
         setCurrentUser(null);
         setUserData(null);
+        setAuthReady(true);
       }
       setLoading(false);
     });
@@ -61,12 +82,37 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Function to wait for auth to be ready after login/signup
+  const waitForAuth = () => {
+    return new Promise((resolve) => {
+      if (authReady && currentUser && userData) {
+        resolve();
+        return;
+      }
+
+      const checkInterval = setInterval(() => {
+        if (currentUser && userData) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
+
+      // Timeout after 5 seconds
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        resolve();
+      }, 5000);
+    });
+  };
+
   const value = {
     currentUser,
     userData,
     loading,
+    authReady,
     setUserData, // For updating user data after profile updates
     refreshUserData, // For manually refreshing user data
+    waitForAuth, // Wait for auth state to be ready
   };
 
   return (

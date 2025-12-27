@@ -10,7 +10,7 @@ import { getAllSkinTypes } from "../services/skinTypesService";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const { refreshUserData } = useAuth();
+  const { refreshUserData, waitForAuth } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -159,11 +159,8 @@ const RegisterPage = () => {
         allergies: formData.allergies || [],
       });
 
-      // Force refresh user data in auth context
-      await refreshUserData();
-
-      // Small delay to ensure auth state is updated
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      // Wait for auth state to fully propagate
+      await waitForAuth();
 
       // Navigate to home page after successful registration
       navigate("/");
@@ -263,7 +260,7 @@ const RegisterPage = () => {
                         <span className="field-error">{errors.phone}</span>
                       )}
                       <small className="field-hint">
-                        يرجى إدخال رقم الهاتف  مع المقدمة الخاصة بالواتس اب
+                        يرجى إدخال رقم الهاتف مع المقدمة الخاصة بالواتس اب
                       </small>
                     </div>
                   </div>
