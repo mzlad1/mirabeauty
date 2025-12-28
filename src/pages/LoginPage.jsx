@@ -55,27 +55,19 @@ const LoginPage = () => {
 
     try {
       // Login with Firebase
-      console.log("🔐 Starting login...");
       const { user, userData } = await loginUser(
         formData.email,
         formData.password
       );
-      console.log(
-        "✅ Login successful, user:",
-        user.uid,
-        "role:",
-        userData.role
-      );
+      
 
       // No need to wait for auth state - we already have userData from loginUser
       // The useAuth hook will update in the background
 
       // Redirect based on user role
       if (userData.role === "admin" || userData.role === "staff") {
-        console.log("📍 Navigating to dashboard...");
         navigate("/dashboard");
       } else {
-        console.log("📍 Navigating to home...");
         navigate("/"); // Redirect customers to home page
       }
     } catch (error) {

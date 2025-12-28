@@ -79,6 +79,11 @@ import {
   deleteSpecialization,
   reorderSpecializations,
 } from "../services/specializationsService";
+import {
+  getBanner,
+  updateBanner,
+  toggleBannerStatus,
+} from "../services/bannerService";
 import UserModal from "../components/dashboard/UserModal";
 import ServiceEditModal from "../components/dashboard/ServiceEditModal";
 import ProductEditModal from "../components/dashboard/ProductEditModal";
@@ -210,6 +215,19 @@ const AdminDashboardPage = ({ currentUser }) => {
   const [isSpecializationModalOpen, setIsSpecializationModalOpen] =
     useState(false);
   const [editingSpecialization, setEditingSpecialization] = useState(null);
+
+  // Banner states
+  const [banner, setBanner] = useState({
+    isActive: false,
+    title: "",
+    description: "",
+    imageUrl: "",
+    link: "",
+    buttonText: "",
+  });
+  const [bannerImageFile, setBannerImageFile] = useState(null);
+  const [bannerImageUploading, setBannerImageUploading] = useState(false);
+  const [bannerSubmitting, setBannerSubmitting] = useState(false);
 
   // Profile editing states
   const [editMode, setEditMode] = useState(false);
@@ -454,7 +472,6 @@ const AdminDashboardPage = ({ currentUser }) => {
   const loadFAQTypes = async () => {
     try {
       const typesData = await getAllFAQTypes();
-      console.log("Loaded FAQ types:", typesData);
       setFaqTypes(typesData);
     } catch (err) {
       console.error("Error loading FAQ types:", err);
@@ -476,6 +493,98 @@ const AdminDashboardPage = ({ currentUser }) => {
       setSpecializations(specializationsData);
     } catch (err) {
       console.error("Error loading specializations:", err);
+    }
+  };
+
+  // Banner management functions
+  const loadBanner = async () => {
+    try {
+      setLoading(true);
+      const bannerData = await getBanner();
+      setBanner(bannerData);
+    } catch (err) {
+      console.error("Error loading banner:", err);
+      showError("فشل في تحميل بيانات البانر");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBannerImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      showError("يرجى اختيار ملف صورة صحيح");
+      return;
+    }
+
+    setBannerImageFile(file);
+
+    // Preview the image
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setBanner((prev) => ({ ...prev, imageUrl: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveBanner = async () => {
+    try {
+      setBannerSubmitting(true);
+      let imageUrl = banner.imageUrl;
+
+      // Upload image if a new file was selected
+      if (bannerImageFile) {
+        setBannerImageUploading(true);
+        // Delete old image if exists
+        const oldImageUrl =
+          typeof banner.imageUrl === "object"
+            ? banner.imageUrl?.url
+            : banner.imageUrl;
+        if (oldImageUrl && !oldImageUrl.startsWith("data:")) {
+          try {
+            await deleteImage(oldImageUrl);
+          } catch (err) {
+            console.error("Error deleting old image:", err);
+          }
+        }
+        const uploadResult = await uploadSingleImage(
+          bannerImageFile,
+          "banners"
+        );
+        imageUrl = uploadResult.url; // Extract just the URL string
+        setBannerImageUploading(false);
+      }
+
+      await updateBanner({
+        ...banner,
+        imageUrl,
+      });
+
+      setBannerImageFile(null);
+      showSuccess("تم حفظ البانر بنجاح");
+      await loadBanner();
+    } catch (err) {
+      console.error("Error saving banner:", err);
+      showError("فشل في حفظ البانر");
+    } finally {
+      setBannerSubmitting(false);
+      setBannerImageUploading(false);
+    }
+  };
+
+  const handleToggleBannerStatus = async () => {
+    try {
+      const newStatus = !banner.isActive;
+      await toggleBannerStatus(newStatus);
+      setBanner((prev) => ({ ...prev, isActive: newStatus }));
+      showSuccess(
+        newStatus ? "تم تفعيل البانر بنجاح" : "تم إيقاف البانر بنجاح"
+      );
+    } catch (err) {
+      console.error("Error toggling banner status:", err);
+      showError("فشل في تغيير حالة البانر");
     }
   };
 
@@ -905,6 +1014,8 @@ const AdminDashboardPage = ({ currentUser }) => {
       loadSkinTypes();
     } else if (activeTab === "specializations") {
       loadSpecializations();
+    } else if (activeTab === "banner") {
+      loadBanner();
     }
   }, [activeTab]);
 
@@ -1138,7 +1249,6 @@ const AdminDashboardPage = ({ currentUser }) => {
 
   const handleFaqSubmit = async (faqData) => {
     try {
-      console.log("Submitting FAQ with data:", faqData);
       if (editingFaq) {
         await updateFAQ(editingFaq.id, faqData);
         showSuccess("تم تحديث السؤال بنجاح");
@@ -1671,6 +1781,15 @@ const AdminDashboardPage = ({ currentUser }) => {
                 </button>
                 <button
                   className={`nav-item ${
+                    activeTab === "banner" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("banner")}
+                >
+                  <i className="nav-icon fas fa-image"></i>
+                  بانر الترويج
+                </button>
+                <button
+                  className={`nav-item ${
                     activeTab === "settings" ? "active" : ""
                   }`}
                   onClick={() => setActiveTab("settings")}
@@ -1854,27 +1973,39 @@ const AdminDashboardPage = ({ currentUser }) => {
                   {/* Filtered Appointments Statistics */}
                   <div className="appointments-stats">
                     <div className="stat-box">
-                      <div className="stat-value">{getFilteredAppointmentStats().total}</div>
+                      <div className="stat-value">
+                        {getFilteredAppointmentStats().total}
+                      </div>
                       <div className="stat-label">إجمالي المواعيد</div>
                     </div>
                     <div className="stat-box pending">
-                      <div className="stat-value">{getFilteredAppointmentStats().pending}</div>
+                      <div className="stat-value">
+                        {getFilteredAppointmentStats().pending}
+                      </div>
                       <div className="stat-label">في الانتظار</div>
                     </div>
                     <div className="stat-box confirmed">
-                      <div className="stat-value">{getFilteredAppointmentStats().confirmed}</div>
+                      <div className="stat-value">
+                        {getFilteredAppointmentStats().confirmed}
+                      </div>
                       <div className="stat-label">مؤكد</div>
                     </div>
                     <div className="stat-box completed">
-                      <div className="stat-value">{getFilteredAppointmentStats().completed}</div>
+                      <div className="stat-value">
+                        {getFilteredAppointmentStats().completed}
+                      </div>
                       <div className="stat-label">مكتمل</div>
                     </div>
                     <div className="stat-box cancelled">
-                      <div className="stat-value">{getFilteredAppointmentStats().cancelled}</div>
+                      <div className="stat-value">
+                        {getFilteredAppointmentStats().cancelled}
+                      </div>
                       <div className="stat-label">ملغي</div>
                     </div>
                     <div className="stat-box revenue">
-                      <div className="stat-value">{getFilteredAppointmentStats().revenue.toFixed(0)} ₪</div>
+                      <div className="stat-value">
+                        {getFilteredAppointmentStats().revenue.toFixed(0)} ₪
+                      </div>
                       <div className="stat-label">إجمالي الإيرادات</div>
                     </div>
                   </div>
@@ -2957,6 +3088,182 @@ const AdminDashboardPage = ({ currentUser }) => {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Banner Tab */}
+              {activeTab === "banner" && (
+                <div className="tab-content">
+                  <div className="tab-header">
+                    <h2>إدارة بانر الترويج</h2>
+                    <div className="tab-actions">
+                      <button
+                        className={`btn-toggle ${
+                          banner.isActive ? "active" : ""
+                        }`}
+                        onClick={handleToggleBannerStatus}
+                        disabled={bannerSubmitting}
+                      >
+                        <i
+                          className={`fas fa-${
+                            banner.isActive ? "eye" : "eye-slash"
+                          }`}
+                        ></i>
+                        {banner.isActive ? "مفعّل" : "متوقف"}
+                      </button>
+                      <button
+                        className="btn-primary"
+                        onClick={handleSaveBanner}
+                        disabled={bannerSubmitting || bannerImageUploading}
+                      >
+                        {bannerSubmitting || bannerImageUploading ? (
+                          <>
+                            <i className="fas fa-spinner fa-spin"></i> جاري
+                            الحفظ...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-save"></i> حفظ التغييرات
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {loading ? (
+                    <div className="loading-message">
+                      <i className="fas fa-spinner fa-spin"></i> جاري التحميل...
+                    </div>
+                  ) : (
+                    <div className="banner-editor">
+                      <div className="banner-preview">
+                        <h3>معاينة البانر</h3>
+                        {bannerImageFile ||
+                        banner.imageUrl ||
+                        banner.imageUrl?.url ? (
+                          <div className="banner-preview-card">
+                            <img
+                              src={
+                                bannerImageFile
+                                  ? URL.createObjectURL(bannerImageFile)
+                                  : typeof banner.imageUrl === "object"
+                                  ? banner.imageUrl?.url
+                                  : banner.imageUrl
+                              }
+                              alt="Banner Preview"
+                              style={{
+                                width: "100%",
+                                borderRadius: "8px",
+                                marginBottom: "1rem",
+                              }}
+                            />
+                            {banner.title && (
+                              <h4 style={{ marginBottom: "0.5rem" }}>
+                                {banner.title}
+                              </h4>
+                            )}
+                            {banner.description && (
+                              <p style={{ marginBottom: "1rem" }}>
+                                {banner.description}
+                              </p>
+                            )}
+                            {banner.buttonText && banner.link && (
+                              <button className="btn-primary">
+                                {banner.buttonText}
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="no-image-placeholder">
+                            <i className="fas fa-image"></i>
+                            <p>لم يتم اختيار صورة</p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="banner-form">
+                        <h3>تفاصيل البانر</h3>
+
+                        <div className="form-group">
+                          <label>صورة البانر</label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleBannerImageChange}
+                            className="form-input"
+                          />
+                          <small style={{ color: "#666", fontSize: "0.85rem" }}>
+                            يُفضل استخدام صورة بأبعاد 1200×400 بكسل
+                          </small>
+                        </div>
+
+                        <div className="form-group">
+                          <label>العنوان</label>
+                          <input
+                            type="text"
+                            value={banner.title}
+                            onChange={(e) =>
+                              setBanner({ ...banner, title: e.target.value })
+                            }
+                            placeholder="أدخل عنوان البانر"
+                            className="form-input"
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>الوصف</label>
+                          <textarea
+                            value={banner.description}
+                            onChange={(e) =>
+                              setBanner({
+                                ...banner,
+                                description: e.target.value,
+                              })
+                            }
+                            placeholder="أدخل وصف البانر"
+                            className="form-input"
+                            rows="3"
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>نص الزر</label>
+                          <input
+                            type="text"
+                            value={banner.buttonText}
+                            onChange={(e) =>
+                              setBanner({
+                                ...banner,
+                                buttonText: e.target.value,
+                              })
+                            }
+                            placeholder="مثال: احجز الآن"
+                            className="form-input"
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>رابط الزر</label>
+                          <select
+                            value={banner.link || ""}
+                            onChange={(e) =>
+                              setBanner({ ...banner, link: e.target.value })
+                            }
+                            className="form-input"
+                          >
+                            <option value="">اختر الصفحة</option>
+                            <option value="/">الرئيسية</option>
+                            <option value="/products">المنتجات</option>
+                            <option value="/services">الخدمات</option>
+                            <option value="/booking">حجز موعد</option>
+                            <option value="/cart">السلة</option>
+                            <option value="/profile">الملف الشخصي</option>
+                            <option value="/faq">الأسئلة الشائعة</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

@@ -38,6 +38,7 @@ const AdminCreateAppointmentModal = ({
     // Flexible time-specific
     laserStartHour: "",
     laserStartMinute: "",
+    useFlexibleCustomTime: false,
     // Fixed time custom time (admin only)
     useCustomTime: false,
     customStartTime: "",
@@ -442,7 +443,6 @@ const AdminCreateAppointmentModal = ({
         );
 
         if (overlapping >= bookingLimit) {
-          console.log("🔔 Overlap limit reached, showing confirmation...");
           // Show warning but allow admin to proceed
           const confirmed = await showConfirm(
             `تحذير: تم الوصول للحد الأقصى من الحجوزات المتداخلة (${overlapping}/${bookingLimit}). هل تريد المتابعة؟`,
@@ -451,15 +451,12 @@ const AdminCreateAppointmentModal = ({
             "إلغاء"
           );
 
-          console.log("🎯 Confirmation result:", confirmed);
 
           if (!confirmed) {
-            console.log("❌ User cancelled, resetting loading...");
             setLoading(false);
             return;
           }
 
-          console.log("✅ User confirmed, continuing...");
         }
       }
 
@@ -599,6 +596,7 @@ const AdminCreateAppointmentModal = ({
                     time: "",
                     laserStartHour: "",
                     laserStartMinute: "",
+                    useFlexibleCustomTime: false,
                     useCustomTime: false,
                     customStartTime: "",
                     customEndTime: "",
@@ -614,6 +612,23 @@ const AdminCreateAppointmentModal = ({
                 ))}
               </select>
             </div>
+
+            {/* show the service duration after service selection */}
+            {formData.serviceId && (
+              <div className="form-group">
+                <label>مدة الخدمة</label>
+                <input
+                  type="text"
+                  value={`${
+                    services.find((s) => s.id === formData.serviceId)
+                      ?.duration || 60
+                  } دقيقة`}
+                  disabled
+                  className="form-input"
+                  style={{ backgroundColor: "#f5f5f5", cursor: "not-allowed" }}
+                />
+              </div>
+            )}
 
             <div className="form-group">
               <label>التاريخ *</label>
@@ -654,64 +669,117 @@ const AdminCreateAppointmentModal = ({
                       </small>
                     </div>
 
-                    <div className="form-grid-2">
-                      <div className="form-group">
-                        <label>الساعة *</label>
-                        <select
-                          value={formData.laserStartHour}
+                    {/* Custom time toggle for flexible services */}
+                    <div className="form-group">
+                      <label
+                        style={{
+                          display: "flex !important",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          cursor: "pointer",
+                          marginBottom: 0,
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.useFlexibleCustomTime || false}
                           onChange={(e) => {
-                            const hour = e.target.value;
-                            const newFormData = {
+                            const useCustom = e.target.checked;
+                            setFormData({
                               ...formData,
-                              laserStartHour: hour,
-                            };
-                            // Update time if both hour and minute are selected
-                            if (hour && formData.laserStartMinute) {
-                              newFormData.time = `${hour}:${formData.laserStartMinute}`;
-                            }
-                            setFormData(newFormData);
+                              useFlexibleCustomTime: useCustom,
+                              time: useCustom
+                                ? formData.time
+                                : formData.laserStartHour &&
+                                  formData.laserStartMinute
+                                ? `${formData.laserStartHour}:${formData.laserStartMinute}`
+                                : "",
+                            });
                           }}
-                          required
-                        >
-                          <option value="">اختر الساعة</option>
-                          {LASER_HOURS.map((hour) => (
-                            <option
-                              key={hour}
-                              value={String(hour).padStart(2, "0")}
-                            >
-                              {String(hour).padStart(2, "0")}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="form-group">
-                        <label>الدقائق *</label>
-                        <select
-                          value={formData.laserStartMinute}
-                          onChange={(e) => {
-                            const minute = e.target.value;
-                            const newFormData = {
-                              ...formData,
-                              laserStartMinute: minute,
-                            };
-                            // Update time if both hour and minute are selected
-                            if (formData.laserStartHour && minute) {
-                              newFormData.time = `${formData.laserStartHour}:${minute}`;
-                            }
-                            setFormData(newFormData);
-                          }}
-                          required
-                        >
-                          <option value="">اختر الدقائق</option>
-                          {LASER_MINUTES.map((minute) => (
-                            <option key={minute} value={minute}>
-                              {minute}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                          style={{ margin: 0, width: "auto", height: "auto" }}
+                        />
+                        <span>استخدام إدخال الوقت المباشر</span>
+                      </label>
                     </div>
+
+                    {formData.useFlexibleCustomTime ? (
+                      /* Custom Time Input */
+                      <div className="form-group">
+                        <label>الوقت *</label>
+                        <input
+                          type="time"
+                          value={formData.time}
+                          onChange={(e) =>
+                            setFormData({ ...formData, time: e.target.value })
+                          }
+                          required
+                          className="form-input"
+                        />
+                        <small style={{ color: "#666", fontSize: "0.85rem" }}>
+                          يمكن إدخال أي وقت مباشرة
+                        </small>
+                      </div>
+                    ) : (
+                      /* Hour and Minute Dropdowns */
+                      <div className="form-grid-2">
+                        <div className="form-group">
+                          <label>الساعة *</label>
+                          <select
+                            value={formData.laserStartHour}
+                            onChange={(e) => {
+                              const hour = e.target.value;
+                              const newFormData = {
+                                ...formData,
+                                laserStartHour: hour,
+                              };
+                              // Update time if both hour and minute are selected
+                              if (hour && formData.laserStartMinute) {
+                                newFormData.time = `${hour}:${formData.laserStartMinute}`;
+                              }
+                              setFormData(newFormData);
+                            }}
+                            required
+                          >
+                            <option value="">اختر الساعة</option>
+                            {LASER_HOURS.map((hour) => (
+                              <option
+                                key={hour}
+                                value={String(hour).padStart(2, "0")}
+                              >
+                                {String(hour).padStart(2, "0")}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label>الدقائق *</label>
+                          <select
+                            value={formData.laserStartMinute}
+                            onChange={(e) => {
+                              const minute = e.target.value;
+                              const newFormData = {
+                                ...formData,
+                                laserStartMinute: minute,
+                              };
+                              // Update time if both hour and minute are selected
+                              if (formData.laserStartHour && minute) {
+                                newFormData.time = `${formData.laserStartHour}:${minute}`;
+                              }
+                              setFormData(newFormData);
+                            }}
+                            required
+                          >
+                            <option value="">اختر الدقائق</option>
+                            {LASER_MINUTES.map((minute) => (
+                              <option key={minute} value={minute}>
+                                {minute}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    )}
 
                     {formData.time && (
                       <div className="time-preview">
@@ -763,7 +831,15 @@ const AdminCreateAppointmentModal = ({
                     </div>
 
                     <div className="custom-time-section">
-                      <label>
+                      <label
+                        style={{
+                          display: "flex !important",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          cursor: "pointer",
+                          marginBottom: 0,
+                        }}
+                      >
                         <input
                           type="checkbox"
                           checked={formData.useCustomTime}
@@ -776,8 +852,9 @@ const AdminCreateAppointmentModal = ({
                               customEndTime: "",
                             });
                           }}
+                          style={{ margin: 0, width: "auto", height: "auto" }}
                         />
-                        استخدام وقت مخصص
+                        <span>استخدام وقت مخصص</span>
                       </label>
 
                       {formData.useCustomTime && (

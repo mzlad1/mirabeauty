@@ -13,14 +13,8 @@ export const AuthProvider = ({ children }) => {
   const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
-    console.log("🔄 Auth effect starting...");
     const unsubscribe = onAuthStateChange(async (user) => {
-      console.log(
-        "Auth state changed:",
-        user ? "User logged in" : "User logged out"
-      );
-      console.log("📊 Current loading state:", loading);
-
+      
       if (user) {
         try {
           // Get user data from Firestore with retry logic
@@ -31,17 +25,12 @@ export const AuthProvider = ({ children }) => {
 
           // If document doesn't exist, retry a few times with delay
           while (!userDoc && retries < maxRetries) {
-            console.log(
-              `User document not found, retrying... (${
-                retries + 1
-              }/${maxRetries})`
-            );
+            
             await new Promise((resolve) => setTimeout(resolve, 500));
             userDoc = await getCurrentUserData(user.uid);
             retries++;
           }
 
-          console.log("User data fetched:", userDoc);
 
           if (userDoc) {
             setCurrentUser(user);
@@ -64,7 +53,6 @@ export const AuthProvider = ({ children }) => {
         setUserData(null);
         setAuthReady(true);
       }
-      console.log("⏹️ Setting loading to false");
       setLoading(false);
     });
 
@@ -87,27 +75,17 @@ export const AuthProvider = ({ children }) => {
 
   // Function to wait for auth to be ready after login/signup
   const waitForAuth = () => {
-    console.log("⏳ waitForAuth called, current state:", {
-      currentUser: !!currentUser,
-      userData: !!userData,
-      authReady,
-    });
+    
     return new Promise((resolve) => {
       if (authReady && currentUser && userData) {
-        console.log("✅ Auth already ready, resolving immediately");
         resolve();
         return;
       }
 
-      console.log("⏳ Waiting for auth state...");
       const checkInterval = setInterval(() => {
-        console.log("🔍 Checking auth state:", {
-          currentUser: !!currentUser,
-          userData: !!userData,
-        });
+        
         if (currentUser && userData) {
           clearInterval(checkInterval);
-          console.log("✅ Auth state ready, resolving!");
           resolve();
         }
       }, 100);
@@ -115,7 +93,6 @@ export const AuthProvider = ({ children }) => {
       // Timeout after 5 seconds
       setTimeout(() => {
         clearInterval(checkInterval);
-        console.log("⏰ Timeout reached, resolving anyway");
         resolve();
       }, 5000);
     });
@@ -132,10 +109,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Show loading spinner while auth is initializing
-  console.log("🎨 Render check - loading:", loading, "authReady:", authReady);
 
   if (loading) {
-    console.log("🌀 Showing loading spinner...");
     return (
       <div
         style={{
@@ -172,7 +147,6 @@ export const AuthProvider = ({ children }) => {
     );
   }
 
-  console.log("✅ Rendering children, loading is false");
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 

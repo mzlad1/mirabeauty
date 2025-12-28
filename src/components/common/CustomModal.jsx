@@ -14,11 +14,12 @@ const CustomModal = ({
   showCancel = false,
   extraActionText = null,
   onExtraAction = null,
+  disableBackdropClick = false,
 }) => {
   if (!isOpen) return null;
 
   const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) {
+    if (e.target === e.currentTarget && !disableBackdropClick) {
       onClose();
     }
   };

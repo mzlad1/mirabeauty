@@ -858,10 +858,47 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
               </tr>
             ) : (
               getPaginatedAppointments().map((appointment) => (
-                <tr key={appointment.id}>
+                <tr
+                  key={appointment.id}
+                  style={{
+                    backgroundColor: appointment.createdByAdmin
+                      ? "#e8f5e9"
+                      : "transparent",
+                  }}
+                >
                   <td>
                     <div className="aap-customer-info">
-                      {appointment.customerId ? (
+                      {appointment.createdByAdmin && appointment.createdBy ? (
+                        <a
+                          href={`/admin/users/${appointment.createdBy}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: "inherit",
+                            textDecoration: "none",
+                            fontWeight: "bold",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.3rem",
+                          }}
+                          title="عرض ملف المسؤول - موعد تم إضافته من قبل المسؤول"
+                        >
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#4CAF50"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                          </svg>
+                          {appointment.customerName}
+                        </a>
+                      ) : appointment.customerId ? (
                         <a
                           href={`/admin/users/${appointment.customerId}`}
                           target="_blank"
@@ -872,20 +909,6 @@ const AdminAppointmentsPage = ({ currentUser, userData }) => {
                             fontWeight: "bold",
                           }}
                           title="عرض ملف العميل"
-                        >
-                          {appointment.customerName}
-                        </a>
-                      ) : appointment.createdBy ? (
-                        <a
-                          href={`/admin/users/${appointment.createdBy}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            color: "inherit",
-                            textDecoration: "none",
-                            fontWeight: "bold",
-                          }}
-                          title="عرض ملف المسؤول"
                         >
                           {appointment.customerName}
                         </a>

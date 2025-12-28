@@ -69,20 +69,26 @@ const PromotionalBanner = ({
           <h2 className="promotional-banner-headline">{headline}</h2>
           <p className="promotional-banner-subheading">{subheading}</p>
 
-          <div className="promotional-banner-actions">
-            <button
-              className="promotional-banner-btn promotional-banner-btn-primary"
-              onClick={handlePrimaryClick}
-            >
-              {primaryButtonText}
-            </button>
-            <button
-              className="promotional-banner-btn promotional-banner-btn-secondary"
-              onClick={handleSecondaryClick}
-            >
-              {secondaryButtonText}
-            </button>
-          </div>
+          {(primaryButtonText || secondaryButtonText) && (
+            <div className="promotional-banner-actions">
+              {primaryButtonText && (
+                <button
+                  className="promotional-banner-btn promotional-banner-btn-primary"
+                  onClick={handlePrimaryClick}
+                >
+                  {primaryButtonText}
+                </button>
+              )}
+              {secondaryButtonText && (
+                <button
+                  className="promotional-banner-btn promotional-banner-btn-secondary"
+                  onClick={handleSecondaryClick}
+                >
+                  {secondaryButtonText}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

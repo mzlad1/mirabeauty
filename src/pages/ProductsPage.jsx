@@ -65,9 +65,7 @@ const ProductsPage = ({ setCurrentPage }) => {
         productsData = await getProductsByCategory(selectedCategory);
       }
 
-      console.log("ProductsPage - Loaded products data:", productsData);
-      console.log("ProductsPage - First product structure:", productsData[0]);
-
+     
       setProducts(productsData);
     } catch (error) {
       console.error("Error loading products:", error);

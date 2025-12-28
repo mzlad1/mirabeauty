@@ -107,7 +107,7 @@ const AppointmentsTimeline = ({
           <h3>جدول المواعيد - {selectedDate}</h3>
         </div>
         <div className="timeline-count">
-          <span>{filteredAppointments.length} موعد</span>
+          <span>{filteredAppointments.length} مواعيد</span>
         </div>
       </div>
 

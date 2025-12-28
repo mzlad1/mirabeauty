@@ -193,17 +193,6 @@ const BookingPage = ({ currentUser, userData }) => {
         ]);
 
         // Debug: Log services data
-        console.log("BookingPage - All services loaded:", servicesData);
-        console.log("BookingPage - Categories loaded:", categoriesData);
-        console.log(
-          "BookingPage - Service categories:",
-          servicesData.map((s) => ({
-            name: s.name,
-            category: s.category,
-            categoryId: s.categoryId,
-            categoryName: s.categoryName,
-          }))
-        );
 
         setServices(servicesData);
         setStaffMembers(staffData);
@@ -729,8 +718,6 @@ const BookingPage = ({ currentUser, userData }) => {
     try {
       // Handle consultation booking
       if (selectedCategory === "consultation") {
-        console.log("Submitting consultation with data:", consultationData);
-
         // Check if user already has a consultation on the same day
         const hasConsultationSameDay = userConsultations.some(
           (consult) =>
@@ -775,9 +762,7 @@ const BookingPage = ({ currentUser, userData }) => {
           status: "في الانتظار",
         };
 
-        console.log("Creating consultation with:", consultationSubmitData);
         const result = await createConsultation(consultationSubmitData);
-        console.log("Consultation created successfully:", result);
         showSuccess(
           "تم حجز استشارتك بنجاح! سيتم التواصل معك خلال 24 ساعة لتأكيد الموعد."
         );
@@ -881,8 +866,9 @@ const BookingPage = ({ currentUser, userData }) => {
             </ul>
           </div>
         </>,
-        () => navigate("/profile"), // Navigate when user closes modal
-        "نجح الحجز"
+        () => navigate("/profile"),
+        "نجح الحجز",
+        { disableBackdropClick: true }
       );
     } catch (error) {
       console.error("Error creating booking:", error);
@@ -1138,16 +1124,6 @@ const BookingPage = ({ currentUser, userData }) => {
 
                 <div className="services-selection">
                   {(() => {
-                    console.log("BookingPage - Filtering services...");
-                    console.log(
-                      "BookingPage - Selected category:",
-                      selectedCategory
-                    );
-                    console.log(
-                      "BookingPage - Total services:",
-                      services.length
-                    );
-
                     const filtered = services.filter((service) => {
                       // Skip hidden services
                       if (service.hidden) {
@@ -1165,24 +1141,11 @@ const BookingPage = ({ currentUser, userData }) => {
                             .includes(selectedCategory.toLowerCase()));
 
                       if (matches) {
-                        console.log(
-                          "BookingPage - Service matched:",
-                          service.name,
-                          {
-                            category: service.category,
-                            categoryName: service.categoryName,
-                            categoryId: service.categoryId,
-                          }
-                        );
+                        console.log("BookingPage");
                       }
 
                       return matches;
                     });
-
-                    console.log(
-                      "BookingPage - Filtered services count:",
-                      filtered.length
-                    );
 
                     return filtered.map((service) => (
                       <div
@@ -1495,10 +1458,7 @@ const BookingPage = ({ currentUser, userData }) => {
                                           cat.id === selectedService.category
                                       );
                                       const bookingLimit =
-                                        serviceCategory?.bookingLimit ||
-                                        console.log(
-                                          "Booking limit not set, defaulting to 5"
-                                        );
+                                        serviceCategory?.bookingLimit;
 
                                       // Check for overlapping
                                       const overlapping =
@@ -2401,6 +2361,7 @@ const BookingPage = ({ currentUser, userData }) => {
         confirmText={modalState.confirmText}
         cancelText={modalState.cancelText}
         showCancel={modalState.showCancel}
+        disableBackdropClick={modalState.disableBackdropClick}
       />
     </div>
   );

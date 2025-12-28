@@ -32,11 +32,7 @@ const ServicesPage = () => {
           fetchedServices = await getServicesByCategory(selectedCategory);
         }
 
-        console.log("ServicesPage - Loaded services data:", fetchedServices);
-        console.log(
-          "ServicesPage - First service structure:",
-          fetchedServices[0]
-        );
+        
 
         setServices(fetchedServices);
       } catch (error) {
@@ -208,14 +204,7 @@ const ServicesPage = () => {
                 <div className="services-page-grid">
                   {filteredServices.map((service) => {
                     // Debug logging for each service
-                    console.log("ServicesPage - Service data:", {
-                      id: service.id,
-                      name: service.name,
-                      image: service.image,
-                      images: service.images,
-                      primaryImageIndex: service.primaryImageIndex,
-                      hidden: service.hidden,
-                    });
+                    
 
                     // Check if service is hidden
                     if (service.hidden) {

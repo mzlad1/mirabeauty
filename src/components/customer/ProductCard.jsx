@@ -32,7 +32,7 @@ const ProductCard = ({ product, onAddToCart }) => {
     product.images && product.images.length > 0
       ? product.images[product.primaryImageIndex || 0]?.url ||
         product.images[product.primaryImageIndex || 0]
-      : product.image || "/assets/default-product.jpg";
+      : product.image || "/assets/logo.png";
 
   const discountPercentage =
     product.originalPrice && product.price

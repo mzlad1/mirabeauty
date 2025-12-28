@@ -13,6 +13,7 @@ export const useModal = () => {
     onCancel: null,
     extraActionText: null,
     onExtraAction: null,
+    disableBackdropClick: false,
   });
 
   const closeModal = () => {
@@ -51,6 +52,7 @@ export const useModal = () => {
         onConfirm: onConfirmOrTitle,
         extraActionText: options.extraActionText || null,
         onExtraAction: options.onExtraAction || null,
+        disableBackdropClick: options.disableBackdropClick || false,
       });
     } else {
       // If second parameter is a string, it's the title
@@ -65,6 +67,7 @@ export const useModal = () => {
         onConfirm: null,
         extraActionText: options.extraActionText || null,
         onExtraAction: options.onExtraAction || null,
+        disableBackdropClick: options.disableBackdropClick || false,
       });
     }
   };

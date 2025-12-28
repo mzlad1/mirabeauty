@@ -54,7 +54,6 @@ export const getProductsByCategory = async (category) => {
       ...doc.data(),
     }));
     
-    console.log("productsService - getProductsByCategory result:", products);
     
     return products;
   } catch (error) {
@@ -75,9 +74,6 @@ export const getProductById = async (productId) => {
         ...productDoc.data(),
       };
       
-      console.log("productsService - getProductById result:", productData);
-      console.log("productsService - Product images:", productData.images);
-      console.log("productsService - Product image:", productData.image);
       
       return productData;
     } else {

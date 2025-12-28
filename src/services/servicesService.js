@@ -54,8 +54,6 @@ export const getServicesByCategory = async (category) => {
       ...doc.data(),
     }));
 
-    console.log("servicesService - getServicesByCategory data:", services);
-    console.log("servicesService - First service structure:", services[0]);
 
     return services;
   } catch (error) {

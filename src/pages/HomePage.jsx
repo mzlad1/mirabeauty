@@ -4,6 +4,7 @@ import "./HomePage.css";
 import { getAllProducts } from "../services/productsService";
 import { getPopularServices } from "../services/servicesService";
 import { getApprovedGeneralFeedbacks } from "../services/feedbackService";
+import { getBanner } from "../services/bannerService";
 import PromotionalBanner from "../components/common/PromotionalBanner";
 import ProductCard from "../components/customer/ProductCard";
 import LoadingSpinner from "../components/common/LoadingSpinner";
@@ -40,6 +41,7 @@ const HomePage = () => {
   const [products, setProducts] = useState([]);
   const [services, setServices] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
+  const [banner, setBanner] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
@@ -83,6 +85,16 @@ const HomePage = () => {
             const data = await getApprovedGeneralFeedbacks();
             onProgress(100);
             setTestimonials(data);
+            return data;
+          },
+        },
+        {
+          taskId: "banner",
+          fn: async (onProgress) => {
+            onProgress(20);
+            const data = await getBanner();
+            onProgress(100);
+            setBanner(data);
             return data;
           },
         },
@@ -323,19 +335,27 @@ const HomePage = () => {
       </section>
 
       {/* Promotional Banner */}
-      <section className="promotional-banner-section">
-        <div className="promo-container">
-          <PromotionalBanner
-            backgroundImage="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            headline="عروض حصرية على منتجات العناية الفاخرة"
-            subheading="وفري حتى 30% على مجموعات العناية المتكاملة والسيروم المتطور"
-            primaryButtonText="تسوقي الآن"
-            secondaryButtonText="اعرفي المزيد"
-            primaryButtonAction="/products"
-            secondaryButtonAction="/services"
-          />
-        </div>
-      </section>
+      {banner &&
+        banner.isActive &&
+        (banner.imageUrl || banner.imageUrl?.url) && (
+          <section className="promotional-banner-section">
+            <div className="promo-container">
+              <PromotionalBanner
+                backgroundImage={
+                  typeof banner.imageUrl === "object"
+                    ? banner.imageUrl?.url
+                    : banner.imageUrl
+                }
+                headline={banner.title || "عروض حصرية"}
+                subheading={banner.description || ""}
+                primaryButtonText={banner.buttonText || "اكتشف المزيد"}
+                primaryButtonAction={banner.link || "/products"}
+                secondaryButtonText=""
+                secondaryButtonAction=""
+              />
+            </div>
+          </section>
+        )}
 
       {/* Top Sales */}
       <section className="top-sales section">

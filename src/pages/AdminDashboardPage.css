@@ -218,6 +218,12 @@
   font-size: 1.3rem;
 }
 
+.tab-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 /* Statistics Grid */
 .stats-grid {
   display: grid;
@@ -2604,4 +2610,183 @@
 .status-badge.status-visible {
   background: #28a745;
   color: var(--white);
+}
+
+/* Banner Management Styles */
+.banner-editor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.banner-preview,
+.banner-form {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+}
+
+.banner-preview h3,
+.banner-form h3 {
+  margin: 0 0 1.5rem 0;
+  color: var(--navy-blue);
+  font-size: 1.2rem;
+  font-weight: 600;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.banner-preview-card {
+  background: var(--background-light);
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.banner-preview-card img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.banner-preview-card h4 {
+  color: var(--navy-blue);
+  font-size: 1.3rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.banner-preview-card p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0 0 1rem 0;
+}
+
+.no-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: var(--background-light);
+  border-radius: 8px;
+  border: 2px dashed var(--border-color);
+}
+
+.no-image-placeholder i {
+  font-size: 3rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.no-image-placeholder p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.banner-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.banner-form .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.banner-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--navy-blue);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.banner-form .form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  font-family: inherit;
+}
+
+.banner-form .form-input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.banner-form textarea.form-input {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.btn-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border: 2px solid var(--border-color);
+  background: white;
+  color: var(--text-secondary);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-toggle:hover {
+  border-color: var(--gold);
+  background: var(--background-light);
+}
+
+.btn-toggle.active {
+  background: #4caf50;
+  color: white;
+  border-color: #4caf50;
+}
+
+.btn-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Banner Styles */
+@media (max-width: 1024px) {
+  .banner-editor {
+    grid-template-columns: 1fr;
+  }
+
+  .banner-preview {
+    order: 2;
+  }
+
+  .banner-form {
+    order: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .banner-preview,
+  .banner-form {
+    padding: 1rem;
+  }
+
+  .banner-preview-card {
+    padding: 1rem;
+  }
+
+  .banner-preview-card img {
+    max-height: 200px;
+  }
+
+  .no-image-placeholder {
+    padding: 2rem 1rem;
+  }
+
+  .no-image-placeholder i {
+    font-size: 2rem;
+  }
 }

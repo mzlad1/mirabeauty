@@ -37,8 +37,6 @@ const ProductDetailsPage = () => {
         // Fetch the main product
         const fetchedProduct = await getProductById(id);
 
-        console.log("ProductDetailsPage - Raw product data:", fetchedProduct);
-
         // Process the product data with enhanced details
         const processedProduct = {
           ...fetchedProduct,
@@ -68,15 +66,6 @@ const ProductDetailsPage = () => {
             "حماية من العوامل الخارجية",
           ],
         };
-
-        console.log(
-          "ProductDetailsPage - Processed product data:",
-          processedProduct
-        );
-        console.log(
-          "ProductDetailsPage - Product images array:",
-          processedProduct.images
-        );
 
         setProduct(processedProduct);
 
@@ -313,7 +302,7 @@ const ProductDetailsPage = () => {
             <div className="product-details-images">
               <div className="product-details-main-image">
                 <img
-                  src={product.images[selectedImage]}
+                  src={product.images[selectedImage] || "/assets/logo.png"}
                   alt={product.name}
                   className="product-details-main-product-image"
                 />

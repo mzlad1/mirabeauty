@@ -151,6 +151,8 @@ export const createAppointment = async (appointmentData) => {
       notes: appointmentData.notes || "",
       status: "في الانتظار", // pending
       paymentStatus: "في الانتظار", // pending payment
+      createdBy: appointmentData.createdBy || null, // Admin who created it
+      createdByAdmin: appointmentData.createdByAdmin || false, // Flag for admin-created
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -360,9 +362,8 @@ export const checkStaffAvailabilityWithDuration = async (
 
       // Get existing appointment time range
       const existingStartMinutes = timeToMinutes(appointment.time);
-      const existingDuration = parseInt(
-        appointment.serviceDuration || appointment.duration
-      ) || 60;
+      const existingDuration =
+        parseInt(appointment.serviceDuration || appointment.duration) || 60;
       const existingEndMinutes = existingStartMinutes + existingDuration;
 
       // Check for overlap: new appointment overlaps if:
