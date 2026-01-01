@@ -845,13 +845,14 @@
 }
 
 .booking-calendar .react-calendar__tile--now {
-  color: white;
+  color: rgb(255, 0, 0);
   font-weight: 600;
 }
 
 .booking-calendar .react-calendar__tile--now:enabled:hover,
 .booking-calendar .react-calendar__tile--now:enabled:focus {
   background-color: var(--gold);
+  color: white;
   opacity: 0.9;
 }
 
