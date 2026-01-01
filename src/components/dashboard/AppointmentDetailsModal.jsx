@@ -25,7 +25,7 @@ const AppointmentDetailsModal = ({
   // Helper function to format Firebase Timestamp to readable date
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "غير متوفر";
-    
+
     let date;
     if (timestamp.seconds) {
       // Firebase Timestamp object
@@ -36,10 +36,10 @@ const AppointmentDetailsModal = ({
       // Try to parse as string
       date = new Date(timestamp);
     }
-    
+
     if (isNaN(date.getTime())) return "غير متوفر";
-    
-    return date.toLocaleString("en-US", {
+
+    return date.toLocaleString("en-GB", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -119,7 +119,9 @@ const AppointmentDetailsModal = ({
             {/* add the creation date in small font */}
             <div className="detail-item creation-date">
               <span className="detail-label">تاريخ الإنشاء:</span>
-              <span className="detail-value">{formatTimestamp(appointment.createdAt)}</span>
+              <span className="detail-value">
+                {formatTimestamp(appointment.createdAt)}
+              </span>
             </div>
 
             <div className="detail-item">
