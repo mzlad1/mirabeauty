@@ -13,7 +13,7 @@ const CategoryModal = ({
     name: "",
     description: "",
     image: "",
-    price: "",
+    // price: "",
     bookingLimit: "",
     timeType: "fixed", // 'fixed' or 'flexible'
     fixedTimeSlots: ["08:30", "10:00", "11:30", "13:00", "15:00"], // For fixed time
@@ -34,7 +34,7 @@ const CategoryModal = ({
         name: editingCategory.name || "",
         description: editingCategory.description || "",
         image: editingCategory.image || "",
-        price: editingCategory.price || "",
+        // price: editingCategory.price || "",
         bookingLimit: editingCategory.bookingLimit || "",
         timeType: editingCategory.timeType || "fixed",
         fixedTimeSlots: editingCategory.fixedTimeSlots || [
@@ -57,7 +57,7 @@ const CategoryModal = ({
         name: "",
         description: "",
         image: "",
-        price: "",
+        // price: "",
         bookingLimit: "",
         timeType: "fixed",
         fixedTimeSlots: ["08:30", "10:00", "11:30", "13:00", "15:00"],
@@ -87,15 +87,15 @@ const CategoryModal = ({
 
     // Validate price for service categories
     if (categoryType === "service") {
-      const priceValue =
-        typeof formData.price === "string"
-          ? formData.price.trim()
-          : String(formData.price || "");
-      if (!priceValue) {
-        newErrors.price = "السعر العام مطلوب";
-      } else if (isNaN(priceValue) || parseFloat(priceValue) <= 0) {
-        newErrors.price = "السعر يجب أن يكون رقم موجب";
-      }
+      // const priceValue =
+      //   typeof formData.price === "string"
+      //     ? formData.price.trim()
+      //     : String(formData.price || "");
+      // if (!priceValue) {
+      //   newErrors.price = "السعر العام مطلوب";
+      // } else if (isNaN(priceValue) || parseFloat(priceValue) <= 0) {
+      //   newErrors.price = "السعر يجب أن يكون رقم موجب";
+      // }
 
       // Validate booking limit
       const bookingLimitValue =
@@ -198,12 +198,12 @@ const CategoryModal = ({
         name: formData.name.trim(),
         description: formData.description.trim(),
         image: imageUrl,
-        price:
-          categoryType === "service"
-            ? typeof formData.price === "string"
-              ? formData.price.trim()
-              : String(formData.price)
-            : "",
+        // price:
+        //   categoryType === "service"
+        //     ? typeof formData.price === "string"
+        //       ? formData.price.trim()
+        //       : String(formData.price)
+        //     : "",
         bookingLimit:
           categoryType === "service"
             ? parseInt(
@@ -306,7 +306,7 @@ const CategoryModal = ({
           </div>
 
           {/* Price - Only for Service Categories */}
-          {categoryType === "service" && (
+          {/* {categoryType === "service" && (
             <div className="form-group">
               <label htmlFor="price">
                 السعر العام (شيكل) <span className="required">*</span>
@@ -337,7 +337,7 @@ const CategoryModal = ({
                 حسب الخصومات.
               </small>
             </div>
-          )}
+          )} */}
 
           {/* Booking Limit - Only for Service Categories */}
           {categoryType === "service" && (

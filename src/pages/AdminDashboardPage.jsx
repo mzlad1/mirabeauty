@@ -2905,7 +2905,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                               )}
                               <div className="category-meta">
                                 {/** Price - Only for Service Categories and if the price is not existing add a note */}
-                                {category.price ? (
+                                {/* {category.price ? (
                                   <span className="category-price">
                                     السعر: {category.price} شيكل
                                   </span>
@@ -2914,7 +2914,7 @@ const AdminDashboardPage = ({ currentUser }) => {
                                     السعر: غير محدد
                                   </span>
                                 )}
-                                <br />
+                                <br /> */}
                                 {category.bookingLimit ? (
                                   <span className="category-booking-limit">
                                     حد الحجز: {category.bookingLimit}
