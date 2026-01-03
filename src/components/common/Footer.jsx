@@ -112,20 +112,22 @@ const Footer = () => {
                 <div className="contact-item">
                   <div className="contact-text">
                     <strong>الهاتف</strong>
-                    <p>+970 11 234 5678</p>
+                    <p>059-5805167</p>
                   </div>
                 </div>
                 <div className="contact-item">
                   <div className="contact-text">
                     <strong>العنوان</strong>
-                    <p>رام الله، شارع ركب، مجمع النخيل التجاري</p>
+                    <p>
+                      رام الله - شارع مستشفى رام الله - عمارة الويفز تاور ( تاج
+                      مول) - الطابق 8
+                    </p>
                   </div>
                 </div>
                 <div className="contact-item">
                   <div className="contact-text">
-                    <strong>أوقات العمل</strong>
-                    <p>الأحد - الخميس: 9:00 ص - 6:00 م</p>
-                    <p>السبت: 10:00 ص - 4:00 م</p>
+                    <strong>ساعات الدوام</strong>
+                    <p>من السبت للخميس من ال8:30 - 4:30</p>
                   </div>
                 </div>
               </div>

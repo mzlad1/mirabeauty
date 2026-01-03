@@ -1093,35 +1093,6 @@ const BookingPage = ({ currentUser, userData }) => {
                   </h2>
                 </div>
 
-                {/* Pricing Info Banner for selected category */}
-                {(() => {
-                  const selectedCat = categories.find(
-                    (c) => c.id === selectedCategory
-                  );
-                  if (selectedCat && selectedCat.price) {
-                    return (
-                      <div className="pricing-info-banner">
-                        <div className="pricing-banner-content">
-                          <i className="fas fa-tag"></i>
-                          <div className="pricing-text">
-                            <p>
-                              سعر فئة <strong>{selectedCat.name}</strong> يبدأ
-                              من{" "}
-                              <strong className="price-highlight">
-                                {selectedCat.price} شيكل
-                              </strong>
-                            </p>
-                            <p className="discount-note">
-                              ستحصلين على أي خصم او عرض خاص بكِ عند الدفع!
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
-
                 <div className="services-selection">
                   {(() => {
                     const filtered = services.filter((service) => {
@@ -1202,6 +1173,28 @@ const BookingPage = ({ currentUser, userData }) => {
                     {selectedService?.duration || "غير محددة"} دقيقة
                   </div>
                 </div>
+
+                {/* Pricing Info Banner for selected service */}
+                {selectedService && selectedService.price && (
+                  <div className="pricing-info-banner">
+                    <div className="pricing-banner-content">
+                      <i className="fas fa-tag"></i>
+                      <div className="pricing-text">
+                        <p>
+                          سعر الخدمة <strong>{selectedService.name}</strong> هو{" "}
+                          <strong className="price-highlight">
+                            {selectedService.price} شيكل
+                          </strong>
+                        </p>
+                        <p className="discount-note">
+                          ستحصلين على أي خصم او عرض خاص بكِ عند الدفع! كما أنه عند
+                          استمرارك معنا سنقدم لك أسعار مميزة وعروض خاصة.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="datetime-selection">
                   {/* Date Selection (common for all) */}
                   <div className="date-selection">
@@ -1785,6 +1778,28 @@ const BookingPage = ({ currentUser, userData }) => {
                   </button>
                   <h2>تأكيد الحجز</h2>
                 </div>
+
+                {/* Pricing Info Banner for selected service */}
+                {selectedService && selectedService.price && (
+                  <div className="pricing-info-banner">
+                    <div className="pricing-banner-content">
+                      <i className="fas fa-tag"></i>
+                      <div className="pricing-text">
+                        <p>
+                          سعر الخدمة <strong>{selectedService.name}</strong> هو{" "}
+                          <strong className="price-highlight">
+                            {selectedService.price} شيكل
+                          </strong>
+                        </p>
+                        <p className="discount-note">
+                          ستحصلين على أي خصم او عرض خاص بكِ عند الدفع! كما أنه عند
+                          استمرارك معنا سنقدم لك أسعار مميزة وعروض خاصة.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="booking-summary">
                   <h3>ملخص الحجز</h3>
                   <div className="summary-details">
@@ -1852,10 +1867,10 @@ const BookingPage = ({ currentUser, userData }) => {
                       </span>
                     </div>
 
-                    {/* <div className="summary-item price-item">
+                    <div className="summary-item price-item">
                       <span className="label">السعر:</span>
-                      <span className="value">{selectedService?.price}</span>
-                    </div> */}
+                      <span className="value">{selectedService?.price} شيكل</span>
+                    </div>
                     <div className="summary-note">
                       {(() => {
                         // Check if user has appointments in the last 6 months
